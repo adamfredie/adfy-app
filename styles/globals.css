@@ -1,0 +1,351 @@
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 14px;
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #f9a825;
+  --primary-foreground: #1a1a1a;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #1a1a1a;
+  --muted: #f8f9fa;
+  --muted-foreground: #6c757d;
+  --accent: #fff3cd;
+  --accent-foreground: #1a1a1a;
+  --destructive: #dc3545;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.08);
+  --input: transparent;
+  --input-background: #f8f9fa;
+  --switch-background: #dee2e6;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: #f9a825;
+  --chart-1: #f9a825;
+  --chart-2: #17a2b8;
+  --chart-3: #6f42c1;
+  --chart-4: #fd7e14;
+  --chart-5: #20c997;
+  --radius: 0.75rem;
+  --sidebar: #f8f9fa;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #f9a825;
+  --sidebar-primary-foreground: #1a1a1a;
+  --sidebar-accent: #fff3cd;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: rgba(0, 0, 0, 0.08);
+  --sidebar-ring: #f9a825;
+  
+  /* ADuffy Learning Brand Colors */
+  --aduffy-yellow: #f9a825;
+  --aduffy-yellow-light: #ffc107;
+  --aduffy-yellow-dark: #e08900;
+  --aduffy-navy: #1a1a1a;
+  --aduffy-navy-light: #343a40;
+  --aduffy-navy-dark: #000000;
+  --aduffy-teal: #17a2b8;
+  --aduffy-teal-light: #20c997;
+  --aduffy-teal-dark: #138496;
+  --aduffy-orange: #fd7e14;
+  --aduffy-orange-light: #ff9800;
+  --aduffy-orange-dark: #e65100;
+  --aduffy-bg: #fff;
+  --aduffy-text: #1a1a1a;
+  
+  /* Success and status colors */
+  --success: #28a745;
+  --success-foreground: #ffffff;
+  --warning: #ffc107;
+  --warning-foreground: #1a1a1a;
+  --info: #17a2b8;
+  --info-foreground: #ffffff;
+}
+
+.dark {
+  --background: #1a1a1a;
+  --foreground: #ffffff;
+  --card: #2d2d2d;
+  --card-foreground: #ffffff;
+  --popover: #2d2d2d;
+  --popover-foreground: #ffffff;
+  --primary: #ffc107;
+  --primary-foreground: #1a1a1a;
+  --secondary: #343a40;
+  --secondary-foreground: #ffffff;
+  --muted: #343a40;
+  --muted-foreground: #adb5bd;
+  --accent: #495057;
+  --accent-foreground: #ffffff;
+  --destructive: #dc3545;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: #343a40;
+  --ring: #ffc107;
+  --chart-1: #ffc107;
+  --chart-2: #20c997;
+  --chart-3: #6f42c1;
+  --chart-4: #fd7e14;
+  --chart-5: #17a2b8;
+  --sidebar: #2d2d2d;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffc107;
+  --sidebar-primary-foreground: #1a1a1a;
+  --sidebar-accent: #495057;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #ffc107;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* ADuffy Learning Brand Colors */
+  --color-aduffy-yellow: var(--aduffy-yellow);
+  --color-aduffy-yellow-light: var(--aduffy-yellow-light);
+  --color-aduffy-yellow-dark: var(--aduffy-yellow-dark);
+  --color-aduffy-navy: var(--aduffy-navy);
+  --color-aduffy-navy-light: var(--aduffy-navy-light);
+  --color-aduffy-navy-dark: var(--aduffy-navy-dark);
+  --color-aduffy-teal: var(--aduffy-teal);
+  --color-aduffy-teal-light: var(--aduffy-teal-light);
+  --color-aduffy-teal-dark: var(--aduffy-teal-dark);
+  --color-aduffy-orange: var(--aduffy-orange);
+  --color-aduffy-orange-light: var(--aduffy-orange-light);
+  --color-aduffy-orange-dark: var(--aduffy-orange-dark);
+  
+  /* Status colors */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+}
+
+html {
+  font-size: var(--font-size);
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--aduffy-yellow);
+    outline-offset: 2px;
+  }
+}
+
+/* Progress animations */
+@keyframes aduffy-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.aduffy-progress-animate {
+  animation: aduffy-progress 1s ease-out;
+}
+
+/* Pulse animation for loading states */
+@keyframes aduffy-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.aduffy-pulse {
+  animation: aduffy-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Accordion animations and custom styling */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+/* Custom accordion trigger styling for ADuffy Learning theme */
+.accordion-trigger {
+  transition: all 0.2s ease-in-out;
+}
+
+.accordion-trigger:hover {
+  background-color: rgba(249, 168, 37, 0.05);
+}
+
+.accordion-trigger[data-state="open"] {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Smooth accordion content animations */
+[data-radix-accordion-content] {
+  overflow: hidden;
+}
+
+[data-radix-accordion-content][data-state="open"] {
+  animation: accordion-down 0.3s ease-out;
+}
+
+[data-radix-accordion-content][data-state="closed"] {
+  animation: accordion-up 0.3s ease-out;
+}
+
+/* Enhanced accordion item styling */
+.accordion-item {
+  border: none;
+  margin-bottom: 1.5rem;
+}
+
+.accordion-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Accordion trigger chevron animation */
+.accordion-trigger svg {
+  transition: transform 0.2s ease-in-out;
+}
+
+.accordion-trigger[data-state="open"] svg {
+  transform: rotate(180deg);
+}
+
+/* Custom styling for accordion content containers */
+.accordion-content {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-top: none;
+}
+
+/* Aduffy Learning Platform Custom CSS */
+
+body {
+  background: var(--aduffy-bg);
+  color: var(--aduffy-text);
+  font-family: 'Inter', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--aduffy-navy);
+  font-weight: 700;
+  margin-top: 0;
+}
+
+.aduffy-button {
+  background: var(--aduffy-yellow);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75em 1.5em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 1rem;
+}
+.aduffy-button:hover {
+  background: var(--aduffy-orange);
+}
+
+.aduffy-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 2em;
+  margin-bottom: 2em;
+}
+
+.aduffy-badge-primary {
+  background: var(--aduffy-teal);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.25em 1em;
+  font-size: 0.9em;
+  font-weight: 500;
+  display: inline-block;
+}
+
+/* Utility classes */
+.mt-2 { margin-top: 0.5rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.p-4 { padding: 1rem; }
+.text-center { text-align: center; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --aduffy-bg: #181a1b;
+    --aduffy-text: #f5f5f5;
+  }
+  .aduffy-card {
+    background: #23272f;
+    color: var(--aduffy-text);
+  }
+}
+
+/* Add more as needed for your components! */

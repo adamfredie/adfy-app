@@ -1,0 +1,1 @@
+export { useVoiceInteraction } from './useVoiceInteraction';
