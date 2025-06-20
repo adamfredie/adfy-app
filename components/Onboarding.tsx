@@ -7,7 +7,6 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 
 // Keep the original interface for backward compatibility
 export interface OnboardingData {
@@ -727,7 +726,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             disabled={currentStep === 'personal'}
             className="border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
           
@@ -743,7 +741,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             ) : (
               <>
                 Continue
-                <ArrowRight className="w-4 h-4 ml-2" />
               </>
             )}
           </Button>
