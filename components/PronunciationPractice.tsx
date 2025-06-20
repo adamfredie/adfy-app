@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
-import { ArrowLeft, Volume2, Mic, CheckCircle, XCircle, RotateCcw, Award } from "lucide-react";
 import { useVoiceInteraction } from "../hooks/useVoiceInteraction";
 
 interface PronunciationPracticeProps {
@@ -220,7 +219,7 @@ export function PronunciationPractice({ onBack }: PronunciationPracticeProps) {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={onBack} className="p-2">
-            <ArrowLeft className="w-4 h-4" />
+            <span role="img" aria-label="back">←</span>
           </Button>
           <div>
             <h1>Pronunciation Practice</h1>
@@ -232,7 +231,7 @@ export function PronunciationPractice({ onBack }: PronunciationPracticeProps) {
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-                <Volume2 className="w-8 h-8 text-muted-foreground" />
+                <span role="img" aria-label="volume">🔊</span>
               </div>
               <div>
                 <h3>Voice Features Not Available</h3>
@@ -252,7 +251,7 @@ export function PronunciationPractice({ onBack }: PronunciationPracticeProps) {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" onClick={onBack} className="p-2">
-          <ArrowLeft className="w-4 h-4" />
+          <span role="img" aria-label="back">←</span>
         </Button>
         <div>
           <h1>Pronunciation Practice</h1>
@@ -285,10 +284,10 @@ export function PronunciationPractice({ onBack }: PronunciationPracticeProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
-              <Volume2 className="w-5 h-5 text-primary" />
+              <span role="img" aria-label="volume">🔊</span>
               {currentWord.word}
               {completedWords[currentWordIndex] && (
-                <CheckCircle className="w-5 h-5 text-green-600" />
+                <span role="img" aria-label="check">✅</span>
               )}
             </CardTitle>
             <div className="flex items-center gap-2">
@@ -324,7 +323,7 @@ export function PronunciationPractice({ onBack }: PronunciationPracticeProps) {
                 onClick={handlePlayPronunciation}
                 disabled={isSpeaking}
               >
-                <Volume2 className="w-4 h-4 mr-1" />
+                <span role="img" aria-label="volume">🔊</span>
                 Hear Word
               </Button>
               <Button 
@@ -333,7 +332,7 @@ export function PronunciationPractice({ onBack }: PronunciationPracticeProps) {
                 onClick={handlePlayExample}
                 disabled={isSpeaking}
               >
-                <Volume2 className="w-4 h-4 mr-1" />
+                <span role="img" aria-label="volume">🔊</span>
                 Hear Example
               </Button>
             </div>
@@ -359,7 +358,7 @@ export function PronunciationPractice({ onBack }: PronunciationPracticeProps) {
                 className="rounded-full w-20 h-20"
                 disabled={isSpeaking}
               >
-                <Mic className="w-8 h-8" />
+                <span role="img" aria-label="microphone">🎤</span>
               </Button>
               
               <div className="mt-4">
@@ -391,13 +390,13 @@ export function PronunciationPractice({ onBack }: PronunciationPracticeProps) {
                 <div className="flex gap-2">
                   {completedWords[currentWordIndex] ? (
                     <Button variant="outline" size="sm" onClick={handleRetry}>
-                      <RotateCcw className="w-4 h-4 mr-1" />
+                      <span role="img" aria-label="reset">🔄</span>
                       Retry
                     </Button>
                   ) : (
                     currentAttempts >= 3 && (
                       <div className="flex items-center gap-2 text-amber-600">
-                        <XCircle className="w-4 h-4" />
+                        <span role="img" aria-label="x">❌</span>
                         <span className="text-sm">Max attempts reached</span>
                       </div>
                     )

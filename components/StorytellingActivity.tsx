@@ -10,36 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Alert } from "./ui/alert";
 import { Select } from "./ui/select";
 import { OnboardingData } from "./Onboarding";
-import { 
-  BookOpen, 
-  ArrowRight, 
-  ArrowLeft, 
-  CheckCircle, 
-  Star, 
-  Volume2, 
-  Mic, 
-  MicOff,
-  Trophy,
-  Target,
-  Brain,
-  Clock,
-  Sparkles,
-  Eye,
-  EyeOff,
-  Play,
-  Pause,
-  RotateCcw,
-  Calendar,
-  RefreshCw,
-  Lightbulb,
-  AlertTriangle,
-  Settings,
-  Shield,
-  X,
-  VolumeX,
-  ChevronDown,
-  Lock
-} from "lucide-react";
 import { useVoiceInteraction } from "../hooks/useVoiceInteraction";
 
 interface StorytellingActivityProps {
@@ -1058,7 +1028,6 @@ export function StorytellingActivity({
     if (!isVoiceSupported) {
       return (
         <Alert className="mb-6">
-          <AlertTriangle className="h-4 w-4" />
           <div className="text-muted-foreground text-sm mt-2">
             Voice features may have limited support in this browser. You can still try the conversation feature, but for the best experience, please use Chrome, Safari, or Edge.
           </div>
@@ -1069,14 +1038,12 @@ export function StorytellingActivity({
     if (voiceError) {
       return (
         <Alert className="mb-6">
-          <AlertTriangle className="h-4 w-4" />
           <div className="flex items-center justify-between text-muted-foreground text-sm mt-2">
             <span>{voiceError}</span>
             <Button
               onClick={() => window.open('chrome://settings/content/microphone', '_blank')}
               className="aduffy-button-outline ml-4"
             >
-              <Settings className="w-3 h-3 mr-1" />
               Settings
             </Button>
           </div>
@@ -1087,14 +1054,12 @@ export function StorytellingActivity({
     if (permissionStatus === 'prompt' || permissionStatus === 'unknown') {
       return (
         <Alert className="mb-6">
-          <Shield className="h-4 w-4" />
           <div className="flex items-center justify-between text-muted-foreground text-sm mt-2">
             <span>Microphone access may be required for voice recognition features.</span>
             <Button
               onClick={requestPermission}
               className="aduffy-button-outline ml-4"
             >
-              <Mic className="w-3 h-3 mr-1" />
               Allow Access
             </Button>
           </div>
@@ -1110,14 +1075,12 @@ export function StorytellingActivity({
 
     return (
       <Alert className="mb-6 bg-info/10 border-info/20 flex items-center">
-        <Lock className="h-4 w-4 text-info flex-shrink-0" />
         <div className="flex items-center justify-between text-info flex-1 text-sm mt-2">
           <span>You're viewing a completed step. Changes are not allowed in view mode.</span>
           <Button
             onClick={handleReturnToFurthest}
             className="aduffy-button-outline ml-4 border-info/30 text-info hover:bg-info/10"
           >
-            <ArrowRight className="w-3 h-3 mr-1" />
             Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
           </Button>
         </div>
@@ -1132,18 +1095,18 @@ export function StorytellingActivity({
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-3 mb-4">
           <div className="w-16 h-16 bg-aduffy-yellow/10 rounded-full flex items-center justify-center border-2 border-aduffy-yellow/20">
-            <BookOpen className="w-8 h-8 text-aduffy-yellow" />
+            <div className="w-8 h-8 text-aduffy-yellow" />
           </div>
           <div className="text-left">
             <h2 className="text-3xl font-bold text-aduffy-navy">Today's Vocabulary Words</h2>
             <div className="flex items-center gap-2 mt-1">
               <Badge className="aduffy-badge-primary">
-                <Calendar className="w-4 h-4 mr-1" />
+                <div className="w-4 h-4 mr-1 text-aduffy-teal" />
                 5 Professional Words
               </Badge>
               {isViewOnly && (
                 <Badge className="aduffy-badge-info">
-                  <Eye className="w-3 h-3 mr-1" />
+                  <div className="w-3 h-3 mr-1 text-muted-foreground" />
                   View Only
                 </Badge>
               )}
@@ -1159,9 +1122,9 @@ export function StorytellingActivity({
       <Card className="aduffy-card bg-gradient-to-br from-aduffy-teal/5 to-transparent max-w-md mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-aduffy-navy text-center">
-            <Settings className="w-5 h-5 text-aduffy-teal" />
+            <div className="w-5 h-5 text-aduffy-teal" />
             Learning Focus
-            {isViewOnly && <Lock className="w-4 h-4 text-muted-foreground" />}
+            {isViewOnly && <div className="w-4 h-4 text-muted-foreground" />}
           </CardTitle>
           <CardDescription className="text-center">
             {isViewOnly ? 'Field selection (view only)' : 'Choose your professional field to get relevant vocabulary'}
@@ -1194,7 +1157,7 @@ export function StorytellingActivity({
       <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-aduffy-navy">
-            <Volume2 className="w-6 h-6 text-aduffy-yellow" />
+            <div className="w-6 h-6 text-aduffy-yellow" />
             Audio Learning
           </CardTitle>
           <CardDescription>
@@ -1210,12 +1173,12 @@ export function StorytellingActivity({
             >
               {isPlayingSequence || currentlyPlayingWord !== null ? (
                 <>
-                  <Pause className="w-4 h-4 mr-2" />
+                  <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                   Stop Playback
                 </>
               ) : (
                 <>
-                  <Play className="w-4 h-4 mr-2" />
+                  <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                   Play All Words
                 </>
               )}
@@ -1234,10 +1197,10 @@ export function StorytellingActivity({
           <Card key={index} className="aduffy-card">
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-aduffy-navy">
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 bg-aduffy-yellow/20 rounded-full flex items-center justify-center text-sm font-bold text-aduffy-navy">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-aduffy-yellow/20 rounded-full flex items-center justify-center text-sm font-bold text-aduffy-navy">
                     {index + 1}
-                  </span>
+                  </div>
                   {word.word}
                   <Button
                     size="sm"
@@ -1249,12 +1212,12 @@ export function StorytellingActivity({
                     title="Listen to pronunciation"
                   >
                     {currentlyPlayingWord === index ? (
-                      <VolumeX className="w-4 h-4 text-aduffy-yellow" />
+                      <div className="w-4 h-4 text-aduffy-yellow" />
                     ) : (
-                      <Volume2 className="w-4 h-4 text-aduffy-yellow" />
+                      <div className="w-4 h-4 text-aduffy-yellow" />
                     )}
                   </Button>
-                </span>
+                </div>
                 <Badge className={`aduffy-badge-${
                   word.difficulty === 'beginner' ? 'success' : 
                   word.difficulty === 'intermediate' ? 'warning' : 'info'
@@ -1285,12 +1248,12 @@ export function StorytellingActivity({
       <div className="flex justify-center">
         {!isViewOnly ? (
           <Button onClick={handleNextStep} className="aduffy-button">
-            <ArrowRight className="w-4 h-4 mr-2" />
+            <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
             Continue to Learning Activities
           </Button>
         ) : (
           <Button onClick={handleReturnToFurthest} className="border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10">
-            <ArrowRight className="w-4 h-4 mr-2" />
+            <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
             Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
           </Button>
         )}
@@ -1305,18 +1268,18 @@ export function StorytellingActivity({
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-3 mb-4">
           <div className="w-16 h-16 bg-aduffy-teal/10 rounded-full flex items-center justify-center border-2 border-aduffy-teal/20">
-            <Brain className="w-8 h-8 text-aduffy-teal" />
+            <div className="w-8 h-8 text-aduffy-teal" />
           </div>
           <div className="text-left">
             <h2 className="text-3xl font-bold text-aduffy-navy">Learn &amp; Practice</h2>
             <div className="flex items-center gap-2 mt-1">
               <Badge className="aduffy-badge-info">
-                <Target className="w-3 h-3 mr-1" />
+                <div className="w-3 h-3 mr-1 text-aduffy-teal" />
                 Interactive Learning
               </Badge>
               {isViewOnly && (
                 <Badge className="aduffy-badge-info">
-                  <Eye className="w-3 h-3 mr-1" />
+                  <div className="w-3 h-3 mr-1 text-muted-foreground" />
                   View Only
                 </Badge>
               )}
@@ -1325,7 +1288,7 @@ export function StorytellingActivity({
                 onClick={() => setShowLearningContent(!showLearningContent)}
                 className="text-xs"
               >
-                {showLearningContent ? <EyeOff className="w-3 h-3 mr-1" /> : <Eye className="w-3 h-3 mr-1" />}
+                {showLearningContent ? <div className="w-3 h-3 mr-1 text-muted-foreground" /> : <div className="w-3 h-3 mr-1 text-aduffy-yellow" />}
                 {showLearningContent ? 'Hide' : 'Show'} Content
               </Button>
             </div>
@@ -1345,14 +1308,14 @@ export function StorytellingActivity({
             value="questions" 
             className="data-[state=active]:bg-aduffy-teal data-[state=active]:text-white font-medium"
           >
-            <Target className="w-4 h-4 mr-2" />
+            <div className="w-4 h-4 mr-2 text-aduffy-teal" />
             Practice Questions ({learningQuestions.length})
           </TabsTrigger>
           <TabsTrigger 
             value="story" 
             className="data-[state=active]:bg-aduffy-teal data-[state=active]:text-white font-medium"
           >
-            <BookOpen className="w-4 h-4 mr-2" />
+            <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
             Example Story
           </TabsTrigger>
         </TabsList>
@@ -1365,14 +1328,14 @@ export function StorytellingActivity({
                   <div>
                     <CardTitle className="text-aduffy-navy">
                       Question {currentQuestionIndex + 1} of {learningQuestions.length}
-                      {isViewOnly && <Lock className="w-4 h-4 ml-2 inline text-muted-foreground" />}
+                      {isViewOnly && <div className="w-4 h-4 ml-2 inline text-muted-foreground" />}
                     </CardTitle>
                     <CardDescription className="mt-1">
                       {dailyWords[learningQuestions[currentQuestionIndex]?.wordIndex]?.word} - {learningQuestions[currentQuestionIndex]?.type}
                     </CardDescription>
                   </div>
                   <Badge className="aduffy-badge-primary">
-                    <Clock className="w-3 h-3 mr-1" />
+                    <div className="w-3 h-3 mr-1 text-aduffy-teal" />
                     {isViewOnly ? 'Completed' : 'Practice'}
                   </Badge>
                 </div>
@@ -1399,15 +1362,15 @@ export function StorytellingActivity({
                       onClick={() => !showQuestionFeedback && !isViewOnly && handleAnswerQuestion(index)}
                       disabled={showQuestionFeedback || isViewOnly}
                     >
-                      <span className="w-6 h-6 bg-muted rounded-full flex items-center justify-center text-sm font-medium mr-3">
+                      <div className="w-6 h-6 bg-muted rounded-full flex items-center justify-center text-sm font-medium mr-3">
                         {String.fromCharCode(65 + index)}
-                      </span>
+                      </div>
                       {option}
                       {(showQuestionFeedback || isViewOnly) && index === learningQuestions[currentQuestionIndex].correctAnswer && (
-                        <CheckCircle className="w-5 h-5 ml-auto text-success" />
+                        <div className="w-5 h-5 ml-auto text-success" />
                       )}
                       {(showQuestionFeedback || isViewOnly) && questionResults[questionResults.length - 1]?.userAnswer === index && index !== learningQuestions[currentQuestionIndex].correctAnswer && (
-                        <X className="w-5 h-5 ml-auto text-destructive" />
+                        <div className="w-5 h-5 ml-auto text-destructive" />
                       )}
                     </Button>
                   ))}
@@ -1417,9 +1380,9 @@ export function StorytellingActivity({
                   <div className={`mt-4 p-4 rounded-lg ${currentQuestionResult.isCorrect ? 'bg-success/10' : 'bg-destructive/10'}`}>
                     <div className="flex items-center gap-2 mb-2">
                       {currentQuestionResult.isCorrect ? (
-                        <CheckCircle className="w-5 h-5 text-success" />
+                        <div className="w-5 h-5 text-success" />
                       ) : (
-                        <X className="w-5 h-5 text-destructive" />
+                        <div className="w-5 h-5 text-destructive" />
                       )}
                       <span className={`font-medium ${currentQuestionResult.isCorrect ? 'text-success' : 'text-destructive'}`}>
                         {currentQuestionResult.isCorrect ? 'Correct!' : 'Incorrect'}
@@ -1431,7 +1394,7 @@ export function StorytellingActivity({
                     {!isViewOnly && (
                       <Button onClick={handleNextQuestion} className="aduffy-button">
                         {currentQuestionIndex < learningQuestions.length - 1 ? 'Next Question' : 'Complete Practice'}
-                        <ArrowRight className="w-4 h-4 ml-2" />
+                        <div className="w-4 h-4 ml-2 text-aduffy-yellow" />
                       </Button>
                     )}
                   </div>
@@ -1470,7 +1433,7 @@ export function StorytellingActivity({
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-3 text-aduffy-navy">
-                      <Sparkles className="w-6 h-6 text-aduffy-yellow" />
+                      <div className="w-6 h-6 text-aduffy-yellow" />
                       Example Professional Story
                     </CardTitle>
                     <CardDescription>
@@ -1484,12 +1447,12 @@ export function StorytellingActivity({
                   >
                     {isListeningToStory ? (
                       <>
-                        <VolumeX className="w-4 h-4 mr-2" />
+                        <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                         Stop Reading
                       </>
                     ) : (
                       <>
-                        <Volume2 className="w-4 h-4 mr-2" />
+                        <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                         Listen to Story
                       </>
                     )}
@@ -1514,7 +1477,7 @@ export function StorytellingActivity({
                           currentStoryWordIndex === index ? 'animate-pulse ring-2 ring-aduffy-yellow' : ''
                         }`}
                       >
-                        <CheckCircle className="w-3 h-3 mr-1" />
+                        <div className="w-3 h-3 mr-1 text-aduffy-teal" />
                         {word.word}
                       </Badge>
                     ))}
@@ -1524,7 +1487,7 @@ export function StorytellingActivity({
                 {isListeningToStory && (
                   <div className="bg-info/10 p-4 rounded-lg">
                     <div className="flex items-center gap-2">
-                      <Volume2 className="w-5 h-5 text-info animate-pulse" />
+                      <div className="w-5 h-5 text-info animate-pulse" />
                       <span className="font-medium text-info">Currently reading the story...</span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -1549,14 +1512,14 @@ export function StorytellingActivity({
               className="aduffy-button"
               disabled={stepProgress < 100 && showLearningContent}
             >
-              <ArrowRight className="w-4 h-4 mr-2" />
+              <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
               Start Writing
             </Button>
           </>
         ) : (
           <div className="flex w-full justify-center">
             <Button onClick={handleReturnToFurthest} className="w-full border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10">
-              <ArrowRight className="w-4 h-4 mr-2" />
+              <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
               Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
             </Button>
           </div>
@@ -1572,18 +1535,18 @@ export function StorytellingActivity({
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-3 mb-4">
           <div className="w-16 h-16 bg-aduffy-orange/10 rounded-full flex items-center justify-center border-2 border-aduffy-orange/20">
-            <Brain className="w-8 h-8 text-aduffy-orange" />
+            <div className="w-8 h-8 text-aduffy-orange" />
           </div>
           <div className="text-left">
             <h2 className="text-3xl font-bold text-aduffy-navy">Write Your Story</h2>
             <div className="flex items-center gap-2 mt-1">
               <Badge className="aduffy-badge-warning">
-                <Star className="w-4 h-4 mr-1" />
+                <div className="w-4 h-4 mr-1 text-aduffy-yellow" />
                 AI-Guided Writing
               </Badge>
               {isViewOnly && (
                 <Badge className="aduffy-badge-info">
-                  <Eye className="w-3 h-3 mr-1" />
+                  <div className="w-3 h-3 mr-1 text-muted-foreground" />
                   View Only
                 </Badge>
               )}
@@ -1605,9 +1568,9 @@ export function StorytellingActivity({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-3 text-aduffy-navy">
-                  <Lightbulb className="w-6 h-6 text-aduffy-yellow" />
+                  <div className="w-6 h-6 text-aduffy-yellow" />
                   Your AI-Generated Story Topic
-                  {isViewOnly && <Lock className="w-4 h-4 text-muted-foreground" />}
+                  {isViewOnly && <div className="w-4 h-4 text-muted-foreground" />}
                 </CardTitle>
                 {selectedTopic && !isViewOnly && (
                   <Button
@@ -1623,7 +1586,7 @@ export function StorytellingActivity({
                       </>
                     ) : (
                       <>
-                        <RefreshCw className="w-3 h-3 mr-1" />
+                        <div className="w-3 h-3 mr-1 text-aduffy-yellow" />
                         New Topic
                       </>
                     )}
@@ -1660,7 +1623,7 @@ export function StorytellingActivity({
                   
                   <div className="bg-aduffy-yellow/10 p-4 rounded-lg">
                     <div className="flex items-start gap-2">
-                      <Sparkles className="w-5 h-5 text-aduffy-yellow mt-0.5 flex-shrink-0" />
+                      <div className="w-5 h-5 text-aduffy-yellow mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="font-medium text-aduffy-navy mb-1">
                           {isViewOnly ? 'Story Requirements (Completed):' : 'Writing Instructions:'}
@@ -1678,7 +1641,7 @@ export function StorytellingActivity({
               ) : (
                 <div className="text-center py-8">
                   <Button onClick={generateStoryTopic} className="aduffy-button" disabled={isViewOnly}>
-                    <Lightbulb className="w-4 h-4 mr-2" />
+                    <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                     Generate My Story Topic
                   </Button>
                 </div>
@@ -1692,7 +1655,7 @@ export function StorytellingActivity({
               <CardHeader>
                 <CardTitle className="text-aduffy-navy">
                   Your Professional Story
-                  {isViewOnly && <Lock className="w-4 h-4 ml-2 inline text-muted-foreground" />}
+                  {isViewOnly && <div className="w-4 h-4 ml-2 inline text-muted-foreground" />}
                 </CardTitle>
                 <CardDescription>
                   {isViewOnly 
@@ -1726,7 +1689,7 @@ export function StorytellingActivity({
             <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-aduffy-navy">
-                  <Trophy className="w-6 h-6 text-aduffy-yellow" />
+                  <div className="w-6 h-6 text-aduffy-yellow" />
                   AI Story Analysis
                 </CardTitle>
               </CardHeader>
@@ -1762,7 +1725,7 @@ export function StorytellingActivity({
                   <ul className="space-y-1 text-muted-foreground">
                     {storyAnalysis.suggestions.map((suggestion: string, index: number) => (
                       <li key={index} className="flex items-start gap-2">
-                        <span className="w-2 h-2 bg-aduffy-yellow rounded-full mt-2 flex-shrink-0"></span>
+                        <div className="w-2 h-2 bg-aduffy-yellow rounded-full mt-2 flex-shrink-0"></div>
                         {suggestion}
                       </li>
                     ))}
@@ -1791,7 +1754,7 @@ export function StorytellingActivity({
                       <div className="text-xs text-muted-foreground">{word.partOfSpeech}</div>
                     </div>
                     {isUsed ? (
-                      <CheckCircle className="w-5 h-5 text-success" />
+                      <div className="w-5 h-5 text-success" />
                     ) : (
                       <div className="w-5 h-5 border-2 border-muted rounded-full"></div>
                     )}
@@ -1816,7 +1779,7 @@ export function StorytellingActivity({
                     </>
                   ) : (
                     <>
-                      <Brain className="w-4 h-4 mr-2" />
+                      <div className="w-4 h-4 mr-2 text-aduffy-teal" />
                       Analyze My Story
                     </>
                   )}
@@ -1824,14 +1787,14 @@ export function StorytellingActivity({
                 
                 {storyAnalysis && (
                   <Button onClick={handleNextStep} className="w-full aduffy-button">
-                    <ArrowRight className="w-4 h-4 mr-2" />
+                    <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                     Continue to Voice Chat
                   </Button>
                 )}
               </>
             ) : (
               <Button onClick={handleReturnToFurthest} className="w-full border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10">
-                <ArrowRight className="w-4 h-4 mr-2" />
+                <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                 Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
               </Button>
             )}
@@ -1848,18 +1811,18 @@ export function StorytellingActivity({
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-3 mb-4">
           <div className="w-16 h-16 bg-info/10 rounded-full flex items-center justify-center border-2 border-info/20">
-            <Volume2 className="w-8 h-8 text-info" />
+            <div className="w-8 h-8 text-info" />
           </div>
           <div className="text-left">
             <h2 className="text-3xl font-bold text-aduffy-navy">Voice Conversation</h2>
             <div className="flex items-center gap-2 mt-1">
               <Badge className="aduffy-badge-info">
-                <Mic className="w-4 h-4 mr-1" />
+                <div className="w-4 h-4 mr-1 text-aduffy-teal" />
                 Interactive Speaking
               </Badge>
               {isViewOnly && (
                 <Badge className="aduffy-badge-info">
-                  <Eye className="w-3 h-3 mr-1" />
+                  <div className="w-3 h-3 mr-1 text-muted-foreground" />
                   View Only
                 </Badge>
               )}
@@ -1883,18 +1846,18 @@ export function StorytellingActivity({
               <CardTitle className="flex items-center justify-between text-aduffy-navy">
                 <span>
                   Conversation
-                  {isViewOnly && <Lock className="w-4 h-4 ml-2 inline text-muted-foreground" />}
+                  {isViewOnly && <div className="w-4 h-4 ml-2 inline text-muted-foreground" />}
                 </span>
                 <div className="flex items-center gap-2">
                   {!isViewOnly && isSpeaking && (
                     <Badge className="aduffy-badge-info">
-                      <Volume2 className="w-3 h-3 mr-1" />
+                      <div className="w-3 h-3 mr-1 text-aduffy-teal" />
                       AI Speaking
                     </Badge>
                   )}
                   {!isViewOnly && isListening && (
                     <Badge className="aduffy-badge-success">
-                      <Mic className="w-3 h-3 mr-1" />
+                      <div className="w-3 h-3 mr-1 text-aduffy-teal" />
                       Listening
                     </Badge>
                   )}
@@ -1905,7 +1868,7 @@ export function StorytellingActivity({
               <div className="h-96 overflow-y-auto space-y-4 bg-muted/20 p-4 rounded-lg">
                 {voiceConversation.length === 0 ? (
                   <div className="text-center text-muted-foreground py-8">
-                    <Volume2 className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+                    <div className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
                     <p>
                       {isViewOnly 
                         ? "No conversation data available to display"
@@ -1947,7 +1910,7 @@ export function StorytellingActivity({
                       onClick={startVoiceConversation} 
                       className="aduffy-button"
                     >
-                      <Play className="w-4 h-4 mr-2" />
+                      <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                       Start Conversation
                     </Button>
                   ) : (
@@ -1959,12 +1922,12 @@ export function StorytellingActivity({
                       >
                         {isListening ? (
                           <>
-                            <MicOff className="w-4 h-4 mr-2" />
+                            <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                             Stop Listening
                           </>
                         ) : (
                           <>
-                            <Mic className="w-4 h-4 mr-2" />
+                            <div className="w-4 h-4 mr-2 text-aduffy-teal" />
                             Start Speaking
                           </>
                         )}
@@ -1972,7 +1935,7 @@ export function StorytellingActivity({
                       
                       {transcript && (
                         <Button onClick={handleVoiceResponse} className="aduffy-button-outline">
-                          <ArrowRight className="w-4 h-4 mr-2" />
+                          <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                           Send Response
                         </Button>
                       )}
@@ -2011,7 +1974,7 @@ export function StorytellingActivity({
                       <div className="text-xs text-muted-foreground">{word.definition}</div>
                     </div>
                     {isUsedInConversation ? (
-                      <CheckCircle className="w-5 h-5 text-success" />
+                      <div className="w-5 h-5 text-success" />
                     ) : (
                       <div className="w-5 h-5 border-2 border-muted rounded-full"></div>
                     )}
@@ -2027,12 +1990,12 @@ export function StorytellingActivity({
               className="w-full aduffy-button"
               disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
             >
-              <ArrowRight className="w-4 h-4 mr-2" />
+              <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
               Complete &amp; Get Results
             </Button>
           ) : (
             <Button onClick={handleReturnToFurthest} className="w-full border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10">
-              <ArrowRight className="w-4 h-4 mr-2" />
+              <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
               Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
             </Button>
           )}
@@ -2046,12 +2009,12 @@ export function StorytellingActivity({
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-3 mb-4">
           <div className="w-16 h-16 bg-aduffy-yellow/10 rounded-full flex items-center justify-center border-2 border-aduffy-yellow/20">
-            <Trophy className="w-8 h-8 text-aduffy-yellow" />
+            <div className="w-8 h-8 text-aduffy-yellow" />
           </div>
           <div className="text-left">
             <h2 className="text-3xl font-bold text-aduffy-navy">Learning Complete!</h2>
             <Badge className="aduffy-badge-primary mt-1">
-              <Star className="w-4 h-4 mr-1" />
+              <div className="w-4 h-4 mr-1 text-aduffy-yellow" />
               Final Score: {finalScore}/100
             </Badge>
           </div>
@@ -2065,7 +2028,7 @@ export function StorytellingActivity({
         <Card className="aduffy-card text-center">
           <CardContent className="pt-6">
             <div className="w-16 h-16 bg-aduffy-teal/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Brain className="w-8 h-8 text-aduffy-teal" />
+              <div className="w-8 h-8 text-aduffy-teal" />
             </div>
             <div className="text-2xl font-bold text-aduffy-teal mb-2">Learning</div>
             <div className="text-sm text-muted-foreground">
@@ -2077,7 +2040,7 @@ export function StorytellingActivity({
         <Card className="aduffy-card text-center">
           <CardContent className="pt-6">
             <div className="w-16 h-16 bg-aduffy-orange/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <BookOpen className="w-8 h-8 text-aduffy-orange" />
+              <div className="w-8 h-8 text-aduffy-orange" />
             </div>
             <div className="text-2xl font-bold text-aduffy-orange mb-2">Writing</div>
             <div className="text-sm text-muted-foreground">
@@ -2089,7 +2052,7 @@ export function StorytellingActivity({
         <Card className="aduffy-card text-center">
           <CardContent className="pt-6">
             <div className="w-16 h-16 bg-info/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Volume2 className="w-8 h-8 text-info" />
+              <div className="w-8 h-8 text-info" />
             </div>
             <div className="text-2xl font-bold text-info mb-2">Speaking</div>
             <div className="text-sm text-muted-foreground">
@@ -2119,19 +2082,19 @@ export function StorytellingActivity({
               <h4 className="font-medium text-aduffy-navy mb-3">Today's Achievements</h4>
               <ul className="space-y-2">
                 <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-success" />
+                  <div className="w-4 h-4 text-success" />
                   <span className="text-sm">Mastered 5 new vocabulary words</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-success" />
+                  <div className="w-4 h-4 text-success" />
                   <span className="text-sm">Completed {learningQuestions.length} practice questions</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-success" />
+                  <div className="w-4 h-4 text-success" />
                   <span className="text-sm">Created AI-guided story</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-success" />
+                  <div className="w-4 h-4 text-success" />
                   <span className="text-sm">Practiced speaking skills</span>
                 </li>
               </ul>
@@ -2152,7 +2115,7 @@ export function StorytellingActivity({
 
       <div className="flex justify-center gap-4">
         <Button onClick={onBack} className="aduffy-button">
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <div className="w-4 h-4 mr-2 text-aduffy-navy" />
           Back to Dashboard
         </Button>
         <Button onClick={() => {
@@ -2167,7 +2130,7 @@ export function StorytellingActivity({
           setShowQuestionFeedback(false);
           setCurrentQuestionResult(null);
         }} className="border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10">
-          <RotateCcw className="w-4 h-4 mr-2" />
+          <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
           Try Again
         </Button>
       </div>
@@ -2230,7 +2193,7 @@ export function StorytellingActivity({
               }
             >
               {status === 'completed' && (
-                <CheckCircle className="w-4 h-4 text-aduffy-teal" />
+                <div className="w-4 h-4 text-aduffy-teal" />
               )}
               {status === 'current' && (
                 <div className="w-4 h-4 bg-aduffy-yellow rounded-full animate-pulse" />
@@ -2252,7 +2215,7 @@ export function StorytellingActivity({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Button onClick={onBack} variant="ghost" className="text-aduffy-navy hover:bg-aduffy-yellow/10">
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <div className="w-4 h-4 mr-2 text-aduffy-navy" />
             Back to Dashboard
           </Button>
           <div className="flex items-center gap-2">
@@ -2261,7 +2224,7 @@ export function StorytellingActivity({
             </Badge>
             {isViewOnly && (
               <Badge className="aduffy-badge-info">
-                <Eye className="w-3 h-3 mr-1" />
+                <div className="w-3 h-3 mr-1 text-muted-foreground" />
                 View Only
               </Badge>
             )}

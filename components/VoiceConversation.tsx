@@ -5,7 +5,6 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { ScrollArea } from "./ui/scroll-area";
 import { Progress } from "./ui/progress";
-import { ArrowLeft, Mic, MicOff, Volume2, VolumeX, MessageSquare, Bot, User } from "lucide-react";
 import { useVoiceInteraction } from "../hooks/useVoiceInteraction";
 
 interface VoiceConversationProps {
@@ -210,7 +209,7 @@ export function VoiceConversation({ onBack }: VoiceConversationProps) {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={onBack} className="p-2">
-            <ArrowLeft className="w-4 h-4" />
+            <span role="img" aria-label="back">←</span>
           </Button>
           <div>
             <h1>Voice Conversation</h1>
@@ -222,7 +221,7 @@ export function VoiceConversation({ onBack }: VoiceConversationProps) {
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-                <MicOff className="w-8 h-8 text-muted-foreground" />
+                <span role="img" aria-label="mic-off">🎤</span>
               </div>
               <div>
                 <h3>Voice Features Not Available</h3>
@@ -243,7 +242,7 @@ export function VoiceConversation({ onBack }: VoiceConversationProps) {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" onClick={onBack} className="p-2">
-          <ArrowLeft className="w-4 h-4" />
+          <span role="img" aria-label="back">←</span>
         </Button>
         <div className="flex-1">
           <h1>AI Voice Conversation</h1>
@@ -256,11 +255,9 @@ export function VoiceConversation({ onBack }: VoiceConversationProps) {
             onClick={() => setIsAutoSpeakEnabled(!isAutoSpeakEnabled)}
             className="flex items-center gap-2"
           >
-            {isAutoSpeakEnabled ? (
-              <Volume2 className="w-4 h-4" />
-            ) : (
-              <VolumeX className="w-4 h-4" />
-            )}
+            <span role="img" aria-label="volume">
+              {isAutoSpeakEnabled ? "🔊" : "🔇"}
+            </span>
             Auto-speak
           </Button>
         </div>
@@ -317,7 +314,7 @@ export function VoiceConversation({ onBack }: VoiceConversationProps) {
       <Card className="flex flex-col h-96">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-primary" />
+            <span role="img" aria-label="message">��</span>
             Conversation: {currentTopicData.title}
           </CardTitle>
           <CardDescription>{currentTopicData.description}</CardDescription>
@@ -339,9 +336,9 @@ export function VoiceConversation({ onBack }: VoiceConversationProps) {
                   >
                     <div className="flex items-center gap-2 mb-1">
                       {message.type === 'user' ? (
-                        <User className="w-4 h-4" />
+                        <span role="img" aria-label="user">🧑</span>
                       ) : (
-                        <Bot className="w-4 h-4" />
+                        <span role="img" aria-label="bot">🤖</span>
                       )}
                       <span className="text-xs opacity-70">
                         {message.timestamp.toLocaleTimeString()}
@@ -376,16 +373,14 @@ export function VoiceConversation({ onBack }: VoiceConversationProps) {
               className="rounded-full w-16 h-16"
               disabled={isSpeaking}
             >
-              {isListening ? (
-                <MicOff className="w-6 h-6" />
-              ) : (
-                <Mic className="w-6 h-6" />
-              )}
+              <span role="img" aria-label="mic">
+                {isListening ? "🔇" : "🎤"}
+              </span>
             </Button>
             
             {isSpeaking && (
               <Button variant="outline" onClick={stopSpeaking}>
-                <VolumeX className="w-4 h-4 mr-2" />
+                <span role="img" aria-label="stop">🔇</span>
                 Stop AI
               </Button>
             )}

@@ -1,6 +1,5 @@
 import * as React from "react";
 import type { ComponentProps } from "react";
-import { ChevronRight, MoreHorizontal } from "lucide-react";
 
 function Breadcrumb({ ...props }: ComponentProps<"nav">) {
   return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;
@@ -70,7 +69,7 @@ function BreadcrumbSeparator({
       className={`[&>svg]:size-3.5 ${className || ""}`}
       {...props}
     >
-      {children ?? <ChevronRight />}
+      {children ?? "→"}
     </li>
   );
 }
@@ -87,8 +86,7 @@ function BreadcrumbEllipsis({
       className={`flex size-9 items-center justify-center ${className || ""}`}
       {...props}
     >
-      <MoreHorizontal className="size-4" />
-      <span className="sr-only">More</span>
+      {"..."}
     </span>
   );
 }

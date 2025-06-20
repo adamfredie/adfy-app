@@ -4,7 +4,6 @@ import { Badge } from "./ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { Home, User, Settings, LogOut, Award } from "lucide-react";
 import { OnboardingData } from "./Onboarding";
 
 interface HeaderProps {
@@ -76,7 +75,7 @@ export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, 
                 <Button 
                   className="text-muted-foreground hover:text-aduffy-navy"
                 >
-                  <Home className="w-4 h-4 mr-2" />
+                  <span role="img" aria-label="home">🏠</span>
                   Dashboard
                 </Button>
                 <span className="text-muted-foreground">/</span>
@@ -93,13 +92,13 @@ export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, 
                 <Button
                   className="hover:bg-aduffy-yellow/10 text-muted-foreground hover:text-aduffy-navy"
                 >
-                  <Settings className="w-5 h-5" />
+                  <span role="img" aria-label="settings">⚙️</span>
                 </Button>
               )}
 
               {/* Vocabulary Level Badge */}
               <Badge className={getVocabularyLevelColor(userProfile.vocabularyLevel)}>
-                <Award className="w-3 h-3 mr-1" />
+                <span role="img" aria-label="award">🏅</span>
                 {userProfile.vocabularyLevel.charAt(0).toUpperCase() + userProfile.vocabularyLevel.slice(1)} Level
               </Badge>
 
@@ -138,7 +137,7 @@ export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, 
                     className="cursor-pointer"
                     onClick={onNavigateToSettings}
                   >
-                    <User className="w-4 h-4 mr-2" />
+                    <span role="img" aria-label="profile">👤</span>
                     Profile Settings
                   </DropdownMenuItem>
                   
@@ -146,7 +145,7 @@ export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, 
                     className="cursor-pointer"
                     onClick={onNavigateToSettings}
                   >
-                    <Settings className="w-4 h-4 mr-2" />
+                    <span role="img" aria-label="settings">⚙️</span>
                     Learning Preferences
                   </DropdownMenuItem>
                   
@@ -156,12 +155,12 @@ export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, 
                     className="cursor-pointer text-warning" 
                     onClick={handleResetOnboarding}
                   >
-                    <Settings className="w-4 h-4 mr-2" />
+                    <span role="img" aria-label="reset">🔄</span>
                     Reset Onboarding
                   </DropdownMenuItem>
                   
                   <DropdownMenuItem className="cursor-pointer text-destructive">
-                    <LogOut className="w-4 h-4 mr-2" />
+                    <span role="img" aria-label="logout">↪️</span>
                     Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
