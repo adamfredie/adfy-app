@@ -1,0 +1,81 @@
+.dashboard {
+  padding: var(--spacing-6) 0;
+}
+
+.header {
+  margin-bottom: var(--spacing-6);
+}
+
+.welcomeCard {
+  background: linear-gradient(to right, var(--primary-light), #F0FDFF);
+  border: none;
+  margin-bottom: var(--spacing-6);
+}
+
+.welcomeTitle {
+  font-size: var(--font-size-xl);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.welcomeSubtitle {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-4);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+}
+
+.scheduleCard {
+  margin-bottom: var(--spacing-6);
+}
+
+.scheduleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.scheduleTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.scheduleTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 var(--spacing-2);
+}
+
+.scheduleRow {
+  background-color: var(--background-alt);
+  border-radius: var(--radius-md);
+}
+
+.scheduleCell {
+  padding: var(--spacing-3) var(--spacing-4);
+}
+
+.scheduleTime {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .scheduleTable {
+    display: block;
+    overflow-x: auto;
+  }
+} 

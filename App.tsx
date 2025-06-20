@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Header } from "./components/Header";
 import { Dashboard } from "./components/Dashboard";
 import { Onboarding, OnboardingData } from "./components/Onboarding";
@@ -9,6 +8,7 @@ import { VocabularyQuiz } from "./components/VocabularyQuiz";
 import { InterviewPrep } from "./components/InterviewPrep";
 import { VoiceConversation } from "./components/VoiceConversation";
 import { PronunciationPractice } from "./components/PronunciationPractice";
+import { Navigation } from './components/Navigation';
 
 type ActivityType = 'dashboard' | 'storytelling' | 'quiz' | 'interview' | 'voice-conversation' | 'pronunciation' | 'settings';
 
@@ -90,65 +90,78 @@ export default function App() {
     });
   }, []);
 
+  const handleSettingsClick = () => {
+    // Handle settings click
+  };
+
+  const handleProfileClick = () => {
+    // Handle profile click
+  };
+
+  const handleNavigate = (page: string) => {
+    // Handle navigation
+    console.log('Navigating to:', page);
+  };
+
   // Show onboarding flow for first-time users
   if (!hasCompletedOnboarding) {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header with ADuffy Learning Logo */}
-      <Header 
-        currentActivity={currentActivity} 
-        onNavigateHome={currentActivity !== 'dashboard' ? handleBackToDashboard : undefined}
-        onNavigateToSettings={() => setCurrentActivity('settings')}
-        userProfile={userProfile}
-      />
-      
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {currentActivity === 'dashboard' && (
-          <Dashboard 
-            onSelectActivity={handleActivitySelect} 
-            userProfile={userProfile}
-            activityProgress={activityProgress}
-          />
-        )}
-        
-        {currentActivity === 'settings' && (
-          <Settings 
-            onBack={handleBackToDashboard}
-            userProfile={userProfile}
-            onProfileUpdate={handleProfileUpdate}
-          />
-        )}
-        
-        {currentActivity === 'storytelling' && (
-          <StorytellingActivity 
-            onBack={handleBackToDashboard}
-            userProfile={userProfile}
-            savedProgress={activityProgress.storytelling}
-            onProgressUpdate={(progress) => handleActivityProgressUpdate('storytelling', progress)}
-            onComplete={() => handleActivityComplete('storytelling')}
-          />
-        )}
-        
-        {currentActivity === 'quiz' && (
-          <VocabularyQuiz onBack={handleBackToDashboard} />
-        )}
-        
-        {currentActivity === 'interview' && (
-          <InterviewPrep onBack={handleBackToDashboard} />
-        )}
-        
-        {currentActivity === 'voice-conversation' && (
-          <VoiceConversation onBack={handleBackToDashboard} />
-        )}
-        
-        {currentActivity === 'pronunciation' && (
-          <PronunciationPractice onBack={handleBackToDashboard} />
-        )}
-      </div>
+    <div className="app-container-column">
+      <Navigation />
+      <main className="main-content-column">
+        <Header 
+          currentActivity={currentActivity} 
+          onNavigateHome={currentActivity !== 'dashboard' ? handleBackToDashboard : undefined}
+          onNavigateToSettings={() => setCurrentActivity('settings')}
+          userProfile={userProfile}
+        />
+        <div className="container mx-auto px-4 py-8 max-w-6xl">
+          {currentActivity === 'dashboard' && (
+            <Dashboard 
+              onSelectActivity={handleActivitySelect} 
+              userProfile={userProfile}
+              activityProgress={activityProgress}
+            />
+          )}
+          
+          {currentActivity === 'settings' && (
+            <Settings 
+              onBack={handleBackToDashboard}
+              userProfile={userProfile}
+              onProfileUpdate={handleProfileUpdate}
+            />
+          )}
+          
+          {currentActivity === 'storytelling' && (
+            <StorytellingActivity 
+              onBack={handleBackToDashboard}
+              userProfile={userProfile}
+              savedProgress={activityProgress.storytelling}
+              onProgressUpdate={(progress) => handleActivityProgressUpdate('storytelling', progress)}
+              onComplete={() => handleActivityComplete('storytelling')}
+            />
+          )}
+          
+          {currentActivity === 'quiz' && (
+            <VocabularyQuiz onBack={handleBackToDashboard} />
+          )}
+          
+          {currentActivity === 'interview' && (
+            <InterviewPrep onBack={handleBackToDashboard} />
+          )}
+          
+          {currentActivity === 'voice-conversation' && (
+            <VoiceConversation onBack={handleBackToDashboard} />
+          )}
+          
+          {currentActivity === 'pronunciation' && (
+            <PronunciationPractice onBack={handleBackToDashboard} />
+          )}
+        </div>
+      </main>
     </div>
   );
 }
