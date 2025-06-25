@@ -30,6 +30,11 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
   };
 
   const getStatsBasedOnLevel = () => {
+    // If no user profile, return reset values
+    if (!userProfile) {
+      return { wordsLearned: 0, weeklyGoal: 0, currentStreak: 0, totalScore: 0 };
+    }
+
     const baseStats = {
       beginner: { wordsLearned: 89, weeklyGoal: 25, currentStreak: 5, totalScore: 650 },
       intermediate: { wordsLearned: 234, weeklyGoal: 50, currentStreak: 12, totalScore: 1450 },
@@ -83,11 +88,11 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
       title: 'AI Storytelling',
       icon: '📚',
       description: 'Build vocabulary through interactive storytelling with AI guidance',
-      currentField: 'Marketing',
-      progress: {
-        current: 4,
+      currentField: activityProgress?.storytelling?.selectedField || 'Marketing',
+      progress: activityProgress?.storytelling ? {
+        current: activityProgress.storytelling.currentStep || 1,
         total: 5
-      }
+      } : undefined
     }
   ];
 
@@ -156,17 +161,29 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
       {/* Welcome Section */}
       <div className="welcome-section">
         <div className="card card-hover">
-          <h1 className="welcome-title">Welcome back, {getUserName()}!</h1>
+          <h1 className="welcome-title">
+            {userProfile ? `Welcome back, ${getUserName()}!` : 'Welcome to Aduffy Learning!'}
+          </h1>
           <p className="welcome-subtitle">
-            Ready to transform your communication skills and advance your career with
-            Aduffy Learning's professional vocabulary mastery program?
+            {userProfile 
+              ? "Ready to transform your communication skills and advance your career with Aduffy Learning's professional vocabulary mastery program?"
+              : "Complete your onboarding to get started with personalized learning experiences."
+            }
           </p>
-          <div className="badge badge-primary">
-            {userProfile?.vocabularyLevel || "Beginner"} Level
-          </div>
-          {userProfile?.fieldOfInterest && (
-            <div className="badge badge-success">
-              {userProfile.fieldOfInterest} Focus
+          {userProfile ? (
+            <>
+              <div className="badge badge-primary">
+                {userProfile?.vocabularyLevel || "Beginner"} Level
+              </div>
+              {userProfile?.fieldOfInterest && (
+                <div className="badge badge-success">
+                  {userProfile.fieldOfInterest} Focus
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="badge badge-warning">
+              Setup Required
             </div>
           )}
         </div>
@@ -184,11 +201,11 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
         
         <div className="course-progress">
           <div className="progress-bar">
-            <div className="progress-fill" style={{ width: "68%" }}></div>
+            <div className="progress-fill" style={{ width: userProfile ? "68%" : "0%" }}></div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem" }}>
             <span className="text-secondary">Progress</span>
-            <span>68% Complete</span>
+            <span>{userProfile ? "68% Complete" : "0% Complete"}</span>
           </div>
         </div>
 
@@ -212,7 +229,9 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
         <div className="card stat-card">
           <div className="stat-value">{userStats.wordsLearned}</div>
           <div className="stat-label">Words Learned</div>
-          <div style={{ color: "var(--success)", fontSize: "var(--font-size-sm)" }}>+12 this week</div>
+          <div style={{ color: userStats.wordsLearned > 0 ? "var(--success)" : "var(--text-secondary)", fontSize: "var(--font-size-sm)" }}>
+            {userStats.wordsLearned > 0 ? "+12 this week" : "No words learned yet"}
+          </div>
         </div>
 
         <div className="card stat-card">
@@ -224,12 +243,17 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
               style={{ width: `${(userStats.weeklyGoal/25) * 100}%` }}
             ></div>
           </div>
+          <div style={{ color: userStats.weeklyGoal > 0 ? "var(--success)" : "var(--text-secondary)", fontSize: "var(--font-size-sm)" }}>
+            {userStats.weeklyGoal > 0 ? "+12 this week" : "No progress yet"}
+          </div>
         </div>
 
         <div className="card stat-card">
           <div className="stat-value">{userStats.currentStreak} days</div>
           <div className="stat-label">Current Streak</div>
-          <div style={{ color: "var(--success)", fontSize: "var(--font-size-sm)" }}>Keep it up! 🔥</div>
+          <div style={{ color: userStats.currentStreak > 0 ? "var(--success)" : "var(--text-secondary)", fontSize: "var(--font-size-sm)" }}>
+            {userStats.currentStreak > 0 ? "Keep it up! 🔥" : "Start your streak today!"}
+          </div>
         </div>
 
         <div className="card stat-card">

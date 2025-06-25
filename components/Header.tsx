@@ -10,10 +10,11 @@ interface HeaderProps {
   currentActivity: string;
   onNavigateHome?: () => void;
   onNavigateToSettings?: () => void;
+  onResetOnboarding?: () => void;
   userProfile?: OnboardingData | null;
 }
 
-export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, userProfile }: HeaderProps) {
+export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, onResetOnboarding, userProfile }: HeaderProps) {
   const getActivityTitle = (activity: string) => {
     switch (activity) {
       case 'storytelling': return 'AI Storytelling';
@@ -43,13 +44,6 @@ export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, 
       case 'advanced': return 'aduffy-badge-success';
       default: return 'aduffy-badge-primary';
     }
-  };
-
-  const handleResetOnboarding = () => {
-    localStorage.removeItem('aduffy-onboarding-completed');
-    localStorage.removeItem('aduffy-user-profile');
-    localStorage.removeItem('aduffy-profile-picture');
-    window.location.reload();
   };
 
   return (
@@ -153,7 +147,7 @@ export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, 
                   
                   <DropdownMenuItem 
                     className="cursor-pointer text-warning" 
-                    onClick={handleResetOnboarding}
+                    onClick={onResetOnboarding}
                   >
                     <span role="img" aria-label="reset">🔄</span>
                     Reset Onboarding

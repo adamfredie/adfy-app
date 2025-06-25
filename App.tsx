@@ -11,7 +11,7 @@ import { PronunciationPractice } from "./components/PronunciationPractice";
 import { Navigation } from './components/Navigation';
 
 type ActivityType = 'dashboard' | 'storytelling' | 'quiz' | 'interview' | 'voice-conversation' | 'pronunciation' | 'settings';
-
+//Why is the activity Progress only for storttelling?
 interface ActivityProgress {
   storytelling?: {
     currentStep: number;
@@ -103,6 +103,40 @@ export default function App() {
     console.log('Navigating to:', page);
   };
 
+  // Handler for signing out: clears localStorage and reloads the app
+  const handleSignOut = useCallback(() => {
+    localStorage.clear();
+    window.location.reload();
+  }, []);
+
+  // Handler for resetting onboarding: sets onboarding as incomplete
+  const handleResetOnboarding = useCallback(() => {
+    // Clear all localStorage items
+    localStorage.removeItem('aduffy-onboarding-completed');
+    localStorage.removeItem('aduffy-user-profile');
+    localStorage.removeItem('aduffy-profile-picture');
+    localStorage.removeItem('aduffy-activity-progress');
+    
+    // Clear any other potential storage
+    sessionStorage.clear();
+    
+    // Clear all localStorage keys that start with 'aduffy-'
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('aduffy-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Reset all state
+    setHasCompletedOnboarding(false);
+    setUserProfile(null);
+    setActivityProgress({});
+    setCurrentActivity('dashboard');
+    
+    // Reload the page to ensure complete reset
+    window.location.reload();
+  }, []);
+
   // Show onboarding flow for first-time users
   if (!hasCompletedOnboarding) {
     return <Onboarding onComplete={handleOnboardingComplete} />;
@@ -110,14 +144,27 @@ export default function App() {
 
   return (
     <div className="app-container-column">
-      <Navigation />
+      <Navigation 
+        currentActivity={currentActivity}
+        onSignOut={handleSignOut}
+        onResetOnboarding={handleResetOnboarding}
+      />
       <main className="main-content-column">
-        <Header 
-          currentActivity={currentActivity} 
-          onNavigateHome={currentActivity !== 'dashboard' ? handleBackToDashboard : undefined}
-          onNavigateToSettings={() => setCurrentActivity('settings')}
-          userProfile={userProfile}
-        />
+        {/* 
+          CHANGED: Conditional Header Rendering
+          - Hide Header component on 'dashboard' and 'storytelling' screens
+          - This was requested to create a cleaner UI for these specific activities
+          - Header only shows on other activities (quiz, interview, voice-conversation, pronunciation, settings)
+        */}
+        {currentActivity !== 'dashboard' && currentActivity !== 'storytelling' && (
+          <Header 
+            currentActivity={currentActivity} 
+            onNavigateHome={currentActivity !== 'dashboard' ? handleBackToDashboard : undefined}
+            onNavigateToSettings={() => setCurrentActivity('settings')}
+            onResetOnboarding={handleResetOnboarding}//passed centralized function
+            userProfile={userProfile}
+          />
+        )}
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           {currentActivity === 'dashboard' && (
             <Dashboard 

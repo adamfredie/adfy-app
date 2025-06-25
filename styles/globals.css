@@ -1,5 +1,5 @@
 @custom-variant dark (&:is(.dark *));
-
+@import "../components/styles/utilities.css";
 :root {
   --font-size: 14px;
   --background: #ffffff;

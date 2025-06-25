@@ -249,6 +249,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <Label htmlFor="name">Full Name *</Label>
             <Input
               id="name"
+              autoComplete="off"
               value={formData.name}
               onChange={(e) => updateFormData({ name: e.target.value })}
               placeholder="Enter your full name"
@@ -259,6 +260,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <Input
               id="email"
               type="email"
+              autoComplete="off"
               value={formData.email}
               onChange={(e) => updateFormData({ email: e.target.value })}
               placeholder="your.email@company.com"
@@ -268,7 +270,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         
         <div className="bg-aduffy-yellow/5 p-6 rounded-lg border border-aduffy-yellow/20">
           <div className="flex items-start gap-3">
-            <span className="w-6 h-6 text-aduffy-yellow mt-1 flex-shrink-0">✨</span>
+            <span className="w-6 h-6 text-aduffy-teal mt-1 flex-shrink-0">✨</span>
             <div>
               <h3 className="font-semibold text-aduffy-navy mb-2">What makes ADuffy Learning special?</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
@@ -335,6 +337,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <Label htmlFor="jobTitle">Job Title *</Label>
             <Input
               id="jobTitle"
+              autoComplete="off"
               value={formData.jobTitle}
               onChange={(e) => updateFormData({ jobTitle: e.target.value })}
               placeholder="e.g., Senior Marketing Manager"
@@ -344,6 +347,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <Label htmlFor="company">Company (Optional)</Label>
             <Input
               id="company"
+              autoComplete="off"
               value={formData.company}
               onChange={(e) => updateFormData({ company: e.target.value })}
               placeholder="Your company name"
@@ -691,9 +695,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <div className="w-20 h-20 bg-gradient-learning rounded-xl flex items-center justify-center shadow-lg text-4xl">
               🧠
             </div>
-            <div className="text-left">
-              <h1 className="text-4xl font-bold text-aduffy-navy">ADuffy Learning</h1>
-              <p className="text-lg text-muted-foreground">Professional Communication Excellence</p>
+            <div className="text-center">
+              <h1 className="hero-title">ADuffy Learning</h1>
+              <p className="hero-subtitle">Professional Communication Excellence</p>
             </div>
           </div>
         </div>

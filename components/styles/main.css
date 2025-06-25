@@ -1,5 +1,21 @@
+/*
+  MAIN.CSS - Main Stylesheet for Aduffy Learning App
+  
+  CHANGES MADE:
+  - FIXED: Added CSS variables import to resolve styling issues
+  - FIXED: Added utilities.css import to make custom utility classes available
+  - UPDATED: Ensured proper CSS variable usage throughout the file
+  - MAINTAINED: Existing component styles and layout structure
+  
+  IMPORTS:
+  - _variables.css: Contains CSS custom properties (colors, spacing, typography)
+  - _reset.css: CSS reset for consistent cross-browser styling
+  - utilities.css: Custom utility classes (imported to replace Tailwind)
+*/
+
 @import './base/_variables.css';
 @import './base/_reset.css';
+@import './utilities.css';
 
 /* Global Utility Classes */
 .container {
@@ -258,11 +274,12 @@ body {
   text-align: center;
   margin-bottom: var(--space-8);
 }
-
+/*Used for welcome sadia and write your story*/
 .welcome-title {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-3xl);
+  font-weight: 600;
+  margin-bottom: var(--space-3);
   color: var(--text-primary);
-  margin-bottom: var(--space-2);
 }
 
 .welcome-subtitle {
@@ -436,8 +453,7 @@ body {
 }
 
 .continue-button:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+  background: var(--warning-dark);
 }
 
 /* Top Navigation */
@@ -1342,4 +1358,7 @@ body {
 
 .continue-button:hover {
   background: var(--warning-dark);
-} 
+}
+
+/*ADDED*/
+/*Is is used for Write your story in storytellingActivity*/ 

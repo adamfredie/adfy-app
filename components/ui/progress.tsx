@@ -10,12 +10,12 @@ function Progress({
   return (
     <div
       data-slot="progress"
-      className={`aduffy-progress relative h-2 w-full overflow-hidden rounded-full bg-muted ${className}`}
+      className={`progress-bar-container ${className}`}
       {...props}
     >
       <div
         data-slot="progress-indicator"
-        className="aduffy-progress-indicator bg-primary h-full transition-all"
+        className="progress-bar-fill"
         style={{ width: `${value}%` }}
       />
     </div>
