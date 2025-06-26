@@ -3,8 +3,9 @@
 import * as React from "react";
 
 interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   defaultTab?: string;
+  className?: string;
 }
 
 Tabs.displayName = "Tabs";
@@ -27,9 +28,10 @@ function Tabs({ children, defaultTab, className = '', ...props }: TabsProps) {
 }
 
 interface TabsListProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   activeTab?: string;
   setActiveTab?: (tab: string) => void;
+  className?: string;
 }
 
 TabsList.displayName = "TabsList";
@@ -43,7 +45,9 @@ function TabsList({ children, className = '', activeTab, setActiveTab, ...props 
         const type = child.type;
         const displayName = (type as any).displayName;
         if (displayName === "TabsTrigger") {
-          return React.cloneElement(child as React.ReactElement<any>, { activeTab, setActiveTab, tabValue: idx.toString() });
+          const existingTabValue = child.props.tabValue;
+          const tabValue = existingTabValue || idx.toString();
+          return React.cloneElement(child as React.ReactElement<any>, { activeTab, setActiveTab, tabValue });
         }
         return child;
       })}
@@ -52,10 +56,11 @@ function TabsList({ children, className = '', activeTab, setActiveTab, ...props 
 }
 
 interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   tabValue?: string;
   activeTab?: string;
   setActiveTab?: (tab: string) => void;
+  className?: string;
 }
 
 TabsTrigger.displayName = "TabsTrigger";
@@ -76,9 +81,10 @@ function TabsTrigger({ children, className = '', tabValue = '', activeTab, setAc
 }
 
 interface TabsContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   tabValue?: string;
   activeTab?: string;
+  className?: string;
 }
 
 TabsContent.displayName = "TabsContent";

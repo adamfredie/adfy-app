@@ -5,6 +5,12 @@
   --secondary: #FF9F3E;
   --accent: #FFB84C;
   
+  /* Aduffy Brand Colors */
+  --aduffy-teal: #1db5a3;
+  --aduffy-yellow: #ffb84c;
+  --aduffy-orange: #ff9f3e;
+  --aduffy-navy: #2d3748;
+  
   /* Text Colors */
   --text-primary: #2D3748;
   --text-secondary: #718096;
@@ -14,6 +20,7 @@
   --bg-primary: #FFFFFF;
   --bg-secondary: #F7FAFC;
   --bg-muted: #EDF2F7;
+  --muted-rgb: 237, 242, 247; /* RGB values for muted color */
   
   /* Status Colors */
   --success: #48BB78;

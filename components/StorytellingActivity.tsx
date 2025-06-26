@@ -55,6 +55,12 @@ import { Alert } from "./ui/alert";
 import { Select } from "./ui/select";
 import { OnboardingData } from "./Onboarding";
 import { useVoiceInteraction } from "../hooks/useVoiceInteraction";
+import { analyzeStoryWithGemini } from '../src/api/gemini';
+
+// ... inside your component
+
+
+
 
 interface StorytellingActivityProps {
   onBack: () => void;
@@ -122,6 +128,25 @@ export function StorytellingActivity({
   onProgressUpdate,
   onComplete 
 }: StorytellingActivityProps) {
+  const [storyAnalysis, setStoryAnalysis] = useState<any>(null);
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false);
+  
+  async function handleAnalyzeStory() {
+    setLoadingAnalysis(true);
+    try {
+      const analysis = await analyzeStoryWithGemini({
+        story: userStory,
+        topic: selectedTopic?.title || '',
+        vocabulary: dailyWords.map(w => w.word)
+      });
+      setStoryAnalysis(analysis);
+    } catch (err) {
+      // handle error, e.g. show a toast
+    } finally {
+      setLoadingAnalysis(false);
+    }
+  }
+  
   // Initialize state from saved progress or defaults
   const [currentStep, setCurrentStep] = useState<StepType>(
     savedProgress ? (STEP_ORDER[savedProgress.currentStep - 1] as StepType) : 'words'
@@ -137,7 +162,6 @@ export function StorytellingActivity({
   const [showQuestionFeedback, setShowQuestionFeedback] = useState(false);
   const [currentQuestionResult, setCurrentQuestionResult] = useState<{ isCorrect: boolean; explanation: string } | null>(null);
   const [userStory, setUserStory] = useState(savedProgress?.userStory || '');
-  const [storyAnalysis, setStoryAnalysis] = useState<any>(null);
   const [voiceConversation, setVoiceConversation] = useState<any[]>([]);
   const [currentWordFocus, setCurrentWordFocus] = useState(0);
   const [finalScore, setFinalScore] = useState(0);
@@ -1283,7 +1307,7 @@ export function StorytellingActivity({
       </div>
     </div>
   );
-
+// Learning Page starts here
   const renderLearningStep = () => (
     <div className="space-y-8">
       {renderViewOnlyAlert()}
@@ -1294,26 +1318,24 @@ export function StorytellingActivity({
             <div className="w-8 h-8 text-aduffy-teal" />
           </div>
           <div className="text-left">
-            <h2 className="text-3xl font-bold text-aduffy-navy">Learn &amp; Practice</h2>
-            <div className="flex items-center gap-2 mt-1">
+            <h2 className="text-3xl font-bold text-aduffy-navy text-center">Learn &amp; Practice</h2>
+            <div className="learning-header-center">
               <Badge className="aduffy-badge-info">
                 <div className="w-3 h-3 mr-1 text-aduffy-teal" />
                 Interactive Learning
               </Badge>
-              {isViewOnly && (
-                <Badge className="aduffy-badge-info">
-                  <div className="w-3 h-3 mr-1 text-muted-foreground" />
-                  View Only
-                </Badge>
-              )}
-              <Button
-                size="sm"
+              <button
+                type="button"
                 onClick={() => setShowLearningContent(!showLearningContent)}
-                className="text-xs"
+                className="hide-content-btn"
               >
-                {showLearningContent ? <div className="w-3 h-3 mr-1 text-muted-foreground" /> : <div className="w-3 h-3 mr-1 text-aduffy-yellow" />}
+                <span className="hide-content-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M17.94 17.94A10.06 10.06 0 0 1 12 20c-5.05 0-9.29-3.36-10-8 .21-1.32.7-2.56 1.44-3.66M6.1 6.1A9.97 9.97 0 0 1 12 4c5.05 0 9.29 3.36 10 8-.21 1.32-.7 2.56-1.44 3.66M1 1l22 22" stroke="#222b3a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
                 {showLearningContent ? 'Hide' : 'Show'} Content
-              </Button>
+              </button>
             </div>
           </div>
         </div>
@@ -1325,19 +1347,13 @@ export function StorytellingActivity({
         </p>
       </div>
 
-      <Tabs defaultValue="questions" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-muted/50 h-12">
-          <TabsTrigger 
-            value="questions" 
-            className="data-[state=active]:bg-aduffy-teal data-[state=active]:text-white font-medium"
-          >
+      <Tabs defaultTab="questions" className="w-full">
+        <TabsList className="tabs-list-pill">
+          <TabsTrigger tabValue="questions" className="tabs-trigger">
             <div className="w-4 h-4 mr-2 text-aduffy-teal" />
             Practice Questions ({learningQuestions.length})
           </TabsTrigger>
-          <TabsTrigger 
-            value="story" 
-            className="data-[state=active]:bg-aduffy-teal data-[state=active]:text-white font-medium"
-          >
+          <TabsTrigger tabValue="story" className="tabs-trigger">
             <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
             Example Story
           </TabsTrigger>
@@ -1370,55 +1386,53 @@ export function StorytellingActivity({
                 </div>
                 
                 <div className="grid grid-cols-1 gap-3">
-                  {learningQuestions[currentQuestionIndex]?.options.map((option, index) => (
-                    <Button
-                      key={index}
-                      className={`justify-start p-4 h-auto text-left ${
-                        showQuestionFeedback || isViewOnly
-                          ? (index === learningQuestions[currentQuestionIndex].correctAnswer 
-                              ? 'border-success bg-success/10 text-success' 
-                              : questionResults[questionResults.length - 1]?.userAnswer === index 
-                                ? 'border-destructive bg-destructive/10 text-destructive'
-                                : 'opacity-50')
-                          : 'hover:border-aduffy-yellow/50'
-                      } ${isViewOnly ? 'cursor-default' : ''}`}
-                      onClick={() => !showQuestionFeedback && !isViewOnly && handleAnswerQuestion(index)}
-                      disabled={showQuestionFeedback || isViewOnly}
-                    >
-                      <div className="w-6 h-6 bg-muted rounded-full flex items-center justify-center text-sm font-medium mr-3">
-                        {String.fromCharCode(65 + index)}
+                  {learningQuestions[currentQuestionIndex]?.options.map((option, index) => {
+                    const isSelected = questionResults[questionResults.length - 1]?.userAnswer === index;
+                    const isCorrect = index === learningQuestions[currentQuestionIndex].correctAnswer;
+                    return (
+                      <div
+                        key={index}
+                        className={`quiz-option${isSelected ? ' selected' : ''}${isCorrect && (showQuestionFeedback || isViewOnly) ? ' correct' : ''}${isViewOnly ? ' cursor-default' : ''}`}
+                        onClick={() => !showQuestionFeedback && !isViewOnly && handleAnswerQuestion(index)}
+                        style={{ pointerEvents: showQuestionFeedback || isViewOnly ? 'none' : 'auto' }}
+                      >
+                        <span className="option-letter">{String.fromCharCode(65 + index)}</span>
+                        {option}
+                        {(showQuestionFeedback || isViewOnly) && isCorrect && (
+                          <span className="option-check">
+                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+                              <path d="M5 13l4 4L19 7" stroke="#22b573" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </span>
+                        )}
                       </div>
-                      {option}
-                      {(showQuestionFeedback || isViewOnly) && index === learningQuestions[currentQuestionIndex].correctAnswer && (
-                        <div className="w-5 h-5 ml-auto text-success" />
-                      )}
-                      {(showQuestionFeedback || isViewOnly) && questionResults[questionResults.length - 1]?.userAnswer === index && index !== learningQuestions[currentQuestionIndex].correctAnswer && (
-                        <div className="w-5 h-5 ml-auto text-destructive" />
-                      )}
-                    </Button>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {(showQuestionFeedback || isViewOnly) && currentQuestionResult && (
-                  <div className={`mt-4 p-4 rounded-lg ${currentQuestionResult.isCorrect ? 'bg-success/10' : 'bg-destructive/10'}`}>
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className={`quiz-feedback ${currentQuestionResult.isCorrect ? 'correct' : 'incorrect'}`}>
+                    <div className="quiz-feedback-header">
                       {currentQuestionResult.isCorrect ? (
-                        <div className="w-5 h-5 text-success" />
+                        <>
+                          <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#22b573" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          Correct!
+                        </>
                       ) : (
-                        <div className="w-5 h-5 text-destructive" />
+                        <>
+                          <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke="#b91c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          Incorrect
+                        </>
                       )}
-                      <span className={`font-medium ${currentQuestionResult.isCorrect ? 'text-success' : 'text-destructive'}`}>
-                        {currentQuestionResult.isCorrect ? 'Correct!' : 'Incorrect'}
-                      </span>
                     </div>
-                    <p className="text-muted-foreground mb-4">
+                    <div className="quiz-feedback-explanation">
                       {currentQuestionResult.explanation}
-                    </p>
+                    </div>
                     {!isViewOnly && (
-                      <Button onClick={handleNextQuestion} className="aduffy-button">
-                        {currentQuestionIndex < learningQuestions.length - 1 ? 'Next Question' : 'Complete Practice'}
-                        <div className="w-4 h-4 ml-2 text-aduffy-yellow" />
-                      </Button>
+                      <button className="quiz-feedback-btn" onClick={handleNextQuestion}>
+                        Next Question
+                        <span style={{ display: 'inline-block', transform: 'translateY(1px)' }}>→</span>
+                      </button>
                     )}
                   </div>
                 )}
@@ -1427,7 +1441,7 @@ export function StorytellingActivity({
           )}
           
           {questionResults.length > 0 && (
-            <Card className="aduffy-card">
+            <Card className="progress-summary-card">
               <CardHeader>
                 <CardTitle className="text-aduffy-navy">Progress Summary</CardTitle>
               </CardHeader>
@@ -1451,73 +1465,41 @@ export function StorytellingActivity({
 
         <TabsContent tabValue="story" className="space-y-6 mt-8">
           {showLearningContent && (
-            <Card className="aduffy-card">
+            <Card className="example-story-card">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex items-start justify-between w-full">
                   <div>
-                    <CardTitle className="flex items-center gap-3 text-aduffy-navy">
-                      <div className="w-6 h-6 text-aduffy-yellow" />
+                    <div className="flex items-center gap-2 text-aduffy-orange font-bold text-lg mb-1">
+                      <span role="img" aria-label="lightbulb">💡</span>
                       Example Professional Story
-                    </CardTitle>
-                    <CardDescription>
+                    </div>
+                    <div className="text-muted-foreground text-base">
                       See how all 5 vocabulary words are used naturally in a workplace context
-                    </CardDescription>
+                    </div>
                   </div>
-                  <Button
-                    onClick={listenToStory}
-                    size="sm"
-                    className={`border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10 ${isListeningToStory ? 'bg-aduffy-yellow/20' : ''}`}
-                  >
-                    {isListeningToStory ? (
-                      <>
-                        <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-                        Stop Reading
-                      </>
-                    ) : (
-                      <>
-                        <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-                        Listen to Story
-                      </>
-                    )}
+                  <Button className="listen-story-btn" /* ...props */>
+                    <span className="mr-2">🔊</span> Listen to Story
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-gradient-to-r from-aduffy-yellow/5 to-transparent p-6 rounded-lg border-l-4 border-aduffy-yellow">
-                  <div 
-                    className="leading-relaxed text-muted-foreground whitespace-pre-line"
-                    dangerouslySetInnerHTML={{ __html: highlightVocabularyWords(exampleStory) }}
-                  />
+              <CardContent>
+                <div className="example-story-box">
+                  <div className="example-story-text">
+                    {/* Your story text here */}
+                    {exampleStory}
+                  </div>
                 </div>
-                
-                <div className="space-y-3">
-                  <h4 className="font-medium text-aduffy-navy">Vocabulary Words Used:</h4>
+                <div className="mt-6">
+                  <div className="font-semibold mb-2">Vocabulary Words Used:</div>
                   <div className="flex flex-wrap gap-2">
                     {dailyWords.map((word, index) => (
-                      <Badge 
-                        key={index} 
-                        className={`aduffy-badge-success ${
-                          currentStoryWordIndex === index ? 'animate-pulse ring-2 ring-aduffy-yellow' : ''
-                        }`}
-                      >
-                        <div className="w-3 h-3 mr-1 text-aduffy-teal" />
+                      <span key={index} className="vocab-badge-success">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" style={{marginRight: 4, verticalAlign: 'middle'}}><path d="M5 13l4 4L19 7" stroke="#22b573" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         {word.word}
-                      </Badge>
+                      </span>
                     ))}
                   </div>
                 </div>
-                
-                {isListeningToStory && (
-                  <div className="bg-info/10 p-4 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 text-info animate-pulse" />
-                      <span className="font-medium text-info">Currently reading the story...</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Vocabulary words will be highlighted as they are mentioned
-                    </p>
-                  </div>
-                )}
               </CardContent>
             </Card>
           )}
@@ -1527,17 +1509,26 @@ export function StorytellingActivity({
       <div className="flex justify-between">
         {!isViewOnly ? (
           <>
-            <Button onClick={handleSkipLearning} className="border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10">
+            <button
+              type="button"
+              onClick={handleSkipLearning}
+              className="skip-learning-btn"
+            >
               Skip Learning
-            </Button>
-            <Button 
-              onClick={handleNextStep} 
-              className="aduffy-button"
+            </button>
+            <button
+              type="button"
+              onClick={handleNextStep}
+              className="start-writing-btn"
               disabled={stepProgress < 100 && showLearningContent}
             >
-              <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
+              <span className="start-writing-icon">
+                <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+                  <path d="M5 12h14M13 6l6 6-6 6" stroke="#222b3a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
               Start Writing
-            </Button>
+            </button>
           </>
         ) : (
           <div className="flex w-full justify-center">
@@ -1733,7 +1724,7 @@ export function StorytellingActivity({
             {!isViewOnly ? (
               <>
                 <Button
-                  onClick={analyzeStory}
+                  onClick={handleAnalyzeStory}
                   disabled={!userStory.trim() || isAnalyzing || !selectedTopic}
                   className="w-full ai-story-new-topic-btn"
                 >
@@ -1750,10 +1741,18 @@ export function StorytellingActivity({
                   )}
                 </Button>
                 {storyAnalysis && (
-                  <Button onClick={handleNextStep} className="w-full aduffy-button">
-                    <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
+                  <button
+                    type="button"
+                    onClick={handleNextStep}
+                    className="continue-voice-btn"
+                  >
+                    <span className="continue-voice-icon">
+                      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+                        <path d="M5 12h14M13 6l6 6-6 6" stroke="#222b3a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </span>
                     Continue to Voice Chat
-                  </Button>
+                  </button>
                 )}
               </>
             ) : (
@@ -1767,7 +1766,7 @@ export function StorytellingActivity({
       </div>
     </div>
   );
-
+// Voice conversation page starts from here
   const renderVoiceStep = () => (
     <div className="space-y-8">
       {renderViewOnlyAlert()}
@@ -1778,19 +1777,23 @@ export function StorytellingActivity({
             <div className="w-8 h-8 text-info" />
           </div>
           <div className="text-left">
-            <h2 className="text-3xl font-bold text-aduffy-navy">Voice Conversation</h2>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge className="aduffy-badge-info">
-                <div className="w-4 h-4 mr-1 text-aduffy-teal" />
+            <h2 className="text-3xl font-bold text-aduffy-navy text-center">Voice Conversation</h2>
+            <div className="speaking-badge-center">
+              <span className="speaking-badge">
+                <span className="speaking-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 17c2.761 0 5-2.239 5-5V7a5 5 0 0 0-10 0v5c0 2.761 2.239 5 5 5zm7-5v-1a1 1 0 1 0-2 0v1a7 7 0 0 1-14 0v-1a1 1 0 1 0-2 0v1c0 4.418 3.582 8 8 8s8-3.582 8-8z" fill="#0097a7"/>
+                  </svg>
+                </span>
                 Interactive Speaking
-              </Badge>
-              {isViewOnly && (
-                <Badge className="aduffy-badge-info">
-                  <div className="w-3 h-3 mr-1 text-muted-foreground" />
-                  View Only
-                </Badge>
-              )}
+              </span>
             </div>
+            {isViewOnly && (
+              <Badge className="aduffy-badge-info">
+                <div className="w-3 h-3 mr-1 text-muted-foreground" />
+                View Only
+              </Badge>
+            )}
           </div>
         </div>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -1803,30 +1806,12 @@ export function StorytellingActivity({
 
       {renderVoicePermissionAlert()}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="conversation-main-grid">
+        {/* Left: Conversation */}
+        <div className="conversation-panel">
           <Card className="aduffy-card">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between text-aduffy-navy">
-                <span>
-                  Conversation
-                  {isViewOnly && <div className="w-4 h-4 ml-2 inline text-muted-foreground" />}
-                </span>
-                <div className="flex items-center gap-2">
-                  {!isViewOnly && isSpeaking && (
-                    <Badge className="aduffy-badge-info">
-                      <div className="w-3 h-3 mr-1 text-aduffy-teal" />
-                      AI Speaking
-                    </Badge>
-                  )}
-                  {!isViewOnly && isListening && (
-                    <Badge className="aduffy-badge-success">
-                      <div className="w-3 h-3 mr-1 text-aduffy-teal" />
-                      Listening
-                    </Badge>
-                  )}
-                </div>
-              </CardTitle>
+              <CardTitle className="text-aduffy-navy">Conversation</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="h-96 overflow-y-auto space-y-4 bg-muted/20 p-4 rounded-lg">
@@ -1839,6 +1824,15 @@ export function StorytellingActivity({
                         : 'Click "Start Conversation" to begin the voice interaction'
                       }
                     </p>
+                    {!isViewOnly && (
+                      <button
+                        type="button"
+                        className="aduffy-button mt-4"
+                        onClick={startVoiceConversation}
+                      >
+                        <span className="mr-2">▶️</span> Start Conversation
+                      </button>
+                    )}
                   </div>
                 ) : (
                   voiceConversation.map((message, index) => (
@@ -1866,48 +1860,35 @@ export function StorytellingActivity({
                   ))
                 )}
               </div>
-              
-              <div className="flex items-center gap-4">
-                {!isViewOnly && (
-                  voiceConversation.length === 0 ? (
-                    <Button 
-                      onClick={startVoiceConversation} 
-                      className="aduffy-button"
-                    >
+              {/* Voice controls and transcript preview */}
+              {!isViewOnly && (
+                <div className="flex items-center gap-4 mt-4">
+                  <button
+                    type="button"
+                    onClick={isListening ? stopListening : startListening}
+                    className={isListening ? "aduffy-button-secondary" : "aduffy-button"}
+                    disabled={!isVoiceSupported}
+                  >
+                    {isListening ? (
+                      <>
+                        <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
+                        Stop Listening
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-4 h-4 mr-2 text-aduffy-teal" />
+                        Start Speaking
+                      </>
+                    )}
+                  </button>
+                  {transcript && (
+                    <button onClick={handleVoiceResponse} className="aduffy-button-outline">
                       <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-                      Start Conversation
-                    </Button>
-                  ) : (
-                    <>
-                      <Button
-                        onClick={isListening ? stopListening : startListening}
-                        className={isListening ? "aduffy-button-secondary" : "aduffy-button"}
-                        disabled={!isVoiceSupported}
-                      >
-                        {isListening ? (
-                          <>
-                            <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-                            Stop Listening
-                          </>
-                        ) : (
-                          <>
-                            <div className="w-4 h-4 mr-2 text-aduffy-teal" />
-                            Start Speaking
-                          </>
-                        )}
-                      </Button>
-                      
-                      {transcript && (
-                        <Button onClick={handleVoiceResponse} className="aduffy-button-outline">
-                          <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-                          Send Response
-                        </Button>
-                      )}
-                    </>
-                  )
-                )}
-              </div>
-              
+                      Send Response
+                    </button>
+                  )}
+                </div>
+              )}
               {!isViewOnly && transcript && (
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <div className="text-xs text-muted-foreground mb-1">Your speech:</div>
@@ -1918,51 +1899,60 @@ export function StorytellingActivity({
           </Card>
         </div>
 
-        <div className="space-y-6">
+        {/* Right: Word Usage Goal */}
+        <div className="word-usage-panel">
           <Card className="aduffy-card">
             <CardHeader>
               <CardTitle className="text-aduffy-navy">Word Usage Goal</CardTitle>
               <CardDescription>
-                {isViewOnly ? 'Words you used in the conversation' : 'Try to use each word in the conversation'}
+                Try to use each word in the conversation
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent>
               {dailyWords.map((word, index) => {
                 const isUsedInConversation = voiceConversation.some(msg => 
                   msg.type === 'user' && msg.content.toLowerCase().includes(word.word.toLowerCase())
                 );
                 return (
-                  <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                    <div>
-                      <div className="font-medium text-aduffy-navy">{word.word}</div>
-                      <div className="text-xs text-muted-foreground">{word.definition}</div>
+                  <div key={index} className="word-usage-card">
+                    <div className="word-usage-info">
+                      <div className="word-usage-title">{word.word}</div>
+                      <div className="word-usage-def">{word.definition}</div>
                     </div>
-                    {isUsedInConversation ? (
-                      <div className="w-5 h-5 text-success" />
-                    ) : (
-                      <div className="w-5 h-5 border-2 border-muted rounded-full"></div>
-                    )}
+                    <div className={`word-usage-indicator${isUsedInConversation ? ' checked' : ''}`}>
+                      {isUsedInConversation && (
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                          <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
                   </div>
                 );
               })}
             </CardContent>
           </Card>
-
-          {!isViewOnly ? (
-            <Button 
-              onClick={handleNextStep} 
-              className="w-full aduffy-button"
-              disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
-            >
-              <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-              Complete &amp; Get Results
-            </Button>
-          ) : (
-            <Button onClick={handleReturnToFurthest} className="w-full border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10">
-              <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-              Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
-            </Button>
-          )}
+          <div className="mt-6">
+            {!isViewOnly ? (
+              <button
+                type="button"
+                onClick={handleNextStep}
+                className="w-full aduffy-button"
+                disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
+              >
+                <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
+                Complete &amp; Get Results
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleReturnToFurthest}
+                className="w-full border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10"
+              >
+                <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
+                Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
