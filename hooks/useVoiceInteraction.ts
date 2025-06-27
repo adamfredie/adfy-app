@@ -1,5 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 
+// Type declarations for Web Speech API
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 interface UseVoiceInteractionReturn {
   isListening: boolean;
   transcript: string;
