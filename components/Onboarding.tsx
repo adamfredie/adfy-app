@@ -45,38 +45,38 @@ interface OnboardingProps {
 type Step = 'personal' | 'professional' | 'assessment' | 'goals' | 'preferences';
 
 const communicationChallenges = [
-  { id: 'public-speaking', label: 'Public speaking and presentations' },
-  { id: 'meeting-participation', label: 'Active participation in meetings' },
-  { id: 'email-clarity', label: 'Writing clear and professional emails' },
-  { id: 'difficult-conversations', label: 'Having difficult conversations' },
-  { id: 'networking', label: 'Professional networking' },
-  { id: 'cross-team-collaboration', label: 'Cross-team collaboration' },
-  { id: 'client-communication', label: 'Client communication' },
-  { id: 'virtual-meetings', label: 'Virtual meeting facilitation' },
-  { id: 'persuasive-writing', label: 'Persuasive writing and proposals' },
-  { id: 'conflict-resolution', label: 'Conflict resolution' }
+  { id: 'public-speaking', label: 'Public speaking and presentations', icon: '🖥️' },
+  { id: 'meeting-participation', label: 'Active participation in meetings', icon: '🧑‍🤝‍🧑' },
+  { id: 'email-clarity', label: 'Writing clear and professional emails', icon: '✉️' },
+  { id: 'difficult-conversations', label: 'Having difficult conversations', icon: '💬' },
+  { id: 'networking', label: 'Professional networking', icon: '📈' },
+  { id: 'cross-team-collaboration', label: 'Cross-team collaboration', icon: '⚙️' },
+  { id: 'client-communication', label: 'Client communication', icon: '📞' },
+  { id: 'virtual-meetings', label: 'Virtual meeting facilitation', icon: '🎥' },
+  { id: 'persuasive-writing', label: 'Persuasive writing and proposals', icon: '📊' },
+  { id: 'conflict-resolution', label: 'Conflict resolution', icon: 'ℹ️' }
 ];
 
 const improvementGoals = [
-  { id: 'confidence', label: 'Build confidence in speaking' },
-  { id: 'vocabulary', label: 'Expand professional vocabulary' },
-  { id: 'clarity', label: 'Improve message clarity' },
-  { id: 'persuasion', label: 'Enhance persuasive communication' },
-  { id: 'leadership', label: 'Develop leadership communication' },
-  { id: 'storytelling', label: 'Master storytelling techniques' },
-  { id: 'active-listening', label: 'Improve active listening skills' },
-  { id: 'emotional-intelligence', label: 'Enhance emotional intelligence' }
+  { id: 'confidence', label: 'Build confidence in speaking',icon: '⭐' },
+  { id: 'vocabulary', label: 'Expand professional vocabulary', icon: '🧠' },
+  { id: 'clarity', label: 'Improve message clarity', icon: '💬' },
+  { id: 'persuasion', label: 'Enhance persuasive communication' , icon: '📈'},
+  { id: 'leadership', label: 'Develop leadership communication' , icon: '🧑‍💼'},
+  { id: 'storytelling', label: 'Master storytelling techniques', icon: '✨' },
+  { id: 'active-listening', label: 'Improve active listening skills', icon: '👂' },
+  { id: 'emotional-intelligence', label: 'Enhance emotional intelligence', icon: '🎯' }
 ];
 
 const learningPreferences = [
-  { id: 'interactive', label: 'Interactive exercises and quizzes' },
-  { id: 'real-scenarios', label: 'Real workplace scenarios' },
-  { id: 'voice-practice', label: 'Voice and speaking practice' },
-  { id: 'writing-exercises', label: 'Writing and composition exercises' },
-  { id: 'peer-feedback', label: 'Peer feedback and collaboration' },
-  { id: 'gamification', label: 'Gamified learning experience' },
-  { id: 'bite-sized', label: 'Short, bite-sized lessons' },
-  { id: 'comprehensive', label: 'Comprehensive deep-dive sessions' }
+  { id: 'interactive', label: 'Interactive exercises and quizzes', icon: '🧠' },
+  { id: 'real-scenarios', label: 'Real workplace scenarios', icon: '🏢' },
+  { id: 'voice-practice', label: 'Voice and speaking practice', icon: '🎤' },
+  { id: 'writing-exercises', label: 'Writing and composition exercises', icon: '✍️' },
+  { id: 'peer-feedback', label: 'Peer feedback and collaboration', icon: '🤝' },
+  { id: 'gamification', label: 'Gamified learning experience', icon: '🎮' },
+  { id: 'bite-sized', label: 'Short, bite-sized lessons', icon: '⏱️' },
+  { id: 'comprehensive', label: 'Comprehensive deep-dive sessions', icon: '🔎' }
 ];
 
 const primaryPainPoints = [
@@ -233,7 +233,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   };
 
   const renderPersonalStep = () => (
-    <Card className="aduffy-card max-w-2xl mx-auto">
+    <Card className="card-glass-welcome">
       <CardHeader className="text-center">
         <div className="w-16 h-16 bg-aduffy-yellow/10 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
           👤
@@ -244,7 +244,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-row gap-6 justify-center">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name *</Label>
             <Input
@@ -307,9 +307,13 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 </p>
                 <Button
                   onClick={handleSkipToEnd}
-                  className="border-aduffy-teal/30 text-aduffy-teal hover:bg-aduffy-teal/10"
+                  className="teal-outline-btn"
                 >
-                  <span className="w-4 h-4 mr-2">⚡</span>
+                  <span className="teal-outline-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{display: 'inline-block', verticalAlign: 'middle'}}>
+                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="#00b3c6" strokeWidth="2" fill="none" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
                   Skip to Dashboard
                 </Button>
               </div>
@@ -321,7 +325,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   );
 
   const renderProfessionalStep = () => (
-    <Card className="aduffy-card max-w-2xl mx-auto">
+    <Card className="card-glass-professional">
       <CardHeader className="text-center">
         <div className="w-16 h-16 bg-aduffy-teal/10 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
           💼
@@ -332,10 +336,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-row gap-6 justify-center">
           <div className="space-y-2">
             <Label htmlFor="jobTitle">Job Title *</Label>
             <Input
+              className="input-soft-glass"
               id="jobTitle"
               autoComplete="off"
               value={formData.jobTitle}
@@ -344,8 +349,10 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="company">Company (Optional)</Label>
+            <Label htmlFor="company" >Company (Optional)</Label>
+             
             <Input
+            className="input-soft-glass"
               id="company"
               autoComplete="off"
               value={formData.company}
@@ -405,7 +412,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   );
 
   const renderAssessmentStep = () => (
-    <Card className="aduffy-card max-w-4xl mx-auto">
+    <Card className="card-glass-assessment">
       <CardHeader className="text-center">
         <div className="w-16 h-16 bg-aduffy-orange/10 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
           📊
@@ -431,9 +438,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   <span className="w-5 h-5 text-aduffy-teal">🧠</span>
                   <Label className="font-medium">{labelMap[key] || key}</Label>
                 </div>
-                <RadioGroup className="flex items-center gap-6">
-                  {[1, 2, 3, 4, 5].map((rating) => (
-                    <div key={rating} className="flex flex-col items-center gap-2">
+                <RadioGroup className="confidence-radio-group">
+                  {[1, 2, 3, 4].map((rating, idx) => (
+                    <div key={rating} className="confidence-radio-item">
                       <RadioGroupItem
                         checked={value === rating}
                         onChange={() => updateFormData({
@@ -443,10 +450,20 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                           }
                         })}
                         id={`${key}-${rating}`}
+                        className="confidence-radio-dot"
                       />
-                      <Label htmlFor={`${key}-${rating}`} className="text-xs text-center">
-                        {rating === 1 ? 'Not confident' : rating === 5 ? 'Very confident' : rating.toString()}
-                      </Label>
+                      {(idx !== 0 && idx !== 3) && (
+                        <Label htmlFor={`${key}-${rating}`} className="confidence-radio-label">
+                          {rating}
+                        </Label>
+                      )}
+                      <span className="confidence-radio-helper">
+                        {idx === 0
+                          ? "Not confident"
+                          : idx === 3
+                          ? "Very confident"
+                          : ""}
+                      </span>
                     </div>
                   ))}
                 </RadioGroup>
@@ -482,7 +499,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   );
 
   const renderGoalsStep = () => (
-    <Card className="aduffy-card max-w-4xl mx-auto">
+    <Card className="card-glass-goals">
       <CardHeader className="text-center">
         <div className="w-16 h-16 bg-info/10 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
           🎯
@@ -499,9 +516,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <Label className="text-base font-medium">What communication challenges do you currently face? *</Label>
           </div>
           <p className="text-sm text-muted-foreground">Select all that apply</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {communicationChallenges.map(({ id, label }) => (
-              <div key={id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
+          <div className="skills-checkbox-grid">
+            {communicationChallenges.map(({ id, label, icon }) => (
+              <label
+                key={id}
+                className={`skill-checkbox-label${formData.communicationChallenges!.includes(id) ? ' selected' : ''}`}
+              >
                 <input
                   type="checkbox"
                   id={id}
@@ -517,10 +537,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                       });
                     }
                   }}
-                  className="aduffy-checkbox"
+                  className="skill-checkbox"
                 />
-                <Label htmlFor={id} className="text-sm cursor-pointer flex-1">{label}</Label>
-              </div>
+                <span className="skill-icon" style={{ color: '#1db5a3' }}>{icon}</span>
+                <span className="flex-1">{label}</span>
+              </label>
             ))}
           </div>
         </div>
@@ -533,9 +554,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <Label className="text-base font-medium">What are your primary improvement goals? *</Label>
           </div>
           <p className="text-sm text-muted-foreground">Select all that apply</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {improvementGoals.map(({ id, label }) => (
-              <div key={id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
+          <div className="skills-checkbox-grid">
+            {improvementGoals.map(({ id, label, icon }) => (
+              <label
+                key={id}
+                className={`skill-checkbox-label${formData.improvementGoals!.includes(id) ? ' selected' : ''}`}
+              >
                 <input
                   type="checkbox"
                   id={id}
@@ -551,10 +575,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                       });
                     }
                   }}
-                  className="aduffy-checkbox"
+                  className="skill-checkbox"
                 />
-                <Label htmlFor={id} className="text-sm cursor-pointer flex-1">{label}</Label>
-              </div>
+                <span className="skill-icon" style={{ color: '#fbb040' }}>{icon}</span>
+                <span className="flex-1">{label}</span>
+              </label>
             ))}
           </div>
         </div>
@@ -563,7 +588,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   );
 
   const renderPreferencesStep = () => (
-    <Card className="aduffy-card max-w-4xl mx-auto">
+    <Card className="card-glass-preferences">
       <CardHeader className="text-center">
         <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
           ⚙️
@@ -580,9 +605,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <Label className="text-base font-medium">How do you prefer to learn? *</Label>
           </div>
           <p className="text-sm text-muted-foreground">Select all that apply</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {learningPreferences.map(({ id, label }) => (
-              <div key={id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
+          <div className="skills-checkbox-grid">
+            {learningPreferences.map(({ id, label, icon }) => (
+              <label
+                key={id}
+                className={`skill-checkbox-label${formData.learningPreferences!.includes(id) ? ' selected' : ''}`}
+              >
                 <input
                   type="checkbox"
                   id={id}
@@ -594,14 +622,15 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                       });
                     } else {
                       updateFormData({
-                        learningPreferences: (formData.learningPreferences || []).filter(p => p !== id)
+                        learningPreferences: (formData.learningPreferences || []).filter(g => g !== id)
                       });
                     }
                   }}
-                  className="aduffy-checkbox"
+                  className="skill-checkbox"
                 />
-                <Label htmlFor={id} className="text-sm cursor-pointer flex-1">{label}</Label>
-              </div>
+                <span className="skill-icon" style={{ color: '#1db5a3' }}>{icon}</span>
+                <span className="flex-1">{label}</span>
+              </label>
             ))}
           </div>
         </div>
@@ -614,9 +643,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <Label className="text-base font-medium">What are your biggest pain points when it comes to communication? *</Label>
           </div>
           <p className="text-sm text-muted-foreground">Select all that apply</p>
-          <div className="grid grid-cols-1 gap-3">
+          <div className="skills-checkbox-grid" style={{ gridTemplateColumns: '1fr' }}>
             {primaryPainPoints.map(({ id, label }) => (
-              <div key={id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
+              <label
+                key={id}
+                className={`skill-checkbox-label${formData.primaryPainPoints!.includes(id) ? ' selected' : ''}`}
+              >
                 <input
                   type="checkbox"
                   id={id}
@@ -632,38 +664,36 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                       });
                     }
                   }}
-                  className="aduffy-checkbox"
+                  className="skill-checkbox"
                 />
-                <Label htmlFor={id} className="text-sm cursor-pointer flex-1">{label}</Label>
-              </div>
+                <span className="flex-1">{label}</span>
+              </label>
             ))}
           </div>
         </div>
 
-        <div className="bg-aduffy-yellow/5 p-6 rounded-lg border border-aduffy-yellow/20">
-          <div className="flex items-start gap-3">
-            <span className="w-6 h-6 text-aduffy-yellow mt-1 flex-shrink-0">🏆</span>
-            <div>
-              <h3 className="font-semibold text-aduffy-navy mb-2">You're almost ready!</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                Based on your responses, we'll create a personalized learning path that focuses on your specific challenges and goals.
-              </p>
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <span className="w-3 h-3 text-aduffy-teal">✅</span>
-                  Customized vocabulary for your field
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-3 h-3 text-aduffy-teal">✅</span>
-                  Scenarios matching your experience level
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-3 h-3 text-aduffy-teal">✅</span>
-                  Activities aligned with your learning style
-                </li>
-              </ul>
-            </div>
+        <div className="almost-ready-box">
+          <div className="almost-ready-header">
+            <span style={{ fontSize: '1.5em', color: '#fbb040' }}>🏅</span>
+            You're almost ready!
           </div>
+          <div className="almost-ready-desc">
+            Based on your responses, we'll create a personalized learning path that focuses on your specific challenges and goals.
+          </div>
+          <ul className="almost-ready-list">
+            <li>
+              <span style={{ color: '#1db5a3', fontSize: '1.2em' }}>✔️</span>
+              Customized vocabulary for your field
+            </li>
+            <li>
+              <span style={{ color: '#1db5a3', fontSize: '1.2em' }}>✔️</span>
+              Scenarios matching your experience level
+            </li>
+            <li>
+              <span style={{ color: '#1db5a3', fontSize: '1.2em' }}>✔️</span>
+              Activities aligned with your learning style
+            </li>
+          </ul>
         </div>
       </CardContent>
     </Card>
@@ -728,15 +758,20 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <Button
             onClick={handleBack}
             disabled={currentStep === 'personal'}
-            className="border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10"
+            className="soft-yellow-outline-btn"
           >
+            <span className="soft-yellow-outline-arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{display: 'inline-block', verticalAlign: 'middle'}}>
+                <path d="M15 19l-7-7 7-7" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
             Back
           </Button>
           
           <Button
             onClick={handleNext}
             disabled={!isStepValid()}
-            className="aduffy-button"
+            className="soft-yellow-btn"
           >
             {currentStep === 'preferences' ? (
               <>

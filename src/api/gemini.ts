@@ -43,3 +43,40 @@ Return your response in this JSON format:
   }
   throw new Error('Failed to parse Gemini response');
 }
+
+export async function generateVoiceResponse({ 
+  userMessage, 
+  conversationHistory, 
+  vocabulary, 
+  topic 
+}: {
+  userMessage: string;
+  conversationHistory: Array<{ type: 'user' | 'ai', content: string }>;
+  vocabulary: string[];
+  topic?: string;
+}) {
+  const prompt = `
+You are an AI language tutor having a conversation with a student. 
+The student is practicing using vocabulary words in a professional context.
+
+${topic ? `Context: The conversation is about "${topic}"` : ''}
+Target Vocabulary: ${vocabulary.map(w => `"${w}"`).join(', ')}
+
+Previous conversation:
+${conversationHistory.map(msg => `${msg.type === 'user' ? 'Student' : 'Tutor'}: ${msg.content}`).join('\n')}
+
+Student's latest message: "${userMessage}"
+
+Respond naturally as a tutor, encouraging the student to use the vocabulary words. 
+Keep responses conversational and under 2 sentences. Don't mention the vocabulary words explicitly unless the student asks.
+`;
+
+  const response = await axios.post(
+    `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+    {
+      contents: [{ parts: [{ text: prompt }] }]
+    }
+  );
+  
+  return response.data.candidates[0].content.parts[0].text;
+}

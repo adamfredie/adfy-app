@@ -349,3 +349,23 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Add more as needed for your components! */
+
+span.aduffy-badge.vocab-badge-professional {
+  background: #fdf0dc !important;
+  color: #222b3a !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  padding: 0.25em 1em !important;
+  border: none !important;
+  gap: 0.5em !important;
+  box-shadow: none !important;
+}
+span.aduffy-badge.vocab-badge-professional svg {
+  display: inline !important;
+  vertical-align: middle !important;
+  margin-right: 0.5em !important;
+  align-self: center !important;
+}

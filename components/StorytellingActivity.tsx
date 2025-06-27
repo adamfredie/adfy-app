@@ -55,7 +55,8 @@ import { Alert } from "./ui/alert";
 import { Select } from "./ui/select";
 import { OnboardingData } from "./Onboarding";
 import { useVoiceInteraction } from "../hooks/useVoiceInteraction";
-import { analyzeStoryWithGemini } from '../src/api/gemini';
+import { analyzeStoryWithGemini, generateVoiceResponse } from '../src/api/gemini';
+import { CustomSelect } from "./ui/CustomSelect";
 
 // ... inside your component
 
@@ -995,7 +996,7 @@ export function StorytellingActivity({
     try {
       const initialPrompt = selectedTopic 
         ? `Great story about "${selectedTopic.title}"! Now let's have a conversation about your approach to this scenario. I'll ask you questions and you should try to use each of our vocabulary words in your responses. Let's start: How did you decide on your approach to handling this professional challenge?`
-        : `Great work on your vocabulary learning! Let's have a conversation to practice using the words you've learned. I'll ask you questions and you should try to use each vocabulary word in your responses. Let's start: How do you plan to use these new vocabulary words in your professional life?`;
+        : `Great work on your vocabulary learning! Let's have a conversation to practice using the words you've learned. I'll ask you questions and you should try to use each vocabulary word in your responses. Let's start: How do you plan to use these new vocabulary words in your professional life? Also ensure that the user used long, proper sentences and proper grammar.`;
       
       console.log('Speaking initial prompt:', initialPrompt);
       
@@ -1018,6 +1019,7 @@ export function StorytellingActivity({
     if (isViewOnly) return;
     
     if (transcript) {
+      // you never modify state directly instad you create a new arrayor object
       const newConversation = [...voiceConversation];
       newConversation.push({
         type: 'user',
@@ -1031,40 +1033,41 @@ export function StorytellingActivity({
       setVoiceConversation(newConversation);
       clearTranscript();
       
-      // Generate AI response based on the selected topic
-      const topicSpecificResponses = selectedTopic ? [
-        `That's interesting! In the context of "${selectedTopic.title}", how would you collaborate differently with team members?`,
-        `I like your perspective on this scenario. How would you leverage the existing resources to facilitate a better outcome?`,
-        `Excellent use of vocabulary! Can you synthesize the main challenges you identified in "${selectedTopic.title}"?`,
-        `Great job being articulate about your approach! What specific strategies would you use to overcome the obstacles in this scenario?`
-      ] : [
-        "That's a great perspective! How would you collaborate with colleagues to implement these vocabulary words?",
-        "Excellent! How might you leverage these communication skills to facilitate better workplace relationships?",
-        "Well articulated! Can you synthesize how these words might help in your career advancement?",
-        "Fantastic! What other professional situations would benefit from using this enhanced vocabulary?"
-      ];
-      
-      const randomResponse = topicSpecificResponses[Math.floor(Math.random() * topicSpecificResponses.length)];
-      
       try {
+        // Generate AI response using Gemini
+        const aiResponse = await generateVoiceResponse({
+          userMessage: transcript,
+          conversationHistory: voiceConversation,
+          vocabulary: dailyWords.map(w => w.word),
+          topic: selectedTopic?.title
+        });
+        
         // Wait a moment before speaking the response
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        await safeSpeak(randomResponse);
-        
+        await safeSpeak(aiResponse);
+        //safeSpeak takes a text and convets it to speech
         newConversation.push({
           type: 'ai',
-          content: randomResponse,
+          content: aiResponse,
           timestamp: new Date()
         });
         setVoiceConversation([...newConversation]);
         
       } catch (error) {
         console.warn('Voice response error:', error);
-        // Still add the text response even if speech fails
+        // Fallback response if Gemini fails
+        const fallbackResponse = "That's interesting! Can you tell me more about how you would apply these concepts in your work?";
+        
+        try {
+          await safeSpeak(fallbackResponse);
+        } catch (speechError) {
+          console.warn('Speech error:', speechError);
+        }
+        
         newConversation.push({
           type: 'ai',
-          content: randomResponse,
+          content: fallbackResponse,
           timestamp: new Date()
         });
         setVoiceConversation([...newConversation]);
@@ -1142,16 +1145,27 @@ export function StorytellingActivity({
     if (!isViewOnly) return null;
 
     return (
-      <Alert className="mb-6 bg-info/10 border-info/20 flex items-center">
-        <div className="flex items-center justify-between text-info flex-1 text-sm mt-2">
-          <span>You're viewing a completed step. Changes are not allowed in view mode.</span>
-          <Button
-            onClick={handleReturnToFurthest}
-            className="aduffy-button-outline ml-4 border-info/30 text-info hover:bg-info/10"
-          >
-            Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
-          </Button>
+      <Alert className="view-mode-alert">
+        <div className="alert-content">
+          <span className="alert-lock-icon" aria-hidden="true">
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+              <rect x="5" y="11" width="14" height="8" rx="3" stroke="#1793b6" strokeWidth="1.5" fill="none"/>
+              <path d="M8 11V8a4 4 0 1 1 8 0v3" stroke="#1793b6" strokeWidth="1.5" fill="none"/>
+            </svg>
+          </span>
+          <span>
+            You're viewing a completed step. Changes are not allowed in view mode.
+          </span>
         </div>
+        <button
+          className="alert-action-btn"
+          onClick={handleReturnToFurthest}
+        >
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" style={{marginRight: '0.3em'}}>
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="#1793b6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
+        </button>
       </Alert>
     );
   };
@@ -1166,11 +1180,25 @@ export function StorytellingActivity({
             <div className="w-8 h-8 text-aduffy-yellow" />
           </div>
           <div className="text-left">
-            <h2 className="text-3xl font-bold text-aduffy-navy">Today's Vocabulary Words</h2>
+            <h2 className="text-3xl font-bold text-aduffy-navy text-center">Today's Vocabulary Words</h2>
             
-            <div className="flex items-center gap-2 mt-1">
-              <Badge className="aduffy-badge-primary">
-                <div className="w-4 h-4 mr-1 text-aduffy-teal" />
+            <div className="flex items-center gap-2 mt-1 justify-center">
+              <Badge className="vocab-badge-professional">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  style={{ marginRight: '0.5em', flexShrink: 0, display: 'inline' }}
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <rect x="3" y="5" width="14" height="12" rx="3" fill="none" stroke="#222b3a" strokeWidth="1.5"/>
+                  <path d="M3 8.5h14" stroke="#222b3a" strokeWidth="1.2"/>
+                  <rect x="6.5" y="2.5" width="1.5" height="3" rx="0.75" fill="#222b3a"/>
+                  <rect x="12" y="2.5" width="1.5" height="3" rx="0.75" fill="#222b3a"/>
+                </svg>
                 5 Professional Words
               </Badge>
               {isViewOnly && (
@@ -1188,45 +1216,55 @@ export function StorytellingActivity({
       </div>
 
       {/* Field Selector */}
-      <Card className="aduffy-card bg-gradient-to-br from-aduffy-teal/5 to-transparent max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3 text-aduffy-navy text-center">
-            <div className="w-5 h-5 text-aduffy-teal" />
+      <div className="learning-focus-card">
+        <div className="card-header">
+          <div className="card-title">
+            <div className="focus-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
             Learning Focus
             {isViewOnly && <div className="w-4 h-4 text-muted-foreground" />}
-          </CardTitle>
-          <CardDescription className="text-center">
+          </div>
+          <div className="card-description">
             {isViewOnly ? 'Field selection (view only)' : 'Choose your professional field to get relevant vocabulary'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Select
+          </div>
+        </div>
+        <div className="card-content">
+          <CustomSelect
             value={selectedField}
-            onChange={e => handleFieldChange(e.target.value)}
+            onChange={handleFieldChange}
             disabled={isViewOnly}
             options={[
-              { value: "marketing", label: "📊 Marketing" },
-              { value: "technology", label: "💻 Technology" },
-              { value: "sales", label: "💼 Sales" },
-              { value: "product", label: "🚀 Product" },
-              { value: "finance", label: "💰 Finance" },
-              { value: "operations", label: "⚙️ Operations" },
+              { value: "marketing", icon: "📊", label: "Marketing" },
+              { value: "technology", icon: "💻", label: "Technology" },
+              { value: "sales", icon: "💼", label: "Sales" },
+              { value: "product", icon: "🚀", label: "Product" },
+              { value: "finance", icon: "💰", label: "Finance" },
+              { value: "operations", icon: "⚙️", label: "Operations" },
             ]}
-            className={`w-full ${isViewOnly ? 'opacity-60' : ''}`}
+            className={isViewOnly ? 'opacity-60' : ''}
           />
           {selectedField !== (userProfile?.field || 'marketing') && (
-            <p className="text-xs text-muted-foreground mt-2 text-center">
+            <div className="field-change-notice">
               📝 Field changed from your profile setting
-            </p>
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Audio Controls */}
-      <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent">
+      <Card className="card-soft-yellow-glass">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-aduffy-navy">
-            <div className="w-6 h-6 text-aduffy-yellow" />
+            <div className="audio-icon-yellow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path d="M3 10v4h4l5 5V5l-5 5H3z" fill="currentColor"/>
+                <path d="M16.5 12c0-1.77-1-3.29-2.5-4.03v8.06A4.978 4.978 0 0 0 16.5 12z" fill="currentColor"/>
+                <path d="M19.5 12c0-3.04-1.64-5.64-4.5-6.32v2.06c1.77.77 3 2.53 3 4.26s-1.23 3.49-3 4.26v2.06c2.86-.68 4.5-3.28 4.5-6.32z" fill="currentColor"/>
+              </svg>
+            </div>
             Audio Learning
           </CardTitle>
           <CardDescription>
@@ -1237,20 +1275,15 @@ export function StorytellingActivity({
           <div className="flex items-center justify-center">
             <Button
               onClick={playAllWords}
-              className="aduffy-button"
+              className="play-all-words-btn"
               disabled={!isVoiceSupported}
             >
-              {isPlayingSequence || currentlyPlayingWord !== null ? (
-                <>
-                  <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-                  Stop Playback
-                </>
-              ) : (
-                <>
-                  <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-                  Play All Words
-                </>
-              )}
+              <span className="play-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <polygon points="5,3 16,10 5,17" fill="none" stroke="#222b3a" strokeWidth="2" strokeLinejoin="round"/>
+                </svg>
+              </span>
+              Play All Words
             </Button>
           </div>
           {!isVoiceSupported && (
@@ -1294,8 +1327,8 @@ export function StorytellingActivity({
 
       <div className="flex justify-center">
         {!isViewOnly ? (
-          <Button onClick={handleNextStep} className="aduffy-button">
-            <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
+          <Button onClick={handleNextStep} className="orange-action-btn">
+            <span style={{fontSize: '1.1em', display: 'inline-block', transform: 'translateY(1px)'}}>→</span>
             Continue to Learning Activities
           </Button>
         ) : (
@@ -1827,10 +1860,11 @@ export function StorytellingActivity({
                     {!isViewOnly && (
                       <button
                         type="button"
-                        className="aduffy-button mt-4"
+                        className="orange-action-btn"
                         onClick={startVoiceConversation}
                       >
-                        <span className="mr-2">▶️</span> Start Conversation
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}><path d="M8 5v14l11-7z" fill="#222"/></svg>
+                        Start Conversation
                       </button>
                     )}
                   </div>
@@ -1866,17 +1900,21 @@ export function StorytellingActivity({
                   <button
                     type="button"
                     onClick={isListening ? stopListening : startListening}
-                    className={isListening ? "aduffy-button-secondary" : "aduffy-button"}
+                    className="orange-action-btn"
                     disabled={!isVoiceSupported}
                   >
                     {isListening ? (
                       <>
-                        <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
+                          <rect x="6" y="6" width="12" height="12" rx="2" fill="#222" />
+                        </svg>
                         Stop Listening
                       </>
                     ) : (
                       <>
-                        <div className="w-4 h-4 mr-2 text-aduffy-teal" />
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
+                          <path d="M8 5v14l11-7z" fill="#222"/>
+                        </svg>
                         Start Speaking
                       </>
                     )}
@@ -1936,10 +1974,10 @@ export function StorytellingActivity({
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="w-full aduffy-button"
+                className="w-full soft-yellow-btn"
                 disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
               >
-                <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
+                <span className="soft-yellow-arrow">&#8594;</span>
                 Complete &amp; Get Results
               </button>
             ) : (
@@ -2188,8 +2226,20 @@ export function StorytellingActivity({
           <div></div>
           <div className="flex items-center gap-2">
             {isViewOnly && (
-              <Badge className="aduffy-badge-info">
-                <div className="w-3 h-3 mr-1 text-muted-foreground" />
+              <Badge className="view-only-badge">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <circle cx="10" cy="10" r="8" stroke="#1793b6" strokeWidth="1.5" fill="none"/>
+                  <circle cx="10" cy="10" r="2.5" stroke="#1793b6" strokeWidth="1.2" fill="none"/>
+                  <path d="M2 10c2-4 8-4 12 0s8 4 12 0" stroke="#1793b6" strokeWidth="1.2" fill="none"/>
+                </svg>
                 View Only
               </Badge>
             )}

@@ -5,6 +5,9 @@ import * as React from "react";
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   options: { label: string; value: string }[];
   className?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  disabled?: boolean;
 }
 
 function Select({ options, value, onChange, className = '', ...props }: SelectProps) {
