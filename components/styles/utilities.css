@@ -656,6 +656,7 @@
 }
 
 .ai-story-card-title {
+  padding: 1.1rem 1.5rem 0.7rem 1.5rem;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -672,13 +673,15 @@
 }
 
 .ai-story-card-inner {
+  padding: 1.2rem 1.5rem;
   background: var(--bg-secondary);
   border-radius: var(--radius-lg);
-  padding: var(--space-4);
   border: 1px solid var(--bg-muted);
 }
 
 .ai-story-card-instructions {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin-bottom: var(--space-3);
@@ -1014,13 +1017,8 @@
   background: #ff9f3e;
 }
 
-.progress-summary-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 1px 8px 0 rgba(0,0,0,0.04);
-  padding: 2rem 2.5rem 1.5rem 2.5rem;
-  margin: 2rem 0;
-  border: 1.5px solid #f0f0f0;
+.aduffy-card.progress-summary-card {
+  padding: 1.2rem 1.5rem;
 }
 
 .example-story-card {
@@ -1029,6 +1027,7 @@
   box-shadow: 0 1px 8px 0 rgba(0,0,0,0.04);
   border: 1.5px solid #f0f0f0;
   padding-bottom: 1.5rem;
+  padding: 1.2rem 1.5rem;
 }
 
 .example-story-box {
@@ -1137,6 +1136,15 @@
   /* Optional: add padding or width constraints if needed */
 } 
 
+.conversation-panel .aduffy-card {
+  padding: 2rem 1.5rem !important;
+}
+
+.word-usage-panel .aduffy-card {
+  padding: 1.3rem 1rem !important;
+  max-width: 420px;
+  width: 100%;
+}
 
 .speaking-badge {
   display: inline-flex;
@@ -1746,4 +1754,337 @@
 .sr-only[type="radio"] {
   appearance: none !important;
   -webkit-appearance: none !important;
+}
+
+/* Final Score Badge Styles */
+.final-score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border: 2px solid #e6c200;
+  border-radius: 12px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+  margin-top: 8px;
+  transition: all 0.3s ease;
+}
+
+.final-score-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.4);
+}
+
+.final-score-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  color: #ffd700;
+  flex-shrink: 0;
+}
+
+.final-score-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.final-score-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8b6914;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.final-score-value {
+  font-size: 16px;
+  font-weight: 800;
+  color: #222b3a;
+  line-height: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .final-score-badge {
+    padding: 6px 12px;
+    gap: 6px;
+  }
+  
+  .final-score-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .final-score-label {
+    font-size: 10px;
+  }
+  
+  .final-score-value {
+    font-size: 14px;
+  }
+}
+
+/* Card Styles for Results Summary */
+.aduffy-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px 0 rgba(30, 60, 90, 0.07);
+  padding: 0;
+  border: none;
+  transition: box-shadow 0.2s;
+}
+
+.aduffy-card .pt-6 {
+  padding-top: 2.5rem;
+}
+
+.card-icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  margin: 0 auto 18px auto;
+  font-size: 2.2rem;
+}
+.card-icon-learning, .card-icon-speaking {
+  background: #e6f6fa;
+  color: #13b0c7;
+}
+.card-icon-writing {
+  background: #fff4e6;
+  color: #ff9800;
+}
+
+.card-title-learning, .card-title-speaking {
+  color: #13b0c7;
+  font-weight: 700;
+  font-size: 1.35rem;
+  margin-bottom: 0.2em;
+}
+.card-title-writing {
+  color: #ff9800;
+  font-weight: 700;
+  font-size: 1.35rem;
+  margin-bottom: 0.2em;
+}
+
+.card-subtitle {
+  color: #8a99a8;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .aduffy-card .pt-6 {
+    padding-top: 1.5rem;
+  }
+  .card-icon-circle {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+  }
+  .card-title-learning, .card-title-writing, .card-title-speaking {
+    font-size: 1.1rem;
+  }
+  .card-subtitle {
+    font-size: 0.95rem;
+  }
+}
+
+/* Daily Learning Achievement Card Styles */
+.daily-achievement-card {
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 4px 24px 0 rgba(240, 180, 60, 0.10), 0 1.5px 0 0 #f6e7c1;
+  border: 1.5px solid #f6e7c1;
+  padding: 2.5rem 2rem 2.5rem 2rem;
+  max-width: 900px;
+  margin: 2.5rem auto 2rem auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.daily-achievement-card .confetti-icon {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  color: #fbb025;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.daily-achievement-card .achievement-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #e09e1a;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.daily-achievement-card .score-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.daily-achievement-card .score-number {
+  font-size: 4.5rem;
+  font-weight: 800;
+  color: #fbb025;
+  margin-bottom: 0.2rem;
+  line-height: 1;
+}
+.daily-achievement-card .score-label {
+  font-size: 1.2rem;
+  color: #888;
+  margin-bottom: 0.5rem;
+}
+.daily-achievement-card .soft-progress-bar {
+  width: 100%;
+  max-width: 340px;
+  height: 10px;
+  background: #fff7e0;
+  border-radius: 8px;
+  margin: 0.5rem auto 1.5rem auto;
+  overflow: hidden;
+  position: relative;
+}
+.daily-achievement-card .soft-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffe6b0 0%, #fbb025 100%);
+  border-radius: 8px;
+  transition: width 0.5s cubic-bezier(.4,1,.4,1);
+}
+.daily-achievement-card .achievement-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem 2rem;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+@media (max-width: 900px) {
+  .daily-achievement-card .achievement-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem 0;
+  }
+}
+.daily-achievement-card .achievement-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.daily-achievement-card .achievement-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  font-size: 1rem;
+  color: #1db56a;
+  margin-bottom: 0.5em;
+}
+.daily-achievement-card .achievement-list li .checkmark {
+  color: #22b573;
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+}
+.daily-achievement-card .topic-mastered {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.1em 1.2em;
+  margin-top: 0.2em;
+  box-shadow: 0 1px 4px 0 rgba(30, 80, 160, 0.04);
+}
+.daily-achievement-card .topic-title {
+  font-weight: 600;
+  color: #222b3a;
+  font-size: 1.05rem;
+}
+.daily-achievement-card .topic-desc {
+  font-size: 0.92rem;
+  color: #888;
+  margin-top: 0.2em;
+}
+
+/* Try Again Button Styles */
+.try-again-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  background: #fff;
+  border: 1.5px solid #ffe6b0;
+  color: #222b3a;
+  border-radius: 0.9em;
+  padding: 0.6em 1.4em;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: none;
+  transition: box-shadow 0.13s, border-color 0.13s;
+}
+.try-again-btn:hover, .try-again-btn:focus {
+  box-shadow: 0 2px 8px 0 rgba(240, 180, 60, 0.10);
+  border-color: #ffd580;
+}
+.try-again-btn .try-again-icon {
+  font-size: 1.25em;
+  display: flex;
+  align-items: center;
+  color: #222b3a;
+  margin-right: 0.2em;
+}
+
+/* Send Response Button Styles */
+.send-response-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  color: #222b3a;
+  border-radius: 0.9em;
+  padding: 0.45em 1.05em;
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: none;
+  transition: box-shadow 0.13s, border-color 0.13s;
+  margin-top: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+.send-response-btn:hover, .send-response-btn:focus {
+  box-shadow: 0 2px 8px 0 rgba(30, 41, 59, 0.08);
+  border-color: #bdbdbd;
+}
+.send-response-btn .send-response-icon {
+  font-size: 1.08em;
+  display: flex;
+  align-items: center;
+  color: #222b3a;
+  margin-right: 0.2em;
+}
+
+.soft-yellow-btn {
+  background: #F9A825 !important;
+}
+
+.orange-action-btn {
+  margin-bottom: 0.7rem;
+}
+
+.quiz-question-card-header {
+  padding: 1.1rem 1.5rem 0.7rem 1.5rem;
+}
+
+.quiz-question-card-title {
+  padding: 0.7rem 1.5rem 0.7rem 1.5rem;
+}
+
+.aduffy-card.quiz-question-card {
+  padding: 1.2rem 1.5rem;
 }

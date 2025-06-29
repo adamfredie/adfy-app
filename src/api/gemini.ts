@@ -5,43 +5,110 @@ import axios from 'axios';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY; // Store your key in .env
 
-export async function analyzeStoryWithGemini({ story, topic, vocabulary }: {
+// Debug: Check if API key is loaded
+console.log('Gemini API Key loaded:', GEMINI_API_KEY ? 'Yes' : 'No');
+if (!GEMINI_API_KEY) {
+  console.error('VITE_GEMINI_API_KEY is not set in environment variables');
+}
+
+export async function analyzeStoryWithGemini({ 
+  story, 
+  topic, 
+  vocabulary 
+}: {
   story: string;
   topic: string;
   vocabulary: string[];
 }) {
-  const prompt = `
-You are an expert language tutor. Analyze the following story according to these rules:
-[...PASTE YOUR RULES HERE, or reference them concisely...]
-Story: """${story}"""
-Topic: "${topic}"
-Target Vocabulary: ${vocabulary.map(w => `"${w}"`).join(', ')}
+  if (!GEMINI_API_KEY) {
+    throw new Error('Gemini API key is not configured. Please check your .env file.');
+  }
 
-Return your response in this JSON format:
-{
-  "creativity": <number, 0-100>,
-  "grammar": <number, 0-100>,
-  "coherence": <number, 0-100>,
-  "topicAdherence": <number, 0-100>,
-  "feedback": "<overall impression and feedback>",
-  "suggestions": ["<suggestion 1>", "<suggestion 2>", ...]
-}
+  const prompt = `
+You are an AI/LLM analyzing user-written stories for a vocabulary learning activity. Follow these detailed rules to assess and provide feedback:
+
+🧠 Focus Areas:
+1. **Creativity**
+2. **Grammar & Syntax**
+3. **Coherence & Flow**
+4. **Topic Match** (especially target vocabulary usage)
+
+🎯 Objective:
+Give constructive, encouraging feedback that helps the user improve their vocabulary application and story writing.
+
+📋 Feedback Format (strictly follow this structure):
+### Story Analysis: [Story Title/Snippet]
+
+**Overall Impression:** [One-line general feedback]
+
+---
+
+**Scores:**
+* Creativity: [%]
+* Grammar: [%]
+* Coherence: [%]
+* Topic Match: [%] (e.g., [X] out of [Y] vocabulary words used)
+
+---
+
+#### 1. Creativity
+* **Strengths:** [List 1-2 points]
+* **Suggestions for Improvement:** [List 1-2 points]
+
+#### 2. Grammar & Syntax
+* **Strengths:** [e.g., sentence variety, good punctuation]
+* **Areas for Review:**
+  * [Highlight 1–3 specific issues with examples if possible]
+
+#### 3. Coherence & Flow
+* **Strengths:** [Logical flow, smooth transitions]
+* **Suggestions for Improvement:** [Mention abrupt or confusing parts]
+
+#### 4. Topic Match
+* **Strengths:** [How vocabulary was used well]
+* **Suggestions for Improvement:** [Better ways to integrate target words]
+
+🏁 End with a brief encouraging sentence.
+
+📊 Scoring Guide (per category):
+- High: 85–100%
+- Moderate: 70–84%
+- Low: below 70%
+
+🎯 Topic Match Scoring (based on vocabulary used effectively):
+0/5 → ~60%, 1/5 → ~70%, 2/5 → ~75%, 3/5 → ~80%, 4/5 → ~90%, 5/5 → ~95–100%
+
+Make sure to consider:
+- Originality (for creativity)
+- Tense consistency, subject-verb agreement, punctuation, sentence structure (for grammar)
+- Logical progression (for coherence)
+- Correctness and naturalness of vocabulary use (for topic match)
+
+Now analyze the following story accordingly:
+
+Story Topic: ${topic}
+Target Vocabulary: ${vocabulary.join(', ')}
+User's Story: ${story}
 `;
 
-  const response = await axios.post(
-    `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
-    {
-      contents: [{ parts: [{ text: prompt }] }]
+  try {
+    console.log('Making request to Gemini API...');
+    const response = await axios.post(
+      `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+      {
+        contents: [{ parts: [{ text: prompt }] }]
+      }
+    );
+    
+    console.log('Gemini API response received');
+    return response.data.candidates[0].content.parts[0].text;
+  } catch (error) {
+    console.error('Gemini API error:', error);
+    if (axios.isAxiosError(error)) {
+      throw new Error(`API Error: ${error.response?.data?.error?.message || error.message}`);
     }
-  );
-  // Parse Gemini's response to extract the JSON object
-  const text = response.data.candidates[0].content.parts[0].text;
-  // Try to extract JSON from the response
-  const match = text.match(/\{[\s\S]*\}/);
-  if (match) {
-    return JSON.parse(match[0]);
+    throw error;
   }
-  throw new Error('Failed to parse Gemini response');
 }
 
 export async function generateVoiceResponse({ 
@@ -58,6 +125,22 @@ export async function generateVoiceResponse({
   const prompt = `
 You are an AI language tutor having a conversation with a student. 
 The student is practicing using vocabulary words in a professional context.
+
+Core Function: Vocabulary Learning Only
+
+Strict Adherence to Topic: You must only process and respond to content directly related to vocabulary practice. Any input not related to designated words or sentence construction should be flagged or ignored as off-topic.
+
+Vocabulary Recognition: Actively listen for the user's pronunciation and usage of the designated vocabulary word within their sentence.
+
+Grammar Validation: Analyze the user's sentence for grammatical correctness. Accept the sentence if the designated word is used correctly and the sentence structure is sound.
+
+No Conversational Diversions: You are forbidden from engaging in general conversation, answering personal questions, or responding to any input that deviates from the vocabulary task. If a user attempts to converse, redirect them back to the learning objective.
+
+Maintain Focus: If a user consistently goes off-topic, gently remind them of the purpose of the chat (e.g., "Let's focus on practicing our vocabulary words.")
+
+Concise Feedback: Responses should be brief and directly address the user's sentence in relation to the vocabulary word and grammar. Avoid verbose explanations.
+
+Error Handling: If you cannot understand the user's speech or identify an off-topic query, politely state your inability to process and reiterate the chat's purpose.
 
 ${topic ? `Context: The conversation is about "${topic}"` : ''}
 Target Vocabulary: ${vocabulary.map(w => `"${w}"`).join(', ')}

@@ -57,6 +57,7 @@ import { OnboardingData } from "./Onboarding";
 import { useVoiceInteraction } from "../hooks/useVoiceInteraction";
 import { analyzeStoryWithGemini, generateVoiceResponse } from '../src/api/gemini';
 import { CustomSelect } from "./ui/CustomSelect";
+import ReactMarkdown from 'react-markdown';
 
 // ... inside your component
 
@@ -133,20 +134,105 @@ export function StorytellingActivity({
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
   
   async function handleAnalyzeStory() {
-    setLoadingAnalysis(true);
+    setIsAnalyzing(true);
     try {
-      const analysis = await analyzeStoryWithGemini({
+      console.log('Starting story analysis...');
+      console.log('Story:', userStory);
+      console.log('Topic:', selectedTopic?.title);
+      console.log('Vocabulary:', dailyWords.map(w => w.word));
+      
+      const analysisText = await analyzeStoryWithGemini({
         story: userStory,
         topic: selectedTopic?.title || '',
         vocabulary: dailyWords.map(w => w.word)
       });
+      
+      console.log('Analysis text received:', analysisText);
+      
+      // Parse the text response into structured data
+      const analysis = parseAnalysisResponse(analysisText);
+      console.log('Parsed analysis:', analysis);
+      
       setStoryAnalysis(analysis);
     } catch (err) {
-      // handle error, e.g. show a toast
+      console.error('Story analysis error:', err);
+      // Show error to user
+      alert(`Failed to analyze story: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
-      setLoadingAnalysis(false);
+      setIsAnalyzing(false);
     }
   }
+  
+  // Helper function to parse the Gemini API text response
+  const parseAnalysisResponse = (text: string) => {
+    try {
+      // Extract scores using regex (now matches [60%] format)
+      const creativityMatch = text.match(/Creativity:\s*\[(\d+)%\]/);
+      const grammarMatch = text.match(/Grammar:\s*\[(\d+)%\]/);
+      const coherenceMatch = text.match(/Coherence:\s*\[(\d+)%\]/);
+      const topicMatch = text.match(/Topic Match:\s*\[(\d+)%\]/);
+      
+      // Extract feedback (everything between "Overall Impression:" and the next section)
+      const feedbackMatch = text.match(/\*\*Overall Impression:\*\*\s*([^*\n]+)/);
+      
+      // Extract suggestions (look for bullet points or numbered lists)
+      const suggestionsMatch = text.match(/Suggestions for Improvement:[\s\S]*?([•\-\*]\s*[^\n]+(?:\n[•\-\*]\s*[^\n]+)*)/);
+      
+      // Extract the detailed feedback section (from #### 1. Creativity onward)
+      const detailedFeedbackMatch = text.match(/(#+\s*1\. Creativity[\s\S]*)/);
+      const detailedFeedback = detailedFeedbackMatch ? detailedFeedbackMatch[1].trim() : '';
+      
+      const creativity = creativityMatch ? parseInt(creativityMatch[1]) : 75;
+      const grammar = grammarMatch ? parseInt(grammarMatch[1]) : 80;
+      const coherence = coherenceMatch ? parseInt(coherenceMatch[1]) : 75;
+      const topicAdherence = topicMatch ? parseInt(topicMatch[1]) : 70;
+      const feedback = feedbackMatch ? feedbackMatch[1].trim() : 'Good work on your story!';
+      
+      // Parse suggestions
+      let suggestions: string[] = [];
+      if (suggestionsMatch) {
+        suggestions = suggestionsMatch[1]
+          .split('\n')
+          .map(line => line.replace(/^[•\-\*]\s*/, '').trim())
+          .filter(line => line.length > 0);
+      }
+      
+      // If no suggestions found, provide default ones
+      if (suggestions.length === 0) {
+        suggestions = [
+          "Try to use all vocabulary words in your story for maximum learning benefit",
+          "Consider adding more specific details about the challenges presented in the scenario",
+          "Practice using the words in different sentence structures to enhance versatility"
+        ];
+      }
+      
+      return {
+        creativity,
+        grammar,
+        coherence,
+        topicAdherence,
+        feedback,
+        suggestions,
+        detailedFeedback
+      };
+    } catch (error) {
+      console.error('Error parsing analysis response:', error);
+      // Return default structure if parsing fails
+      return {
+        creativity: 75,
+        grammar: 80,
+        coherence: 75,
+        topicAdherence: 70,
+        feedback: 'Good work on your story! Keep practicing to improve your vocabulary usage.',
+        suggestions: [
+          "Try to use all vocabulary words in your story for maximum learning benefit",
+          "Consider adding more specific details about the challenges presented in the scenario",
+          "Practice using the words in different sentence structures to enhance versatility"
+        ],
+        detailedFeedback: ''
+      };
+    }
+  };
   
   // Initialize state from saved progress or defaults
   const [currentStep, setCurrentStep] = useState<StepType>(
@@ -599,7 +685,8 @@ export function StorytellingActivity({
 
   // Load vocabulary words based on selected field
   useEffect(() => {
-    if (!savedProgress?.vocabularyWords) {
+    // Always generate words if we don't have any or if the field changed
+    if (!dailyWords || dailyWords.length === 0) {
       const words = generateVocabularyWords(selectedField);
       setDailyWords(words);
     }
@@ -1080,7 +1167,7 @@ export function StorytellingActivity({
     const learningScore = (correctAnswers / learningQuestions.length) * 25;
     
     const storyScore = storyAnalysis ? 
-      ((storyAnalysis.creativity + storyAnalysis.grammar + storyAnalysis.coherence + storyAnalysis.topicAdherence) / 4) * 0.35 : 0;
+      ((storyAnalysis?.creativity || 0) + (storyAnalysis?.grammar || 0) + (storyAnalysis?.coherence || 0) + (storyAnalysis?.topicAdherence || 0)) / 4 * 0.35 : 0;
     
     const voiceScore = voiceConversation.filter(msg => 
       msg.type === 'user' && msg.wordsUsed?.length > 0
@@ -1394,11 +1481,11 @@ export function StorytellingActivity({
         
         <TabsContent tabValue="questions" className="space-y-6 mt-8">
           {showLearningContent && learningQuestions.length > 0 && (
-            <Card className="aduffy-card">
+            <Card className="aduffy-card quiz-question-card">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-aduffy-navy">
+                    <CardTitle className="text-aduffy-navy quiz-question-card-title">
                       Question {currentQuestionIndex + 1} of {learningQuestions.length}
                       {isViewOnly && <div className="w-4 h-4 ml-2 inline text-muted-foreground" />}
                     </CardTitle>
@@ -1474,7 +1561,7 @@ export function StorytellingActivity({
           )}
           
           {questionResults.length > 0 && (
-            <Card className="progress-summary-card">
+            <Card className="aduffy-card progress-summary-card">
               <CardHeader>
                 <CardTitle className="text-aduffy-navy">Progress Summary</CardTitle>
               </CardHeader>
@@ -1498,7 +1585,7 @@ export function StorytellingActivity({
 
         <TabsContent tabValue="story" className="space-y-6 mt-8">
           {showLearningContent && (
-            <Card className="example-story-card">
+            <Card className="example-story-card progress-summary-card">
               <CardHeader>
                 <div className="flex items-start justify-between w-full">
                   <div>
@@ -1690,38 +1777,46 @@ export function StorytellingActivity({
                 </div>
                 <div className="ai-analysis-scores-row">
                   <div className="text-center">
-                    <div className="ai-analysis-score ai-analysis-score-creativity">{storyAnalysis.creativity}%</div>
+                    <div className="ai-analysis-score ai-analysis-score-creativity">{storyAnalysis?.creativity || 0}%</div>
                     <div className="ai-analysis-label">Creativity</div>
                   </div>
                   <div className="text-center">
-                    <div className="ai-analysis-score ai-analysis-score-grammar">{storyAnalysis.grammar}%</div>
+                    <div className="ai-analysis-score ai-analysis-score-grammar">{storyAnalysis?.grammar || 0}%</div>
                     <div className="ai-analysis-label">Grammar</div>
                   </div>
                   <div className="text-center">
-                    <div className="ai-analysis-score ai-analysis-score-coherence">{storyAnalysis.coherence}%</div>
+                    <div className="ai-analysis-score ai-analysis-score-coherence">{storyAnalysis?.coherence || 0}%</div>
                     <div className="ai-analysis-label">Coherence</div>
                   </div>
                   <div className="text-center">
-                    <div className="ai-analysis-score ai-analysis-score-topic">{storyAnalysis.topicAdherence}%</div>
+                    <div className="ai-analysis-score ai-analysis-score-topic">{storyAnalysis?.topicAdherence || 0}%</div>
                     <div className="ai-analysis-label">Topic Match</div>
                   </div>
                 </div>
                 <hr className="ai-analysis-divider" />
                 <div>
                   <h4 className="font-medium text-aduffy-navy mb-2">Feedback</h4>
-                  <p className="text-muted-foreground">{storyAnalysis.feedback}</p>
+                  <p className="text-muted-foreground">{storyAnalysis?.feedback || 'No feedback available.'}</p>
                 </div>
                 <div>
                   <h4 className="font-medium text-aduffy-navy mb-2">Suggestions for Improvement</h4>
                   <ul className="space-y-1 text-muted-foreground">
-                    {storyAnalysis.suggestions.map((suggestion: string, index: number) => (
+                    {storyAnalysis?.suggestions && storyAnalysis.suggestions.length > 0 ? storyAnalysis.suggestions.map((suggestion: string, index: number) => (
                       <li key={index} className="flex items-start gap-2">
                         <div className="w-2 h-2 bg-aduffy-yellow rounded-full mt-2 flex-shrink-0"></div>
                         {suggestion}
                       </li>
-                    ))}
+                    )) : (
+                      <li className="text-muted-foreground">No specific suggestions available.</li>
+                    )}
                   </ul>
                 </div>
+                {/* Render detailed feedback as markdown */}
+                {storyAnalysis?.detailedFeedback && (
+                  <div className="ai-analysis-detailed-feedback mt-6">
+                    <ReactMarkdown>{storyAnalysis.detailedFeedback}</ReactMarkdown>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -1733,7 +1828,7 @@ export function StorytellingActivity({
               {isViewOnly ? 'Words you used in your story' : "Track which words you've used in your story"}
             </div>
             <div className="vocab-checklist-list">
-              {dailyWords.map((word, index) => {
+              {dailyWords && dailyWords.length > 0 ? dailyWords.map((word, index) => {
                 const isUsed = userStory.toLowerCase().includes(word.word.toLowerCase());
                 return (
                   <div key={index} className="vocab-checklist-item">
@@ -1750,7 +1845,12 @@ export function StorytellingActivity({
                     </div>
                   </div>
                 );
-              })}
+              }) : (
+                <div className="text-center text-muted-foreground py-4">
+                  <div className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
+                  <p className="text-sm">Loading vocabulary words...</p>
+                </div>
+              )}
             </div>
           </div>
           <div className="space-y-4">
@@ -1857,16 +1957,7 @@ export function StorytellingActivity({
                         : 'Click "Start Conversation" to begin the voice interaction'
                       }
                     </p>
-                    {!isViewOnly && (
-                      <button
-                        type="button"
-                        className="orange-action-btn"
-                        onClick={startVoiceConversation}
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}><path d="M8 5v14l11-7z" fill="#222"/></svg>
-                        Start Conversation
-                      </button>
-                    )}
+                   
                   </div>
                 ) : (
                   voiceConversation.map((message, index) => (
@@ -1897,33 +1988,48 @@ export function StorytellingActivity({
               {/* Voice controls and transcript preview */}
               {!isViewOnly && (
                 <div className="flex items-center gap-4 mt-4">
-                  <button
-                    type="button"
-                    onClick={isListening ? stopListening : startListening}
-                    className="orange-action-btn"
-                    disabled={!isVoiceSupported}
-                  >
-                    {isListening ? (
-                      <>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
-                          <rect x="6" y="6" width="12" height="12" rx="2" fill="#222" />
-                        </svg>
-                        Stop Listening
-                      </>
-                    ) : (
-                      <>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
-                          <path d="M8 5v14l11-7z" fill="#222"/>
-                        </svg>
-                        Start Speaking
-                      </>
-                    )}
-                  </button>
-                  {transcript && (
-                    <button onClick={handleVoiceResponse} className="aduffy-button-outline">
-                      <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-                      Send Response
+                  {voiceConversation.length === 0 ? (
+                    <button
+                      type="button"
+                      className="orange-action-btn"
+                      onClick={startVoiceConversation}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}><path d="M8 5v14l11-7z" fill="#222"/></svg>
+                      Start Conversation
                     </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={isListening ? stopListening : startListening}
+                        className="orange-action-btn"
+                        disabled={!isVoiceSupported}
+                      >
+                        {isListening ? (
+                          <>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
+                              <rect x="6" y="6" width="12" height="12" rx="2" fill="#222" />
+                            </svg>
+                            Stop Listening
+                          </>
+                        ) : (
+                          <>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
+                              <path d="M8 5v14l11-7z" fill="#222"/>
+                            </svg>
+                            Start Speaking
+                          </>
+                        )}
+                      </button>
+                      {transcript &&(
+                        <button onClick={handleVoiceResponse} className="send-response-btn">
+                          <span className="send-response-icon" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#222b3a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </span>
+                          Send Response
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               )}
@@ -2004,11 +2110,20 @@ export function StorytellingActivity({
             <div className="w-8 h-8 text-aduffy-yellow" />
           </div>
           <div className="text-left">
-            <h2 className="text-3xl font-bold text-aduffy-navy">Learning Complete!</h2>
-            <Badge className="aduffy-badge-primary mt-1">
-              <div className="w-4 h-4 mr-1 text-aduffy-yellow" />
-              Final Score: {finalScore}/100
-            </Badge>
+            <h2 className="text-3xl font-bold text-aduffy-navy text-center">Learning Complete!</h2>
+            <div className="text-center">
+              <div className="final-score-badge">
+                <div className="final-score-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 4V2h14v2h3v2c0 3.31-2.69 6-6 6h-2v2.09A7.001 7.001 0 0 1 12 22a7.001 7.001 0 0 1-2-13.91V10H8c-3.31 0-6-2.69-6-6V4h3zm2 0v2c0 2.21 1.79 4 4 4s4-1.79 4-4V4H7zm-3 2c0 2.21 1.79 4 4 4h2V4H4v2zm16-2h-6v4h2c2.21 0 4-1.79 4-4V4z" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div className="final-score-content">
+                  <div className="final-score-label">Final Score</div>
+                  <div className="final-score-value">{finalScore}/100</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -2016,112 +2131,109 @@ export function StorytellingActivity({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="aduffy-card text-center">
-          <CardContent className="pt-6">
-            <div className="w-16 h-16 bg-aduffy-teal/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <div className="w-8 h-8 text-aduffy-teal" />
-            </div>
-            <div className="text-2xl font-bold text-aduffy-teal mb-2">Learning</div>
-            <div className="text-sm text-muted-foreground">
-              {Math.round((questionResults.filter(r => r.isCorrect).length / learningQuestions.length) * 100)}% correct ({questionResults.filter(r => r.isCorrect).length}/{learningQuestions.length})
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="aduffy-card text-center">
-          <CardContent className="pt-6">
-            <div className="w-16 h-16 bg-aduffy-orange/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <div className="w-8 h-8 text-aduffy-orange" />
-            </div>
-            <div className="text-2xl font-bold text-aduffy-orange mb-2">Writing</div>
-            <div className="text-sm text-muted-foreground">
-              {storyAnalysis ? Math.round((storyAnalysis.creativity + storyAnalysis.grammar + storyAnalysis.coherence + storyAnalysis.topicAdherence) / 4) : 0}% quality
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="aduffy-card text-center">
-          <CardContent className="pt-6">
-            <div className="w-16 h-16 bg-info/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <div className="w-8 h-8 text-info" />
-            </div>
-            <div className="text-2xl font-bold text-info mb-2">Speaking</div>
-            <div className="text-sm text-muted-foreground">
-              {voiceConversation.filter(msg => msg.type === 'user').length} interactions
-            </div>
-          </CardContent>
-        </Card>
+      <div className="w-full max-w-4xl mx-auto">
+        <div className="grid grid-cols-3 gap-6">
+          {/* learning */}
+          <Card className="aduffy-card text-center">
+            <CardContent className="pt-6">
+              <div className="card-icon-circle card-icon-learning">
+                {/* brain icon */}
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M8.5 8.5a2 2 0 1 1 4 0m-4 0V10a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v1.5m-5-7A5.5 5.5 0 0 0 2 12v0a5.5 5.5 0 0 0 5.5 5.5h.5m7-11A5.5 5.5 0 0 1 22 12v0a5.5 5.5 0 0 1-5.5 5.5h-.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+              <div className="card-title-learning">Learning</div>
+              <div className="card-subtitle">{Math.round((questionResults.filter(r => r.isCorrect).length / learningQuestions.length) * 100)}% correct ({questionResults.filter(r => r.isCorrect).length}/{learningQuestions.length})</div>
+            </CardContent>
+          </Card>
+          {/* writing */}
+          <Card className="aduffy-card text-center">
+            <CardContent className="pt-6">
+              <div className="card-icon-circle card-icon-writing">
+                {/* book icon */}
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M3 8.5h18" stroke="currentColor" strokeWidth="1.2"/><rect x="7.5" y="2.5" width="2" height="3" rx="1" fill="currentColor"/><rect x="14.5" y="2.5" width="2" height="3" rx="1" fill="currentColor"/></svg>
+              </div>
+              <div className="card-title-writing">Writing</div>
+              <div className="card-subtitle">{storyAnalysis ? Math.round(((storyAnalysis?.creativity || 0) + (storyAnalysis?.grammar || 0) + (storyAnalysis?.coherence || 0) + (storyAnalysis?.topicAdherence || 0)) / 4) : 0}% quality</div>
+            </CardContent>
+          </Card>
+          {/* speaking */}
+          <Card className="aduffy-card text-center">
+            <CardContent className="pt-6">
+              <div className="card-icon-circle card-icon-speaking">
+                {/* speaker icon */}
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M3 10v4h4l5 5V5l-5 5H3z" fill="currentColor"/><path d="M16.5 12c0-1.77-1-3.29-2.5-4.03v8.06A4.978 4.978 0 0 0 16.5 12z" fill="currentColor"/><path d="M19.5 12c0-3.04-1.64-5.64-4.5-6.32v2.06c1.77.77 3 2.53 3 4.26s-1.23 3.49-3 4.26v2.06c2.86-.68 4.5-3.28 4.5-6.32z" fill="currentColor"/></svg>
+              </div>
+              <div className="card-title-speaking">Speaking</div>
+              <div className="card-subtitle">{voiceConversation.filter(msg => msg.type === 'user').length} interactions</div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent">
-        <CardHeader>
-          <CardTitle className="text-center text-aduffy-navy">
-            🎉 Daily Learning Achievement Unlocked!
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="text-center">
-            <div className="text-6xl font-bold text-aduffy-yellow mb-2">{finalScore}</div>
-            <div className="text-lg text-muted-foreground">Overall Score</div>
-            <Progress value={finalScore} className="mt-4 max-w-md mx-auto" />
+      <Card className="daily-achievement-card">
+        <div className="confetti-icon" aria-hidden="true">🎉</div>
+        <div className="achievement-title">Daily Learning Achievement Unlocked!</div>
+        <div className="score-section">
+          <div className="score-number">{finalScore}</div>
+          <div className="score-label">Overall Score</div>
+          <div className="soft-progress-bar">
+            <div
+              className="soft-progress-bar-fill"
+              style={{ width: `${finalScore}%` }}
+            />
           </div>
-          
-          <Separator />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-medium text-aduffy-navy mb-3">Today's Achievements</h4>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <div className="w-4 h-4 text-success" />
-                  <span className="text-sm">Mastered 5 new vocabulary words</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-4 h-4 text-success" />
-                  <span className="text-sm">Completed {learningQuestions.length} practice questions</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-4 h-4 text-success" />
-                  <span className="text-sm">Created AI-guided story</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-4 h-4 text-success" />
-                  <span className="text-sm">Practiced speaking skills</span>
-                </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-medium text-aduffy-navy mb-3">Story Topic Mastered</h4>
-              <div className="bg-muted/50 p-3 rounded-lg">
-                <p className="font-medium text-aduffy-navy text-sm">{selectedTopic?.title || 'Professional Communication'}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Successfully addressed this professional scenario while incorporating vocabulary words
-                </p>
-              </div>
+        </div>
+        <div className="achievement-grid">
+          <div>
+            <h4 className="font-medium text-aduffy-navy mb-3">Today's Achievements</h4>
+            <ul className="achievement-list">
+              <li><span className="checkmark">✔</span><span>Mastered 5 new vocabulary words</span></li>
+              <li><span className="checkmark">✔</span><span>Completed {learningQuestions.length} practice questions</span></li>
+              <li><span className="checkmark">✔</span><span>Created AI-guided story</span></li>
+              <li><span className="checkmark">✔</span><span>Practiced speaking skills</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-medium text-aduffy-navy mb-3">Story Topic Mastered</h4>
+            <div className="topic-mastered">
+              <p className="topic-title">{selectedTopic?.title || 'Professional Communication'}</p>
+              <p className="topic-desc">
+                Successfully addressed this professional scenario while incorporating vocabulary words
+              </p>
             </div>
           </div>
-        </CardContent>
+        </div>
       </Card>
 
       <div className="flex justify-center gap-4">
-        {/* Remove the duplicate Back to Dashboard button here */}
-        <Button onClick={() => {
-          setCurrentStep('words');
-          setStepProgress(0);
-          setUserStory('');
-          setStoryAnalysis(null);
-          setVoiceConversation([]);
-          setQuestionResults([]);
-          setCurrentQuestionIndex(0);
-          setSelectedTopic(null);
-          setShowQuestionFeedback(false);
-          setCurrentQuestionResult(null);
-        }} className="border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10">
-          <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
+        <button
+          className="back-to-dashboard-btn"
+          onClick={onBack}
+        >
+          <span className="arrow" aria-hidden="true">
+            ←
+          </span>
+          Back to Dashboard
+        </button>
+        <button
+          onClick={() => {
+            setCurrentStep('words');
+            setStepProgress(0);
+            setUserStory('');
+            setStoryAnalysis(null);
+            setVoiceConversation([]);
+            setQuestionResults([]);
+            setCurrentQuestionIndex(0);
+            setSelectedTopic(null);
+            setShowQuestionFeedback(false);
+            setCurrentQuestionResult(null);
+          }}
+          className="try-again-btn"
+        >
+          <span className="try-again-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5V3m0 0C6.477 3 2 7.477 2 13s4.477 10 10 10 10-4.477 10-10c0-2.21-.896-4.21-2.343-5.657M12 3l-3 3m3-3l3 3" stroke="#222b3a" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </span>
           Try Again
-        </Button>
+        </button>
       </div>
     </div>
   );
