@@ -52,12 +52,13 @@ import { Textarea } from "./ui/textarea";
 import { Separator } from "./ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Alert } from "./ui/alert";
-import { Select } from "./ui/select";
+// import { Select } from "./ui/select";
 import { OnboardingData } from "./Onboarding";
 import { useVoiceInteraction } from "../hooks/useVoiceInteraction";
-import { analyzeStoryWithGemini, generateVoiceResponse } from '../src/api/gemini';
-import { CustomSelect } from "./ui/CustomSelect";
+import { analyzeStoryWithGemini, generateVoiceResponse, generateVoiceResponseFromAudio } from '../src/api/gemini';
+// import { CustomSelect } from "./ui/CustomSelect";
 import ReactMarkdown from 'react-markdown';
+import { getGeminiExample } from '../src/api/gemini';
 
 // ... inside your component
 
@@ -123,6 +124,106 @@ type StepType = 'words' | 'learning' | 'writing' | 'voice' | 'results';
 
 const STEP_ORDER: StepType[] = ['words', 'learning', 'writing', 'voice', 'results'];
 
+// Utility to shuffle an array
+function shuffleArray<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Generate learning questions dynamically from dailyWords
+function generateLearningQuestions(words: DailyWord[]): LearningQuestion[] {
+  return words.map((word, idx) => {
+    // Get other words for incorrect options
+    const otherWords = words.filter((_, i) => i !== idx);
+    // Definition question
+    const defOptions = shuffleArray([
+      word.definition,
+      ...otherWords.slice(0, 3).map(w => w.definition)
+    ]);
+    const defCorrect = defOptions.indexOf(word.definition);
+    // Usage question
+    const usageOptions = shuffleArray([
+      word.example,
+      ...otherWords.slice(0, 3).map(w => w.example)
+    ]);
+    const usageCorrect = usageOptions.indexOf(word.example);
+    // Context question
+    const contextOptions = shuffleArray([
+      'Professional/business context',
+      'At a party',
+      'While cooking',
+      'During sports'
+    ]);
+    const contextCorrect = contextOptions.indexOf('Professional/business context');
+    // Example fill-in-the-blank
+    const exampleSentence = word.example.replace(new RegExp(word.word, 'gi'), '_____');
+    const exampleOptions = shuffleArray([
+      word.word,
+      ...otherWords.slice(0, 3).map(w => w.word)
+    ]);
+    const exampleCorrect = exampleOptions.indexOf(word.word);
+    // Cycle through types for variety
+    const types: LearningQuestion['type'][] = ['definition', 'usage', 'context', 'example'];
+    const type = types[idx % types.length];
+    switch (type) {
+      case 'definition':
+        return {
+          id: `q${idx + 1}`,
+          wordIndex: idx,
+          question: `What does "${word.word}" mean?`,
+          options: defOptions,
+          correctAnswer: defCorrect,
+          explanation: `The correct definition of "${word.word}" is: ${word.definition}`,
+          type
+        };
+      case 'usage':
+        return {
+          id: `q${idx + 1}`,
+          wordIndex: idx,
+          question: `Which is a correct professional usage of "${word.word}"?`,
+          options: usageOptions,
+          correctAnswer: usageCorrect,
+          explanation: `Example usage: ${word.example}`,
+          type
+        };
+      case 'context':
+        return {
+          id: `q${idx + 1}`,
+          wordIndex: idx,
+          question: `In which context would you most likely use "${word.word}"?`,
+          options: contextOptions,
+          correctAnswer: contextCorrect,
+          explanation: `"${word.word}" is typically used in professional contexts.`,
+          type
+        };
+      case 'example':
+        return {
+          id: `q${idx + 1}`,
+          wordIndex: idx,
+          question: `Complete the sentence: ${exampleSentence}`,
+          options: exampleOptions,
+          correctAnswer: exampleCorrect,
+          explanation: `The correct word is "${word.word}".`,
+          type
+        };
+      default:
+        return {
+          id: `q${idx + 1}`,
+          wordIndex: idx,
+          question: `What does "${word.word}" mean?`,
+          options: defOptions,
+          correctAnswer: defCorrect,
+          explanation: `The correct definition of "${word.word}" is: ${word.definition}`,
+          type: 'definition'
+        };
+    }
+  });
+}
+
 export function StorytellingActivity({ 
   onBack, 
   userProfile, 
@@ -132,6 +233,159 @@ export function StorytellingActivity({
 }: StorytellingActivityProps) {
   const [storyAnalysis, setStoryAnalysis] = useState<any>(null);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
+  const [loadingRandomWords, setLoadingRandomWords] = useState(false);
+  //GEMINI AUDIO USESTATE
+  const [audioLoading, setAudioLoading] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioSupported, setAudioSupported] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  
+  // Check audio recording support on mount
+  useEffect(() => {
+    setAudioSupported(!!window.MediaRecorder && !!navigator.mediaDevices);
+  }, []);
+  
+  //GEMINI AUDIO FUNCTIONS
+  const startRecording = async () => {
+    setAudioBlob(null);
+    try {
+      // Check if MediaRecorder is supported
+      if (!window.MediaRecorder) {
+        throw new Error('Audio recording is not supported in this browser');
+      }
+      
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+      mediaRecorder.start();
+      setRecording(true);
+
+      mediaRecorder.ondataavailable = (e) => {
+        audioChunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        setAudioBlob(blob);
+        setRecording(false);
+        // Stop all tracks to release microphone
+        stream.getTracks().forEach(track => track.stop());
+      };
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      setRecording(false);
+      if (error instanceof Error) {
+        alert(`Could not start recording: ${error.message}`);
+      } else {
+        alert('Could not access microphone. Please check permissions.');
+      }
+    }
+  };
+  
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop();
+    }
+  };
+  
+  const stopAndSendToGemini = async () => {
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop();
+      setRecording(false);
+      // The onstop handler will set the audioBlob, then we can send it
+    }
+  };
+  //GEMINI AUDIO FUNCTIONS END
+  
+  // Function to send audio to Gemini and get response
+  const sendAudioToGemini = async (audioBlob: Blob) => {
+    if (isViewOnly) return;
+    
+    setAudioLoading(true);
+    try {
+      // Add a placeholder message to show recording was received
+      const newConversation = [...voiceConversation];
+      newConversation.push({
+        type: 'user',
+        content: '[Processing audio…]',
+        timestamp: new Date(),
+        isAudio: true
+      });
+      setVoiceConversation(newConversation);
+      
+      // Send audio to Gemini
+      const aiResponse = await generateVoiceResponseFromAudio({
+        audioBlob,
+        conversationHistory: voiceConversation,
+        vocabulary: dailyWords.map(w => w.word),
+        topic: selectedTopic?.title
+      });
+      
+      // Update the user message with transcribed text
+      // Try to extract the transcription from Gemini's response
+      const updatedConversation = [...newConversation];
+      const lastUserMessage = updatedConversation[updatedConversation.length - 1];
+      
+      // Parse the response to extract transcription and AI response
+      const transcriptionMatch = aiResponse.match(/TRANSCRIPTION:\s*(.+?)(?=\nRESPONSE:|$)/s);
+      const responseMatch = aiResponse.match(/RESPONSE:\s*(.+?)(?=\n|$)/s);
+      
+      const transcription = transcriptionMatch ? transcriptionMatch[1].trim() : '[Audio message]';
+      const aiResponseText = responseMatch ? responseMatch[1].trim() : aiResponse;
+      
+      // Update the user message with the transcription
+      lastUserMessage.content = transcription;
+      lastUserMessage.wordsUsed = dailyWords.filter(word => 
+        transcription.toLowerCase().includes(word.word.toLowerCase())
+      );
+      
+      // Wait a moment before speaking the response
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      await safeSpeak(aiResponseText);
+      
+      // Add AI response
+      updatedConversation.push({
+        type: 'ai',
+        content: aiResponseText,
+        timestamp: new Date()
+      });
+      
+      setVoiceConversation(updatedConversation);
+      
+    } catch (error) {
+      console.warn('Audio response error:', error);
+      // Fallback response if Gemini fails
+      const fallbackResponse = "I couldn't process your audio. Please try speaking again.";
+      
+      try {
+        await safeSpeak(fallbackResponse);
+      } catch (speechError) {
+        console.warn('Speech error:', speechError);
+      }
+      
+      const newConversation = [...voiceConversation];
+      newConversation.push({
+        type: 'ai',
+        content: fallbackResponse,
+        timestamp: new Date()
+      });
+      setVoiceConversation(newConversation);
+    } finally {
+      setAudioLoading(false);
+      setAudioBlob(null);
+    }
+  };
+  
+  // Effect to automatically send audio when it's ready
+  useEffect(() => {
+    if (audioBlob && !audioLoading) {
+      sendAudioToGemini(audioBlob);
+    }
+  }, [audioBlob, audioLoading]);
   
   async function handleAnalyzeStory() {
     setIsAnalyzing(true);
@@ -166,11 +420,25 @@ export function StorytellingActivity({
   // Helper function to parse the Gemini API text response
   const parseAnalysisResponse = (text: string) => {
     try {
+      //Mapping function
+      // function mapLevelToScore(level: string) {
+      //   if (!level) return 0;
+      //   if (level.toLowerCase() === "high") return Math.floor(Math.random() * 16) + 85; // 85-100%
+      //   if (level.toLowerCase() === "moderate") return Math.floor(Math.random() * 15) + 70; // 70-84%
+      //   return Math.floor(Math.random() * 71);//0-70%
+      // }
       // Extract scores using regex (now matches [60%] format)
+      //OLD BLOCK
       const creativityMatch = text.match(/Creativity:\s*\[(\d+)%\]/);
       const grammarMatch = text.match(/Grammar:\s*\[(\d+)%\]/);
       const coherenceMatch = text.match(/Coherence:\s*\[(\d+)%\]/);
       const topicMatch = text.match(/Topic Match:\s*\[(\d+)%\]/);
+      //NEW BLOCK
+//       const creativityLevel = text.match(/Creativity:\s*(High|Moderate|Low)/i)?.[1] || "Moderate";
+//       const grammarLevel = text.match(/Grammar:\s*(High|Moderate|Low)/i)?.[1] || "Moderate";
+// const coherenceLevel = text.match(/Coherence:\s*(High|Moderate|Low)/i)?.[1] || "Moderate";
+// const topicLevel = text.match(/Topic Match:\s*(High|Moderate|Low)/i)?.[1] || "Moderate";
+
       
       // Extract feedback (everything between "Overall Impression:" and the next section)
       const feedbackMatch = text.match(/\*\*Overall Impression:\*\*\s*([^*\n]+)/);
@@ -181,13 +449,18 @@ export function StorytellingActivity({
       // Extract the detailed feedback section (from #### 1. Creativity onward)
       const detailedFeedbackMatch = text.match(/(#+\s*1\. Creativity[\s\S]*)/);
       const detailedFeedback = detailedFeedbackMatch ? detailedFeedbackMatch[1].trim() : '';
-      
+      //OLD BLOCK
       const creativity = creativityMatch ? parseInt(creativityMatch[1]) : 75;
       const grammar = grammarMatch ? parseInt(grammarMatch[1]) : 80;
       const coherence = coherenceMatch ? parseInt(coherenceMatch[1]) : 75;
       const topicAdherence = topicMatch ? parseInt(topicMatch[1]) : 70;
       const feedback = feedbackMatch ? feedbackMatch[1].trim() : 'Good work on your story!';
-      
+      //NEW BLOCK
+//       const creativity = mapLevelToScore(creativityLevel);
+// const grammar = mapLevelToScore(grammarLevel);
+// const coherence = mapLevelToScore(coherenceLevel);
+// const topicAdherence = mapLevelToScore(topicLevel);
+// const feedback = feedbackMatch ? feedbackMatch[1].trim() : 'Good work on your story!';
       // Parse suggestions
       let suggestions: string[] = [];
       if (suggestionsMatch) {
@@ -562,8 +835,9 @@ export function StorytellingActivity({
     onProgressUpdate(currentProgress);
   }, [onProgressUpdate, currentProgress, dailyWords.length]);
 
-  // Audio playback functions with improved error handling
-  const safeSpeak = useCallback((text: string, wordIndex?: number) => {
+ 
+ //This is the old block for safeSpeak 
+ const safeSpeak = useCallback((text: string, wordIndex?: number) => {
     console.log('SafeSpeak called with:', text, 'wordIndex:', wordIndex);
     
     if (!text || text.trim() === '') {
@@ -584,9 +858,18 @@ export function StorytellingActivity({
         }
 
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.8;
-        utterance.pitch = 1.0;
-        utterance.volume = 0.9;
+        utterance.rate = 0.9;
+        utterance.pitch = 1.05;
+        utterance.volume = 0.95;
+              // Get available voices
+      // const voices = window.speechSynthesis.getVoices();
+       // Try to find a high-quality English voice
+      //  utterance.voice =
+      //  voices.find(v => v.name.includes("Google") && v.lang === "en-US") ||
+      //  voices.find(v => v.name.includes("Microsoft") && v.lang === "en-US") ||
+      //  voices.find(v => v.lang === "en-US") ||
+      //  voices[0];
+
 
         utterance.onstart = () => {
           console.log('Speech started for:', text);
@@ -603,6 +886,22 @@ export function StorytellingActivity({
           setCurrentlyPlayingWord(null);
           reject(new Error(`Speech synthesis error: ${event.error}`));
         };
+           // Sometimes voices are not loaded immediately, so ensure they're loaded
+      // if (voices.length === 0) {
+      //   window.speechSynthesis.onvoiceschanged = () => {
+      //     const loadedVoices = window.speechSynthesis.getVoices();
+      //     utterance.voice =
+      //       loadedVoices.find(v => v.name.includes("Google") && v.lang === "en-US") ||
+      //       loadedVoices.find(v => v.name.includes("Microsoft") && v.lang === "en-US") ||
+      //       loadedVoices.find(v => v.lang === "en-US") ||
+      //       loadedVoices[0];
+      //     window.speechSynthesis.speak(utterance);
+      //   };
+      // } else {
+      //   setTimeout(() => {
+      //     window.speechSynthesis.speak(utterance);
+      //   }, 100);
+      // }
 
         // Small delay to ensure cleanup is complete
         setTimeout(() => {
@@ -616,6 +915,7 @@ export function StorytellingActivity({
       }
     });
   }, []);
+
 
   const playWordPronunciation = useCallback(async (wordIndex: number) => {
     if (wordIndex < 0 || wordIndex >= dailyWords.length) {
@@ -694,90 +994,10 @@ export function StorytellingActivity({
 
   // Generate learning questions and story topics
   useEffect(() => {
-    // Generate 5 questions for each word (25 total)
-    const mockQuestions: LearningQuestion[] = [
-      // Questions for each word based on the selected field vocabulary
-      {
-        id: "q1",
-        wordIndex: 0,
-        question: "What does the first vocabulary word mean?",
-        options: ["Confused and unclear", "Clear professional concept", "Random business term", "Outdated practice"],
-        correctAnswer: 1,
-        explanation: "This vocabulary word represents an important professional concept.",
-        type: "definition"
-      },
-      {
-        id: "q2",
-        wordIndex: 1,
-        question: "How is the second vocabulary word used in business?",
-        options: ["For personal tasks", "In professional collaboration", "Only in meetings", "For documentation"],
-        correctAnswer: 1,
-        explanation: "This word is commonly used in professional collaboration contexts.",
-        type: "usage"
-      },
-      {
-        id: "q3",
-        wordIndex: 2,
-        question: "What synonym best matches the third vocabulary word?",
-        options: ["Enable", "Prevent", "Confuse", "Delay"],
-        correctAnswer: 0,
-        explanation: "Enable has a similar meaning to this vocabulary word.",
-        type: "synonym"
-      },
-      {
-        id: "q4",
-        wordIndex: 3,
-        question: "In what context is the fourth vocabulary word most useful?",
-        options: ["Personal hobbies", "Data analysis", "Cooking", "Shopping"],
-        correctAnswer: 1,
-        explanation: "This word is particularly useful in data analysis and business contexts.",
-        type: "context"
-      },
-      {
-        id: "q5",
-        wordIndex: 4,
-        question: "Complete the sentence with the fifth vocabulary word:",
-        options: ["leverage", "ignore", "waste", "forget"],
-        correctAnswer: 0,
-        explanation: "Leverage is the correct choice for maximizing resources.",
-        type: "example"
-      }
-    ];
-
-    const mockTopics: StoryTopic[] = [
-      {
-        id: "topic1",
-        title: "The Cross-Department Project Crisis",
-        scenario: "You're a project manager facing a critical deadline with multiple departments involved",
-        context: "A major client presentation is due in 48 hours, but different teams have conflicting approaches and communication has broken down.",
-        challenge: "Navigate team dynamics, resolve conflicts, and deliver a unified solution while maintaining professional relationships."
-      },
-      {
-        id: "topic2",
-        title: "The Remote Team Integration Challenge",
-        scenario: "You're leading the integration of a newly acquired remote team into your company culture",
-        context: "Your company has just acquired a smaller tech startup, and you need to integrate their team of 15 remote employees into your existing workflow.",
-        challenge: "Bridge cultural differences, establish clear communication channels, and create a cohesive team environment."
-      },
-      {
-        id: "topic3",
-        title: "The Strategic Pivot Presentation",
-        scenario: "You need to present a major strategic change to skeptical stakeholders",
-        context: "Market conditions have forced your company to pivot its main product strategy, and you must convince investors and board members.",
-        challenge: "Present complex data clearly, address concerns diplomatically, and build consensus around the new direction."
-      },
-      {
-        id: "topic4",
-        title: "The Mentorship Dilemma",
-        scenario: "You're mentoring a talented but struggling team member while managing your own workload",
-        context: "A promising junior colleague is having difficulty with client presentations and seeks your guidance, but you're swamped with your own responsibilities.",
-        challenge: "Balance your time effectively, provide meaningful guidance, and help develop their professional skills."
-      }
-    ];
-
-    setLearningQuestions(mockQuestions);
-    setStoryTopics(mockTopics);
-  }, []);
+    if (dailyWords && dailyWords.length > 0) {
+      setLearningQuestions(generateLearningQuestions(dailyWords));
+    }
+  }, [dailyWords]);
 
   // Update progress when significant changes occur
   useEffect(() => {
@@ -1183,11 +1403,11 @@ export function StorytellingActivity({
   };
 
   const renderVoicePermissionAlert = () => {
-    if (!isVoiceSupported) {
+    if (!audioSupported) {
       return (
         <Alert className="mb-6">
           <div className="text-muted-foreground text-sm mt-2">
-            Voice features may have limited support in this browser. You can still try the conversation feature, but for the best experience, please use Chrome, Safari, or Edge.
+            Audio recording is not supported in this browser. Please use Chrome, Safari, or Edge for the best experience with voice conversations.
           </div>
         </Alert>
       );
@@ -1213,7 +1433,7 @@ export function StorytellingActivity({
       return (
         <Alert className="mb-6">
           <div className="flex items-center justify-between text-muted-foreground text-sm mt-2">
-            <span>Microphone access may be required for voice recognition features.</span>
+            <span>Microphone access is required for audio recording and voice conversations.</span>
             <Button
               onClick={requestPermission}
               className="aduffy-button-outline ml-4"
@@ -1319,20 +1539,48 @@ export function StorytellingActivity({
           </div>
         </div>
         <div className="card-content">
-          <CustomSelect
-            value={selectedField}
-            onChange={handleFieldChange}
-            disabled={isViewOnly}
-            options={[
-              { value: "marketing", icon: "📊", label: "Marketing" },
-              { value: "technology", icon: "💻", label: "Technology" },
-              { value: "sales", icon: "💼", label: "Sales" },
-              { value: "product", icon: "🚀", label: "Product" },
-              { value: "finance", icon: "💰", label: "Finance" },
-              { value: "operations", icon: "⚙️", label: "Operations" },
-            ]}
-            className={isViewOnly ? 'opacity-60' : ''}
-          />
+          <div className="generate-random-words-container">
+            <button
+              onClick={async () => {
+                if (isViewOnly) return;
+                setLoadingRandomWords(true);
+                try {
+                  const wordsWithDefs: typeof dailyWords = [];
+                  while (wordsWithDefs.length < 5) {
+                    const response = await fetch('https://random-word-api.herokuapp.com/word?number=1');
+                    const [word] = await response.json();
+                    try {
+                      const defRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                      if (!defRes.ok) throw new Error('No definition');
+                      const defData = await defRes.json();
+                      const firstMeaning = defData[0]?.meanings[0]?.definitions[0]?.definition || '';
+                      const partOfSpeech = defData[0]?.meanings[0]?.partOfSpeech || '';
+                      if (firstMeaning) {
+                        const example = await getGeminiExample(word, firstMeaning);
+                        wordsWithDefs.push({
+                          word,
+                          definition: firstMeaning,
+                          partOfSpeech,
+                          example,
+                          difficulty: 'beginner' as const
+                        });
+                      }
+                    } catch {
+                      // skip words with no definition
+                    }
+                  }
+                  setDailyWords(wordsWithDefs);
+                } catch (err) {
+                  alert('Could not fetch random words or definitions.');
+                }
+                setLoadingRandomWords(false);
+              }}
+              disabled={isViewOnly || loadingRandomWords}
+              className={`random-words-btn${isViewOnly ? ' opacity-60' : ''}`}
+            >
+              {loadingRandomWords ? 'Loading...' : 'Generate Random Words'}
+            </button>
+          </div>
           {selectedField !== (userProfile?.field || 'marketing') && (
             <div className="field-change-notice">
               📝 Field changed from your profile setting
@@ -1932,7 +2180,7 @@ export function StorytellingActivity({
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           {isViewOnly 
             ? "Review your completed voice conversation with AI. All interactions are shown in view-only mode."
-            : "Have a natural conversation with AI about your story. Try to use each vocabulary word in your responses."
+            : "Have a natural conversation with AI about your story using audio. Record your voice and try to use each vocabulary word in your responses."
           }
         </p>
       </div>
@@ -1967,7 +2215,18 @@ export function StorytellingActivity({
                           ? 'bg-aduffy-yellow/20 text-aduffy-navy' 
                           : 'bg-card border text-foreground'
                       }`}>
-                        <p>{message.content}</p>
+                        <p>
+                          {message.isAudio ? (
+                            <span className="flex items-center gap-2">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 17c2.761 0 5-2.239 5-5V7a5 5 0 0 0-10 0v5c0 2.761 2.239 5 5 5z" fill="currentColor"/>
+                              </svg>
+                              {message.content}
+                            </span>
+                          ) : (
+                            message.content
+                          )}
+                        </p>
                         {message.wordsUsed && message.wordsUsed.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-1">
                             {message.wordsUsed.map((word: any, wordIndex: number) => (
@@ -1985,7 +2244,7 @@ export function StorytellingActivity({
                   ))
                 )}
               </div>
-              {/* Voice controls and transcript preview */}
+              {/* Audio recording controls */}
               {!isViewOnly && (
                 <div className="flex items-center gap-4 mt-4">
                   {voiceConversation.length === 0 ? (
@@ -1999,44 +2258,43 @@ export function StorytellingActivity({
                     </button>
                   ) : (
                     <>
-                      <button
-                        type="button"
-                        onClick={isListening ? stopListening : startListening}
-                        className="orange-action-btn"
-                        disabled={!isVoiceSupported}
-                      >
-                        {isListening ? (
-                          <>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
-                              <rect x="6" y="6" width="12" height="12" rx="2" fill="#222" />
-                            </svg>
-                            Stop Listening
-                          </>
-                        ) : (
-                          <>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
-                              <path d="M8 5v14l11-7z" fill="#222"/>
-                            </svg>
-                            Start Speaking
-                          </>
-                        )}
-                      </button>
-                      {transcript &&(
-                        <button onClick={handleVoiceResponse} className="send-response-btn">
-                          <span className="send-response-icon" aria-hidden="true">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#222b3a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          </span>
-                          Send Response
+                      {audioSupported ? (
+                        <button
+                          type="button"
+                          onClick={recording ? stopRecording : startRecording}
+                          className="orange-action-btn"
+                          disabled={audioLoading}
+                        >
+                          {recording ? (
+                            <>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
+                                <rect x="6" y="6" width="12" height="12" rx="2" fill="#222" />
+                              </svg>
+                              Stop Recording
+                            </>
+                          ) : (
+                            <>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
+                                <path d="M8 5v14l11-7z" fill="#222"/>
+                              </svg>
+                              {audioLoading ? 'Processing...' : 'Record Audio'}
+                            </>
+                          )}
                         </button>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">
+                          Audio recording not supported in this browser
+                        </div>
+                      )}
+                      
+                      {audioLoading && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                          Sending to AI...
+                        </div>
                       )}
                     </>
                   )}
-                </div>
-              )}
-              {!isViewOnly && transcript && (
-                <div className="p-3 bg-muted/50 rounded-lg">
-                  <div className="text-xs text-muted-foreground mb-1">Your speech:</div>
-                  <p className="text-sm">{transcript}</p>
                 </div>
               )}
             </CardContent>
@@ -2055,7 +2313,9 @@ export function StorytellingActivity({
             <CardContent>
               {dailyWords.map((word, index) => {
                 const isUsedInConversation = voiceConversation.some(msg => 
-                  msg.type === 'user' && msg.content.toLowerCase().includes(word.word.toLowerCase())
+                  msg.type === 'user' && 
+                  (msg.content.toLowerCase().includes(word.word.toLowerCase()) || 
+                   (msg.wordsUsed && msg.wordsUsed.some((w: any) => w.word.toLowerCase() === word.word.toLowerCase())))
                 );
                 return (
                   <div key={index} className="word-usage-card">
@@ -2309,6 +2569,41 @@ export function StorytellingActivity({
       </div>
     );
   };
+
+  // Add this useEffect to restore story topics
+  useEffect(() => {
+    const mockTopics: StoryTopic[] = [
+      {
+        id: "topic1",
+        title: "The Cross-Department Project Crisis",
+        scenario: "You're a project manager facing a critical deadline with multiple departments involved",
+        context: "A major client presentation is due in 48 hours, but different teams have conflicting approaches and communication has broken down.",
+        challenge: "Navigate team dynamics, resolve conflicts, and deliver a unified solution while maintaining professional relationships."
+      },
+      {
+        id: "topic2",
+        title: "The Remote Team Integration Challenge",
+        scenario: "You're leading the integration of a newly acquired remote team into your company culture",
+        context: "Your company has just acquired a smaller tech startup, and you need to integrate their team of 15 remote employees into your existing workflow.",
+        challenge: "Bridge cultural differences, establish clear communication channels, and create a cohesive team environment."
+      },
+      {
+        id: "topic3",
+        title: "The Strategic Pivot Presentation",
+        scenario: "You need to present a major strategic change to skeptical stakeholders",
+        context: "Market conditions have forced your company to pivot its main product strategy, and you must convince investors and board members.",
+        challenge: "Present complex data clearly, address concerns diplomatically, and build consensus around the new direction."
+      },
+      {
+        id: "topic4",
+        title: "The Mentorship Dilemma",
+        scenario: "You're mentoring a talented but struggling team member while managing your own workload",
+        context: "A promising junior colleague is having difficulty with client presentations and seeks your guidance, but you're swamped with your own responsibilities.",
+        challenge: "Balance your time effectively, provide meaningful guidance, and help develop their professional skills."
+      }
+    ];
+    setStoryTopics(mockTopics);
+  }, []);
 
   return (
     <div className="space-y-8">
