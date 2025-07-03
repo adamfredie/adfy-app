@@ -6,7 +6,9 @@ declare global {
     SpeechRecognition: any;
     webkitSpeechRecognition: any;
   }
+  type SpeechRecognition = InstanceType<typeof window.SpeechRecognition>;
 }
+// Add this at the top of your file or in a global .d.ts file
 
 interface UseVoiceInteractionReturn {
   isListening: boolean;

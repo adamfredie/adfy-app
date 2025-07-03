@@ -4,7 +4,8 @@ import axios from 'axios';
 
 // const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-const GEMINI_AUDIO_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+const GEMINI_AUDIO_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+// const GEMINI_AUDIO_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY; // Store your key in .env
 
 // Debug: Check if API key is loaded
@@ -78,7 +79,8 @@ Give constructive, encouraging feedback that helps the user improve their vocabu
 - Low: below 70%
 
 🎯 Topic Match Scoring (based on vocabulary used effectively):
-0/5 → ~60%, 1/5 → ~70%, 2/5 → ~75%, 3/5 → ~80%, 4/5 → ~90%, 5/5 → ~95–100%
+0/5 → ~0%, 1/5 → ~20%, 2/5 → ~40%, 3/5 → ~60%, 4/5 → ~80%, 5/5 → ~95–100%
+
 Special Rule: If the user's story is gibberish, irrelevant, or nonsensical (e.g., random letters, words that do not form sentences, or content unrelated to the topic), assign a score of 0% for all categories and state in the feedback that the submission was not understandable.
 
 Make sure to consider:
@@ -191,7 +193,6 @@ No Conversational Diversions: You are forbidden from engaging in general convers
 Maintain Focus: If a user consistently goes off-topic, gently remind them of the purpose of the chat (e.g., "Let's focus on practicing our vocabulary words.")
 
 Concise Feedback: Responses should be brief and directly address the user's sentence in relation to the vocabulary word and grammar. Avoid verbose explanations.
-
 Error Handling: If you cannot understand the user's speech or identify an off-topic query, politely state your inability to process and reiterate the chat's purpose.
 
 ${topic ? `Context: The conversation is about "${topic}"` : ''}
@@ -201,7 +202,6 @@ Previous conversation:
 ${conversationHistory.map(msg => `${msg.type === 'user' ? 'Student' : 'Tutor'}: ${msg.content}`).join('\n')}
 
 Student's latest message: "${userMessage}"
-
 Respond naturally as a tutor, encouraging the student to use the vocabulary words. 
 Keep responses conversational and under 2 sentences. Don't mention the vocabulary words explicitly unless the student asks.
 `;
@@ -258,6 +258,9 @@ Strict Adherence to Topic: You must only process and respond to content directly
 Vocabulary Recognition: Actively listen for the user's pronunciation and usage of the designated vocabulary word within their sentence.
 
 Grammar Validation: Analyze the user's sentence for grammatical correctness. Accept the sentence if the designated word is used correctly and the sentence structure is sound.
+Success Feedback: If the student uses the vocabulary word correctly and passes all the rules in voice chat, then give the student a brief success message, and immediately follow up with the next question. 
+
+If the student uses the vocabulary word correctly and does not pass all the rules in voice chat, then give the student proper feedback that will help them succeed.
 
 No Conversational Diversions: You are forbidden from engaging in general conversation, answering personal questions, or responding to any input that deviates from the vocabulary task. If a user attempts to converse, redirect them back to the learning objective.
 
@@ -283,7 +286,7 @@ Please format your response as:
 TRANSCRIPTION: [the transcribed text]
 RESPONSE: [your tutor response]
 
-Keep responses conversational and under 2 sentences. Don't mention the vocabulary words explicitly unless the student asks.
+Keep responses conversational and under 2 sentences. Don't mention the vocabulary words explicitly unless the student asks. 
 `;
 
     const response = await axios.post(
@@ -312,7 +315,7 @@ Keep responses conversational and under 2 sentences. Don't mention the vocabular
     throw error;
   }
 }
-
+// For getting the example for the words
 export async function getGeminiExample(word: string, definition: string): Promise<string> {
   const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
   const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;

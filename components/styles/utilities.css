@@ -2088,3 +2088,26 @@
 .aduffy-card.quiz-question-card {
   padding: 1.2rem 1.5rem;
 }
+.return-btn {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #ffe0b2; /* light orange */
+  border-radius: 12px;
+  background: #fff;
+  color: #222b3a;
+  font-weight: 500;
+  font-size: 1.1em;
+  padding: 0.5em 1.5em;
+  transition: background 0.15s, border-color 0.15s;
+  box-shadow: none;
+  cursor: pointer;
+}
+.return-btn:hover {
+  background: #fff8f0; /* very light orange */
+  border-color: #ffd699;
+}
+.return-btn .arrow {
+  font-size: 1.2em;
+  margin-right: 0.7em;
+  color: #222b3a;
+}

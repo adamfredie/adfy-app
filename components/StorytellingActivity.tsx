@@ -59,6 +59,8 @@ import { analyzeStoryWithGemini, generateVoiceResponse, generateVoiceResponseFro
 // import { CustomSelect } from "./ui/CustomSelect";
 import ReactMarkdown from 'react-markdown';
 import { getGeminiExample } from '../src/api/gemini';
+//Elevens Lab 
+import { getElevenLabsAudio } from '../src/api/elevenlabs';
 
 // ... inside your component
 
@@ -241,6 +243,7 @@ export function StorytellingActivity({
   const [audioSupported, setAudioSupported] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const [transcript, setTranscript] = useState('');
   
   // Check audio recording support on mount
   useEffect(() => {
@@ -250,6 +253,8 @@ export function StorytellingActivity({
   //GEMINI AUDIO FUNCTIONS
   const startRecording = async () => {
     setAudioBlob(null);
+    //Speech-to-text (real-time transcript)
+    startListening();
     try {
       // Check if MediaRecorder is supported
       if (!window.MediaRecorder) {
@@ -273,6 +278,7 @@ export function StorytellingActivity({
         setRecording(false);
         // Stop all tracks to release microphone
         stream.getTracks().forEach(track => track.stop());
+        // setTranscript(transcribedText); // <-- Remove this line, transcript is set after AI response
       };
     } catch (error) {
       console.error('Error starting recording:', error);
@@ -286,6 +292,7 @@ export function StorytellingActivity({
   };
   
   const stopRecording = () => {
+    stopListening();
     if (mediaRecorderRef.current && recording) {
       mediaRecorderRef.current.stop();
     }
@@ -307,10 +314,12 @@ export function StorytellingActivity({
     setAudioLoading(true);
     try {
       // Add a placeholder message to show recording was received
+      //Loading
       const newConversation = [...voiceConversation];
       newConversation.push({
         type: 'user',
-        content: '[Processing audio…]',
+        content: "",
+        // content: "Loading",
         timestamp: new Date(),
         isAudio: true
       });
@@ -334,6 +343,7 @@ export function StorytellingActivity({
       const responseMatch = aiResponse.match(/RESPONSE:\s*(.+?)(?=\n|$)/s);
       
       const transcription = transcriptionMatch ? transcriptionMatch[1].trim() : '[Audio message]';
+      setTranscript(transcription); // <-- Set transcript here
       const aiResponseText = responseMatch ? responseMatch[1].trim() : aiResponse;
       
       // Update the user message with the transcription
@@ -345,8 +355,17 @@ export function StorytellingActivity({
       // Wait a moment before speaking the response
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      await safeSpeak(aiResponseText);
-      
+      // await safeSpeak(aiResponseText);
+      //USED ELEVENLABS AUDIO FOR THE AI RESPONSE
+      try {
+        const audioBlob = await getElevenLabsAudio(aiResponseText);
+        const url = URL.createObjectURL(audioBlob);
+        const audio = new Audio(url);
+        await audio.play();
+      } catch (ttsError) {
+        // Fallback to browser TTS if ElevenLabs fails
+        await safeSpeak(aiResponseText);
+      }
       // Add AI response
       updatedConversation.push({
         type: 'ai',
@@ -381,11 +400,11 @@ export function StorytellingActivity({
   };
   
   // Effect to automatically send audio when it's ready
-  useEffect(() => {
-    if (audioBlob && !audioLoading) {
-      sendAudioToGemini(audioBlob);
-    }
-  }, [audioBlob, audioLoading]);
+  // useEffect(() => {
+  //   if (audioBlob && !audioLoading) {
+  //     sendAudioToGemini(audioBlob);
+  //   }
+  // }, [audioBlob, audioLoading]);
   
   async function handleAnalyzeStory() {
     setIsAnalyzing(true);
@@ -568,7 +587,7 @@ export function StorytellingActivity({
 
   const { 
     isListening, 
-    transcript, 
+    transcript: voiceTranscript, 
     error: voiceError,
     isSupported: isVoiceSupported,
     startListening, 
@@ -580,6 +599,7 @@ export function StorytellingActivity({
     requestPermission,
     stopSpeaking
   } = useVoiceInteraction();
+
 
   // Generate words based on selected field and user level
   const generateVocabularyWords = (field: string) => {
@@ -1021,7 +1041,7 @@ export function StorytellingActivity({
 
   const calculateProgress = (): number => {
     const currentStepNum = getStepNumber(currentStep);
-    const baseProgress = ((currentStepNum - 1) / 5) * 100;
+    const baseProgress = ((currentStepNum ) / 5) * 100;
     
     if (currentStep === 'learning' && learningQuestions.length > 0) {
       const questionProgress = (currentQuestionIndex / learningQuestions.length) * 20;
@@ -1302,8 +1322,8 @@ export function StorytellingActivity({
     
     try {
       const initialPrompt = selectedTopic 
-        ? `Great story about "${selectedTopic.title}"! Now let's have a conversation about your approach to this scenario. I'll ask you questions and you should try to use each of our vocabulary words in your responses. Let's start: How did you decide on your approach to handling this professional challenge?`
-        : `Great work on your vocabulary learning! Let's have a conversation to practice using the words you've learned. I'll ask you questions and you should try to use each vocabulary word in your responses. Let's start: How do you plan to use these new vocabulary words in your professional life? Also ensure that the user used long, proper sentences and proper grammar.`;
+        ? `Hello ${userProfile?.name} Let's have a conversation about your approach to this scenario I'll ask you questions and you should try to use each of our vocabulary words in your responses Here is the first question:How did you decide on your approach to handling this professional challenge?`
+        : `Hello ${userProfile?.name} Let's have a conversation about your approach to this scenario I'll ask you questions and you should try to use each of our vocabulary words in your responses Here is the first question:How did you decide on your approach to handling this professional challenge?`;
       
       console.log('Speaking initial prompt:', initialPrompt);
       
@@ -1313,7 +1333,17 @@ export function StorytellingActivity({
       ]);
       
       // Then speak the prompt with error handling
-      await safeSpeak(initialPrompt);
+      // await safeSpeak(initialPrompt);
+      // USED ELEVENLABS FOR INITIAL PROMPT
+      try {
+        const audioBlob = await getElevenLabsAudio(initialPrompt);
+        const url = URL.createObjectURL(audioBlob);
+        const audio = new Audio(url);
+        await audio.play();
+      } catch (ttsError) {
+        // Fallback to browser TTS if ElevenLabs fails
+        await safeSpeak(initialPrompt);
+      }
       
     } catch (error) {
       console.warn('Voice conversation start error:', error);
@@ -1384,11 +1414,12 @@ export function StorytellingActivity({
 
   const calculateFinalScore = () => {
     const correctAnswers = questionResults.filter(result => result.isCorrect).length;
+    //This is for calculating the learning score upto 25 points
     const learningScore = (correctAnswers / learningQuestions.length) * 25;
-    
+    //The is for calculating the story score upto 35 points
     const storyScore = storyAnalysis ? 
       ((storyAnalysis?.creativity || 0) + (storyAnalysis?.grammar || 0) + (storyAnalysis?.coherence || 0) + (storyAnalysis?.topicAdherence || 0)) / 4 * 0.35 : 0;
-    
+    // This is for calculating the voice score upto 40
     const voiceScore = voiceConversation.filter(msg => 
       msg.type === 'user' && msg.wordsUsed?.length > 0
     ).length * 10;
@@ -1547,7 +1578,7 @@ export function StorytellingActivity({
                 try {
                   const wordsWithDefs: typeof dailyWords = [];
                   while (wordsWithDefs.length < 5) {
-                    const response = await fetch('https://random-word-api.herokuapp.com/word?number=1');
+                    const response = await fetch('https://random-word-api.vercel.app/word?number=1');
                     const [word] = await response.json();
                     try {
                       const defRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
@@ -1667,7 +1698,8 @@ export function StorytellingActivity({
             Continue to Learning Activities
           </Button>
         ) : (
-          <Button onClick={handleReturnToFurthest} className="border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10">
+          // Return Button View Only
+          <Button onClick={handleReturnToFurthest} className="return-btn">
             <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
             Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
           </Button>
@@ -1748,8 +1780,10 @@ export function StorytellingActivity({
                 </div>
                 <Progress value={(currentQuestionIndex / learningQuestions.length) * 100} className="mt-4" />
               </CardHeader>
+              {/* This is the quiz question card */}
               <CardContent className="space-y-6">
                 <div className="text-lg font-medium text-aduffy-navy">
+                  {/* This line displays the text of the current learning question in your quiz */}
                   {learningQuestions[currentQuestionIndex]?.question}
                 </div>
                 
@@ -1777,6 +1811,7 @@ export function StorytellingActivity({
                     );
                   })}
                 </div>
+                
 
                 {(showQuestionFeedback || isViewOnly) && currentQuestionResult && (
                   <div className={`quiz-feedback ${currentQuestionResult.isCorrect ? 'correct' : 'incorrect'}`}>
@@ -1804,6 +1839,7 @@ export function StorytellingActivity({
                     )}
                   </div>
                 )}
+              
               </CardContent>
             </Card>
           )}
@@ -1830,7 +1866,7 @@ export function StorytellingActivity({
             </Card>
           )}
         </TabsContent>
-
+{/* This is the example story tab */}
         <TabsContent tabValue="story" className="space-y-6 mt-8">
           {showLearningContent && (
             <Card className="example-story-card progress-summary-card">
@@ -1900,7 +1936,9 @@ export function StorytellingActivity({
           </>
         ) : (
           <div className="flex w-full justify-center">
-            <Button onClick={handleReturnToFurthest} className="w-full border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10">
+            {/* Return Button View Only */}
+            <Button onClick={handleReturnToFurthest} className="return-btn">
+            {/*Return Button View Only */}
               <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
               Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
             </Button>
@@ -2137,7 +2175,8 @@ export function StorytellingActivity({
                 )}
               </>
             ) : (
-              <Button onClick={handleReturnToFurthest} className="w-full border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10">
+              // Return Button View Only
+              <Button onClick={handleReturnToFurthest} className="return-btn">
                 <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                 Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
               </Button>
@@ -2188,7 +2227,7 @@ export function StorytellingActivity({
       {renderVoicePermissionAlert()}
 
       <div className="conversation-main-grid">
-        {/* Left: Conversation */}
+        {/* Left: Voice Conversation */}
         <div className="conversation-panel">
           <Card className="aduffy-card">
             <CardHeader>
@@ -2218,9 +2257,7 @@ export function StorytellingActivity({
                         <p>
                           {message.isAudio ? (
                             <span className="flex items-center gap-2">
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M12 17c2.761 0 5-2.239 5-5V7a5 5 0 0 0-10 0v5c0 2.761 2.239 5 5 5z" fill="currentColor"/>
-                              </svg>
+                             
                               {message.content}
                             </span>
                           ) : (
@@ -2270,14 +2307,14 @@ export function StorytellingActivity({
                               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
                                 <rect x="6" y="6" width="12" height="12" rx="2" fill="#222" />
                               </svg>
-                              Stop Recording
+                              Listening
                             </>
                           ) : (
                             <>
                               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
                                 <path d="M8 5v14l11-7z" fill="#222"/>
                               </svg>
-                              {audioLoading ? 'Processing...' : 'Record Audio'}
+                              {audioLoading ? 'Listening...' : 'Talk'}
                             </>
                           )}
                         </button>
@@ -2287,14 +2324,31 @@ export function StorytellingActivity({
                         </div>
                       )}
                       
-                      {audioLoading && (
+                      {/* {audioLoading && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                           Sending to AI...
                         </div>
+                      )} */}
+                      {audioBlob && !audioLoading && (
+                        <button
+                          type="button"
+                          className="orange-action-btn"
+                          onClick={handleSubmitAudio}
+                        >
+                          Submit
+                        </button>
                       )}
+                      
                     </>
                   )}
+                </div>
+              )}
+               {/* NEW BLOCKS */}
+               {!isViewOnly &&  voiceTranscript && (
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <div className="text-xs text-muted-foreground mb-1">Your speech:</div>
+                  <p className="text-sm">{voiceTranscript}</p>
                 </div>
               )}
             </CardContent>
@@ -2302,6 +2356,7 @@ export function StorytellingActivity({
         </div>
 
         {/* Right: Word Usage Goal */}
+        {/* Check list for voice conversation */}
         <div className="word-usage-panel">
           <Card className="aduffy-card">
             <CardHeader>
@@ -2312,6 +2367,7 @@ export function StorytellingActivity({
             </CardHeader>
             <CardContent>
               {dailyWords.map((word, index) => {
+                // Checks if the word is used
                 const isUsedInConversation = voiceConversation.some(msg => 
                   msg.type === 'user' && 
                   (msg.content.toLowerCase().includes(word.word.toLowerCase()) || 
@@ -2319,10 +2375,12 @@ export function StorytellingActivity({
                 );
                 return (
                   <div key={index} className="word-usage-card">
+                    {/* Displays the word and definition */}
                     <div className="word-usage-info">
                       <div className="word-usage-title">{word.word}</div>
                       <div className="word-usage-def">{word.definition}</div>
                     </div>
+                    {/* Checkmark if the word is used */}
                     <div className={`word-usage-indicator${isUsedInConversation ? ' checked' : ''}`}>
                       {isUsedInConversation && (
                         <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
@@ -2347,10 +2405,11 @@ export function StorytellingActivity({
                 Complete &amp; Get Results
               </button>
             ) : (
+              // Return Button View Only
               <button
                 type="button"
                 onClick={handleReturnToFurthest}
-                className="w-full border-aduffy-yellow/30 text-aduffy-navy hover:bg-aduffy-yellow/10"
+                className="return-btn"
               >
                 <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                 Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
@@ -2486,6 +2545,8 @@ export function StorytellingActivity({
             setSelectedTopic(null);
             setShowQuestionFeedback(false);
             setCurrentQuestionResult(null);
+            setCompletedSteps(new Set());
+            setFurthestStep('words');
           }}
           className="try-again-btn"
         >
@@ -2604,6 +2665,14 @@ export function StorytellingActivity({
     ];
     setStoryTopics(mockTopics);
   }, []);
+
+  const handleSubmitAudio = () => {
+    
+    if (audioBlob && !audioLoading) {
+      sendAudioToGemini(audioBlob);
+      setAudioBlob(null); // Clear after submission
+    }
+  };
 
   return (
     <div className="space-y-8">

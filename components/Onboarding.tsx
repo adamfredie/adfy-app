@@ -125,7 +125,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   ];
 
   const currentStepIndex = steps.findIndex(step => step.key === currentStep);
-  const progress = ((currentStepIndex + 1) / steps.length) * 100;
+  const progress = ((currentStepIndex + 1) / steps.length) * 100;// calculates the progress percentage based on the current step index and the total number of steps
 
   const updateFormData = (updates: Partial<OnboardingData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
