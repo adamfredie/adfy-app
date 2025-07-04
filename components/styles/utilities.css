@@ -520,7 +520,7 @@
   STEP BADGE STYLING
   For indicating current step in the storytelling activity
 */
-.step-badge {
+/* .step-badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -532,6 +532,18 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+} */
+ /* STEP BADGE DISPLAYED IN THE STORYTELLING ACTIVITY */
+.step-badge {
+  background: #ffe9c7;
+  color: #222b3a;
+  border-radius: 999px;
+  padding: 0.3em 1.2em;
+  /* font-weight: lighter; */
+  font-size: 1rem;
+  display: inline-block;
+  border: none;
+  box-shadow: none;
 }
 
 /* 
@@ -746,34 +758,39 @@
   background-clip: text;
   text-fill-color: transparent;
 }
+/* ADuffy TITLE STYLING IN ONBOARDING */
 
 .hero-title {
   font-size: 3.5rem;
-  font-weight: 800;
+  /* font-weight: 800; */
+  font-weight: 700;
   color: var(--aduffy-navy);
   text-align: center;
   filter: drop-shadow(0 4px 24px rgba(0,0,0,0.10));
   margin-top: 2.5rem;
-  margin-bottom: 1.25rem;
+  /* margin-bottom: 0.5rem; */
   line-height: 1.1;
 }
 @media (min-width: 768px) {
   .hero-title {
-    font-size: 4.5rem;
+    font-size: 2.231rem;
+    /* font-size: 4.5rem; */
   }
 }
-
+/* Aduffy SUBTITLE STYLING IN ONBOARDING */
 .hero-subtitle {
   font-size: 1.5rem;
   font-weight: 500;
-  color: var(--text-muted-foreground);
+  /* font-weight: 250; */
+  /* color: var(--text-muted-foreground);*/
+  color:rgb(108, 117, 125);
   text-align: center;
   margin-bottom: 2rem;
   line-height: 1.3;
 }
 @media (min-width: 768px) {
   .hero-subtitle {
-    font-size: 2rem;
+    font-size: 1rem;
   }
 }
 
@@ -1183,7 +1200,8 @@
   border: none;
   border-radius: 9999px;
   padding: 0.25rem 0.75rem;
-  font-size: 1rem;
+  /* font-size: 1rem; */
+  font-size: 0.8rem;
   color: #222b3a;
   font-weight: 400;
   cursor: pointer;
@@ -1335,7 +1353,8 @@
 }
 
 .aduffy-card.card-soft-yellow-glass {
-  background: linear-gradient(135deg, #fffbe9 80%, #fff7e0 100%) !important;
+  background: linear-gradient(135deg, #FFFEFB 80%, #fff7e0 100%) !important;
+  /* background: linear-gradient(135deg, #fffbe9 80%, #fff7e0 100%) !important; */
   border: 1.5px solid #f6e7c1 !important;
   border-radius: 18px !important;
   box-shadow: 0 2px 12px 0 rgba(200, 150, 30, 0.07) !important;
@@ -1513,7 +1532,7 @@
   border-radius: 999px !important;
   display: inline-flex !important;
   align-items: center !important;
-  font-size: 1rem !important;
+  font-size: 0.8rem !important;
   font-weight: 400 !important;
   padding: 0.35em 1.2em !important;
   border: none !important;
@@ -2069,9 +2088,6 @@
   margin-right: 0.2em;
 }
 
-.soft-yellow-btn {
-  background: #F9A825 !important;
-}
 
 .orange-action-btn {
   margin-bottom: 0.7rem;
@@ -2110,4 +2126,399 @@
   font-size: 1.2em;
   margin-right: 0.7em;
   color: #222b3a;
+}
+/* FOR MAKING THE VOICE CONVERSATION AREA SCROLLABLE */
+.scrollable-fixed {
+  height: 24rem;      /* or whatever fixed height you want */
+  overflow-y: auto;
+  /* Optional: for nice look */
+  background: var(--color-muted, #f5f5f5);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  /* Optional: spacing between children */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+/* FOR MAKING THE RIGTH AND LEFT AI AND USER CHAT */
+/* Chat bubble base */
+.chat-bubble {
+  max-width: 70%;
+  padding: 1rem;
+  border-radius: 1rem;
+  margin-bottom: 0.75rem;
+  word-break: break-word;
+  font-size: 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* AI (left) bubble */
+.chat-bubble-ai {
+  background: #fff;
+  color: #222b3a;
+  border: 1px solid #e0e0e0;
+  border-bottom-left-radius: 0.25rem;
+  margin-right: auto;
+  margin-left: 0;
+}
+
+/* User (right) bubble */
+.chat-bubble-user {
+  background: #ffe9c7;
+  color: #222b3a;
+  border: none;
+  border-bottom-right-radius: 0.25rem;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* Timestamp */
+.chat-timestamp {
+  font-size: 0.85em;
+  color: #888;
+  margin-top: 0.5em;
+  align-self: flex-end;
+}
+/* WHAT MAKES ADUFFY SPECIAL BOX STYLING */
+.aduffy-special-box {
+  background: #FEFAF4;
+  border: 1px solid #efd0a1;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.aduffy-special-flex {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.aduffy-special-sparkle {
+  font-size: 1.5rem;
+  color: #fbbf24; /* gold/yellow */
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+.aduffy-special-title {
+  font-weight: 600;
+  color: #222b3a;
+  margin-bottom: 0.5rem;
+}
+
+.aduffy-special-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.aduffy-special-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: #4b5563; /* muted */
+  margin-bottom: 0.25rem;
+}
+
+.aduffy-special-check {
+  color: #14b8a6; /* teal */
+  font-size: 1.1em;
+  flex-shrink: 0;
+}
+/* FULL NAME AND EMAIL ADDRESS INPUT FIELD STYLING */
+.input-neutral-bg {
+  background: #f7f7fa;         /* very light gray */
+  border: none;                /* no border */
+  border-radius: 12px;         /* rounded corners */
+  color: #222b3a;
+  padding: 0.75em 1em;
+  outline: none;
+  font-size: 1rem;
+  transition: box-shadow 0.2s;
+}
+
+.input-neutral-bg:focus {
+  box-shadow: 0 0 0 2px #e0e7ef; /* subtle focus ring */
+}
+/* GENERATE RANDOM BUTTON STYLING */
+.btn-outline-teal {
+  background: #fff;
+  color: #14b8a6; /* teal-500 */
+  border: 1.5px solid #14b8a6;
+  border-radius: 12px;
+  padding: 0.6em 1.5em;
+  font-weight: 500;
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn-outline-teal:disabled,
+.btn-outline-teal[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-outline-teal:hover,
+.btn-outline-teal:focus {
+  background: #f0fdfa; /* very subtle teal background on hover/focus */
+  border-color: #0ea5e9; /* slightly more blue-teal on hover */
+  color: #0ea5e9;
+}
+/* INCORRECT QUESTION STYLING */
+.quiz-feedback-incorrect {
+  background: #fde8e8;      /* soft red */
+  border-radius: 16px;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  color: #b91c1c;           /* red-700 for text/icons */
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.quiz-feedback-incorrect .quiz-feedback-explanation {
+  color: #374151;           /* muted text for explanation */
+  margin-top: 0.5rem;
+}
+.text-error {
+  color: #b91c1c; /* Tailwind's red-700, or use your preferred red */
+  font-weight: 500;
+}
+/* FOR STYLING CORRECT OPTION */
+.quiz-option.correct {
+  background: #e6f9ed;      /* soft green */
+  border: 1.5px solid #22b573; /* green border */
+  color: #14532d;           /* dark green text (optional) */
+}
+.quiz-option.correct .option-letter {
+  background: #22b573;      /* green circle for the letter */
+  color: #fff;
+}
+/* FOR STYLING INCORRECT OPTION */
+.quiz-option.incorrect {
+  background: #fde8e8;      /* soft red */
+  border: 1.5px solid #f87171; /* red border */
+  color: #b91c1c;           /* red text (optional) */
+}
+/* ONBOADING STYLING STARTS HERE */
+/* BADGE IN ORBOARDING STYLING*/
+.soft-yellow-badge {
+  background: #ffe9c7;
+  color: #222b3a;
+  border-radius: 999px;
+  padding: 0.3em 1.2em;
+  font-weight: bold;
+  font-size: 1rem;
+  display: inline-block;
+  border: none;
+  box-shadow: none;
+}
+/* SKIP TO DASHBOARD BOX STYLING */
+.quickstart-box {
+  background: #f3fbfc;
+  border: 1.5px solid #b6e6ef;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.quickstart-flex {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.quickstart-icon {
+  font-size: 2rem;
+  color: #00b3c6;
+  margin-top: 0.2em;
+  flex-shrink: 0;
+}
+
+.quickstart-title {
+  font-weight: 600;
+  color: #222b3a;
+  margin-bottom: 0.5rem;
+  font-size: 1.15rem;
+}
+
+.quickstart-desc {
+  color: #64748b;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.btn-outline-teal {
+  background: #fff;
+  color: #00b3c6;
+  border: 1.5px solid #00b3c6;
+  border-radius: 999px;
+  padding: 0.6em 1.5em;
+  font-weight: 500;
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn-outline-teal:hover,
+.btn-outline-teal:focus {
+  background: #e0f7fa;
+  border-color: #00b3c6;
+  color: #0097a7;
+}
+.btn-outline-teal svg {
+  margin-right: 0.5em;
+}
+/* ONBOARDING CONTINUE BUTTON */
+.soft-yellow-btn {
+  background: #F9A825 !important;
+  color:black;
+}
+/* RADIO BUTTON FOR PROFESSIONAL FIELD */
+.custom-radio {
+  appearance: none;
+  /* width: 1.5em;
+  height: 1.5em; */
+  width: 1em;
+  height: 1em;
+
+  border-radius: 50%;
+  border: 2.5px solid #f3f3f3;
+  background: #fff;
+  display: inline-block;
+  position: relative;
+  margin-right: 0.7em;
+  vertical-align: middle;
+  transition: border-color 0.2s;
+  box-shadow: 0 0 0 2px #f3f3f3;
+}
+
+.custom-radio:checked {
+  border-color: #ffd166;
+  box-shadow: 0 0 0 2px #fff8ec;
+}
+
+.custom-radio:checked::after {
+  content: '';
+  display: block;
+  /* width: 0.7em;
+  height: 0.7em; */
+  width: 0.4em;
+  height: 0.4em;
+  background: #ffc107;
+  border-radius: 50%;
+  position: absolute;
+  /* top: 0.25em; */
+  top: 0.21em;
+  /* left: 0.25em; */
+  left: 0.14em;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  font-weight: light;
+  color: #111;
+  font-size: 1em;
+  /* font-size: 1.15em; */
+  gap: 0.5em;
+}
+
+.radio-icon {
+  font-size: 1.3em;
+  margin-right: 0.2em;
+  vertical-align: middle;
+}
+/* INTERACTIVE BADGE STYLING IN LEARNING PAGE */
+.info-badge {
+  background: #eaf8fa;
+  color: #14b8a6;
+  border-radius: 999px;
+  padding: 0.25em 1.1em 0.25em 0.9em;
+  font-weight: 500;
+  /* font-size: 1rem; */
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  border: none;
+  box-shadow: none;
+}
+.info-badge .info-badge-icon {
+  font-size: 1.1em;
+  margin-right: 0.4em;
+  display: flex;
+  align-items: center;
+}
+/* PRACTICE BADGE IN THE LEARNING PAGE */
+.practice-badge {
+  background: #ffe9c7;
+  color: #222b3a;
+  border-radius: 999px;
+  padding: 0.25em 1.1em 0.25em 0.9em;
+  /* font-weight: bold; */
+  /* font-size: 1rem; */
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  border: none;
+  box-shadow: none;
+}
+.practice-badge .practice-badge-icon {
+  font-size: 1.1em;
+  margin-right: 0.4em;
+  display: flex;
+  align-items: center;
+}
+/* PROGRESS BAR FOR THE QUIZ */
+.quiz-progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #fff8ec;         /* very light yellow for the track */
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 1em;
+}
+.writing-instructions-box {
+  background: #fff8ec;
+  border-radius: 16px;
+  padding: 1.2em 1.5em 1.2em 1.5em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7em;
+}
+
+.writing-instructions-icon {
+  color: #fbbf24; /* yellow */
+  font-size: 1.4em;
+  margin-top: 0.1em;
+  flex-shrink: 0;
+}
+
+.writing-instructions-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.writing-instructions-title {
+  font-weight: bold;
+  color: #222b3a;
+  margin-bottom: 0.1em;
+  font-size: 1.08em;
+}
+
+.writing-instructions-desc {
+  color: #444;
+  font-size: 1em;
+  margin-top: 0.1em;
 }

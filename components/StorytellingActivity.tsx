@@ -58,10 +58,11 @@ import { useVoiceInteraction } from "../hooks/useVoiceInteraction";
 import { analyzeStoryWithGemini, generateVoiceResponse, generateVoiceResponseFromAudio } from '../src/api/gemini';
 // import { CustomSelect } from "./ui/CustomSelect";
 import ReactMarkdown from 'react-markdown';
-import { getGeminiExample } from '../src/api/gemini';
+// import { getGeminiExample } from '../src/api/gemini';
 //Elevens Lab 
 import { getElevenLabsAudio } from '../src/api/elevenlabs';
-
+//RANDOM WORDS FROM GEMINI IMPORTS
+import { getRandomWordsFromGemini, getGeminiExample } from '../src/api/gemini';
 // ... inside your component
 
 
@@ -405,7 +406,7 @@ export function StorytellingActivity({
   //     sendAudioToGemini(audioBlob);
   //   }
   // }, [audioBlob, audioLoading]);
-  
+  //Event Handler
   async function handleAnalyzeStory() {
     setIsAnalyzing(true);
     try {
@@ -1056,7 +1057,7 @@ export function StorytellingActivity({
     if (step === currentStep) return 'current';
     return 'upcoming';
   };
-
+//Event Handler
   const handleStepNavigation = (step: StepType) => {
     const status = getStepStatus(step);
     
@@ -1065,7 +1066,7 @@ export function StorytellingActivity({
       setCurrentStep(step);
     }
   };
-
+//Event Handler
   const handleFieldChange = (newField: string) => {
     // Don't allow field changes in view-only mode
     if (isViewOnly) return;
@@ -1086,7 +1087,7 @@ export function StorytellingActivity({
       }
     }
   };
-
+//Event Handler
   const handleNextStep = () => {
     // Don't allow navigation in view-only mode
     if (isViewOnly) return;
@@ -1118,7 +1119,7 @@ export function StorytellingActivity({
       }
     }
   };
-
+//Event Handler
   const handleSkipLearning = () => {
     // Don't allow skipping in view-only mode
     if (isViewOnly) return;
@@ -1138,7 +1139,7 @@ export function StorytellingActivity({
     generateStoryTopic();
     setStepProgress(0);
   };
-
+//Event Handler
   const handleReturnToFurthest = () => {
     setCurrentStep(furthestStep);
   };
@@ -1169,7 +1170,7 @@ export function StorytellingActivity({
       setIsGeneratingTopic(false);
     }, 1500);
   };
-
+//Event Handler
   const handleAnswerQuestion = (answerIndex: number) => {
     // Don't allow answering in view-only mode
     if (isViewOnly) return;
@@ -1193,7 +1194,7 @@ export function StorytellingActivity({
     });
     setShowQuestionFeedback(true);
   };
-
+//Event Handler
   const handleNextQuestion = () => {
     // Don't allow navigation in view-only mode
     if (isViewOnly) return;
@@ -1350,7 +1351,7 @@ export function StorytellingActivity({
       // Continue even if speech fails - user can still see the text
     }
   };
-
+//Event Handler
   const handleVoiceResponse = async () => {
     // Don't allow voice responses in view-only mode
     if (isViewOnly) return;
@@ -1548,7 +1549,8 @@ export function StorytellingActivity({
             </div>
           </div>
         </div>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        {/* <p className="text-lg text-muted-foreground max-w-2xl mx-auto"> */}
+        <p>
           Master these 5 carefully selected vocabulary words to enhance your professional communication skills.
         </p>
       </div>
@@ -1570,47 +1572,40 @@ export function StorytellingActivity({
           </div>
         </div>
         <div className="card-content">
+
           <div className="generate-random-words-container">
+          <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
             <button
-              onClick={async () => {
-                if (isViewOnly) return;
-                setLoadingRandomWords(true);
-                try {
-                  const wordsWithDefs: typeof dailyWords = [];
-                  while (wordsWithDefs.length < 5) {
-                    const response = await fetch('https://random-word-api.vercel.app/word?number=1');
-                    const [word] = await response.json();
-                    try {
-                      const defRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-                      if (!defRes.ok) throw new Error('No definition');
-                      const defData = await defRes.json();
-                      const firstMeaning = defData[0]?.meanings[0]?.definitions[0]?.definition || '';
-                      const partOfSpeech = defData[0]?.meanings[0]?.partOfSpeech || '';
-                      if (firstMeaning) {
-                        const example = await getGeminiExample(word, firstMeaning);
-                        wordsWithDefs.push({
-                          word,
-                          definition: firstMeaning,
-                          partOfSpeech,
-                          example,
-                          difficulty: 'beginner' as const
-                        });
-                      }
-                    } catch {
-                      // skip words with no definition
-                    }
-                  }
-                  setDailyWords(wordsWithDefs);
-                } catch (err) {
-                  alert('Could not fetch random words or definitions.');
-                }
-                setLoadingRandomWords(false);
-              }}
+             
+            // Event handler for generating random words
+            onClick={async () => {
+              if (isViewOnly) return;
+              setLoadingRandomWords(true);
+              try {
+                // Get random words from Gemini
+                const geminiWords = await getRandomWordsFromGemini(5);
+                // Optionally, get example sentences for each word
+                const wordsWithExamples = await Promise.all(
+                  geminiWords.map(async (w: any) => ({
+                    ...w,
+                    example: await getGeminiExample(w.word, w.definition),
+                    difficulty: 'beginner' // or set based on your logic
+                  }))
+                );
+                setDailyWords(wordsWithExamples);
+              } catch (err) {
+                alert('Could not fetch random words from Gemini.');
+              }
+              setLoadingRandomWords(false);
+            }}
+              
               disabled={isViewOnly || loadingRandomWords}
-              className={`random-words-btn${isViewOnly ? ' opacity-60' : ''}`}
+              className={`btn-outline-teal${isViewOnly ? ' opacity-60' : ''}`}
+              
             >
               {loadingRandomWords ? 'Loading...' : 'Generate Random Words'}
             </button>
+          </div>
           </div>
           {selectedField !== (userProfile?.field || 'marketing') && (
             <div className="field-change-notice">
@@ -1721,8 +1716,18 @@ export function StorytellingActivity({
             <h2 className="text-3xl font-bold text-aduffy-navy text-center">Learn &amp; Practice</h2>
             <div className="learning-header-center">
               <Badge className="aduffy-badge-info">
-                <div className="w-3 h-3 mr-1 text-aduffy-teal" />
+                {/*INTERACTIVE BADGE IN THE LEARNING PAGE */}
+              <span className="info-badge">
+                <span className="info-badge-icon" aria-hidden="true">
+                  {/* SVG icon for target/interactive */}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" stroke="#14b8a6" strokeWidth="2"/>
+                    <circle cx="12" cy="12" r="5" stroke="#14b8a6" strokeWidth="2"/>
+                    <circle cx="12" cy="12" r="1.5" fill="#14b8a6"/>
+                  </svg>
+                </span>
                 Interactive Learning
+              </span>
               </Badge>
               <button
                 type="button"
@@ -1739,7 +1744,8 @@ export function StorytellingActivity({
             </div>
           </div>
         </div>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+        {/* <p className="text-lg text-muted-foreground max-w-2xl mx-auto"> */}
           {isViewOnly 
             ? "Review your completed learning session. All answers and content are shown in view-only mode."
             : "Strengthen your understanding through comprehensive questions and contextual examples. You can skip this step if you're confident."
@@ -1773,14 +1779,24 @@ export function StorytellingActivity({
                       {dailyWords[learningQuestions[currentQuestionIndex]?.wordIndex]?.word} - {learningQuestions[currentQuestionIndex]?.type}
                     </CardDescription>
                   </div>
+                  {/* PRACTICE BADGE IN LEARNING PAGE */}
                   <Badge className="aduffy-badge-primary">
-                    <div className="w-3 h-3 mr-1 text-aduffy-teal" />
-                    {isViewOnly ? 'Completed' : 'Practice'}
+                    <span className="practice-badge">
+                      <span className="practice-badge-icon" aria-hidden="true">
+                        {/* Clock SVG icon */}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="9" stroke="#222b3a" strokeWidth="2"/>
+                          <path d="M12 7v5l3 3" stroke="#222b3a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </span>
+                      Practice
+                    </span>
                   </Badge>
                 </div>
-                <Progress value={(currentQuestionIndex / learningQuestions.length) * 100} className="mt-4" />
+                {/* PROGRESS BAR FOR THE QUIZ */}
+                <Progress value={(currentQuestionIndex / learningQuestions.length) * 100} className="mt-4 quiz-progress-bar" />
               </CardHeader>
-              {/* This is the quiz question card */}
+              {/* THIS IS THE QUIZ QUESTION CARD*/}
               <CardContent className="space-y-6">
                 <div className="text-lg font-medium text-aduffy-navy">
                   {/* This line displays the text of the current learning question in your quiz */}
@@ -1789,12 +1805,22 @@ export function StorytellingActivity({
                 
                 <div className="grid grid-cols-1 gap-3">
                   {learningQuestions[currentQuestionIndex]?.options.map((option, index) => {
-                    const isSelected = questionResults[questionResults.length - 1]?.userAnswer === index;
+                    // HIGHLIGHTING THE OPTION THAT IS BEING SELECTED
+                    const lastResult = questionResults[questionResults.length - 1];
+                    const isCurrentQuestionAnswered = lastResult && lastResult.questionId === learningQuestions[currentQuestionIndex]?.id;
+                    const isSelected = isCurrentQuestionAnswered && lastResult.userAnswer === index;
+                    
                     const isCorrect = index === learningQuestions[currentQuestionIndex].correctAnswer;
                     return (
                       <div
                         key={index}
-                        className={`quiz-option${isSelected ? ' selected' : ''}${isCorrect && (showQuestionFeedback || isViewOnly) ? ' correct' : ''}${isViewOnly ? ' cursor-default' : ''}`}
+                        // FOR STYLING TEH CORRECT AND INCORRECT OPTION
+                        className={`quiz-option
+                          ${isSelected ? ' selected' : ''}
+                          ${isCorrect && (showQuestionFeedback || isViewOnly) ? ' correct' : ''}
+                          ${isSelected && !isCorrect && showQuestionFeedback ? ' incorrect' : ''}
+                          ${isViewOnly ? ' cursor-default' : ''}
+                        `}
                         onClick={() => !showQuestionFeedback && !isViewOnly && handleAnswerQuestion(index)}
                         style={{ pointerEvents: showQuestionFeedback || isViewOnly ? 'none' : 'auto' }}
                       >
@@ -1814,7 +1840,7 @@ export function StorytellingActivity({
                 
 
                 {(showQuestionFeedback || isViewOnly) && currentQuestionResult && (
-                  <div className={`quiz-feedback ${currentQuestionResult.isCorrect ? 'correct' : 'incorrect'}`}>
+                  <div className={`quiz-feedback ${currentQuestionResult.isCorrect ? 'correct' : 'quiz-feedback-incorrect'}`}>
                     <div className="quiz-feedback-header">
                       {currentQuestionResult.isCorrect ? (
                         <>
@@ -1824,26 +1850,40 @@ export function StorytellingActivity({
                       ) : (
                         <>
                           <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke="#b91c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          Incorrect
+                          <span className="text-error" style={{marginLeft: 6}}>Incorrect</span>
                         </>
                       )}
                     </div>
                     <div className="quiz-feedback-explanation">
                       {currentQuestionResult.explanation}
                     </div>
+                    {/* CURRENT INDEX LESS THAN 4 NEXT QUESTION BUTTON IS DISPLAY WHEN IT REACHES 5 COMPLETE PRACTICE IS SHOWN WHICH TAKES THE USER TO THE NEXT STEP */}
                     {!isViewOnly && (
+                    currentQuestionIndex < learningQuestions.length - 1 ? (
                       <button className="quiz-feedback-btn" onClick={handleNextQuestion}>
                         Next Question
                         <span style={{ display: 'inline-block', transform: 'translateY(1px)' }}>→</span>
                       </button>
-                    )}
+                    ) : (
+                      <button
+                        className="quiz-feedback-btn"
+                        onClick={() => {
+                          setStepProgress(100);
+                          handleNextStep(); // or your function to move to the next step
+                        }}
+                      >
+                        Complete Practice
+                        <span style={{ display: 'inline-block', transform: 'translateY(1px)' }}>✔</span>
+                      </button>
+                    )
+                  )}
                   </div>
                 )}
               
               </CardContent>
             </Card>
           )}
-          
+          {/* FEEDBACK SECTION */}
           {questionResults.length > 0 && (
             <Card className="aduffy-card progress-summary-card">
               <CardHeader>
@@ -2016,13 +2056,25 @@ export function StorytellingActivity({
                 <div><b>Context:</b> {selectedTopic?.context}</div>
                 <div><b>Your Challenge:</b> {selectedTopic?.challenge}</div>
               </div>
-              <div className="ai-story-card-instructions mt-4">
+              {/* <div className="ai-story-card-instructions mt-4">
                 <span role="img" aria-label="writing">📝</span>
                 <span>
                   <b>Writing Instructions:</b> {isViewOnly
                     ? `You successfully incorporated all 5 vocabulary words into this scenario: ${dailyWords.map(w => w.word).join(', ')}`
                     : `Create a compelling narrative that addresses this scenario while naturally incorporating all 5 vocabulary words: ${dailyWords.map(w => w.word).join(', ')}`}
                 </span>
+              </div> */}
+              {/* NEW BLOCK */}
+              <div className="writing-instructions-box">
+                <span className="writing-instructions-icon" aria-hidden="true">✨</span>
+                <div className="writing-instructions-content">
+                  <span className="writing-instructions-title">Writing Instructions:</span>
+                  <span className="writing-instructions-desc">
+                    {isViewOnly
+                      ? `You successfully incorporated all 5 vocabulary words into this scenario: ${dailyWords.map(w => w.word).join(', ')}`
+                      : `Create a compelling narrative that addresses this scenario while naturally incorporating all 5 vocabulary words: ${dailyWords.map(w => w.word).join(', ')}`}
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -2233,8 +2285,9 @@ export function StorytellingActivity({
             <CardHeader>
               <CardTitle className="text-aduffy-navy">Conversation</CardTitle>
             </CardHeader>
+            {/* .CONVERSATION AREA */}
             <CardContent className="space-y-4">
-              <div className="h-96 overflow-y-auto space-y-4 bg-muted/20 p-4 rounded-lg">
+              <div className="scrollable-fixed">
                 {voiceConversation.length === 0 ? (
                   <div className="text-center text-muted-foreground py-8">
                     <div className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
@@ -2248,12 +2301,10 @@ export function StorytellingActivity({
                   </div>
                 ) : (
                   voiceConversation.map((message, index) => (
+
                     <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] p-4 rounded-lg ${
-                        message.type === 'user' 
-                          ? 'bg-aduffy-yellow/20 text-aduffy-navy' 
-                          : 'bg-card border text-foreground'
-                      }`}>
+              {/* ADDED INDENTATION */}
+                      <div className={`chat-bubble ${message.type === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`}>
                         <p>
                           {message.isAudio ? (
                             <span className="flex items-center gap-2">
@@ -2273,7 +2324,8 @@ export function StorytellingActivity({
                             ))}
                           </div>
                         )}
-                        <div className="text-xs text-muted-foreground mt-1">
+                        {/* This is used for displaying the time in the chat */}
+                        <div className="chat-timestamp">
                           {message.timestamp.toLocaleTimeString()}
                         </div>
                       </div>
@@ -2281,6 +2333,7 @@ export function StorytellingActivity({
                   ))
                 )}
               </div>
+              {/* CONVERSATION AREA ENDS */}
               {/* Audio recording controls */}
               {!isViewOnly && (
                 <div className="flex items-center gap-4 mt-4">

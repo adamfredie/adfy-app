@@ -341,3 +341,42 @@ export async function getGeminiExample(word: string, definition: string): Promis
     return `Try to use "${word}" in a professional sentence.`;
   }
 }
+export async function getRandomWordsFromGemini(count: number = 5) {
+  const prompt = `
+Give me ${count} random,different, professional English words. 
+For each word, provide:
+- word
+- definition
+- part of speech
+Return the result as a JSON array, like:
+[
+  { "word": "...", "definition": "...", "partOfSpeech": "..." },
+  ...
+]
+  Do NOT repeat words from previous requests. Make sure the words are truly random and professional.
+`;
+
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }]
+  };
+
+  try {
+    const response = await axios.post(
+      `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+      body,
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    const data = response.data;
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const jsonStart = text.indexOf('[');
+    const jsonEnd = text.lastIndexOf(']');
+    if (jsonStart !== -1 && jsonEnd !== -1) {
+      const jsonString = text.substring(jsonStart, jsonEnd + 1);
+      return JSON.parse(jsonString);
+    }
+    throw new Error('Could not parse Gemini response as JSON');
+  } catch (error) {
+    console.error('Gemini random words error:', error);
+    return [];
+  }
+}

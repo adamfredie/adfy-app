@@ -253,6 +253,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               value={formData.name}
               onChange={(e) => updateFormData({ name: e.target.value })}
               placeholder="Enter your full name"
+              className="input-neutral-bg"
             />
           </div>
           <div className="space-y-2">
@@ -264,50 +265,53 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               value={formData.email}
               onChange={(e) => updateFormData({ email: e.target.value })}
               placeholder="your.email@company.com"
+              className="input-neutral-bg"
             />
           </div>
         </div>
-        
-        <div className="bg-aduffy-yellow/5 p-6 rounded-lg border border-aduffy-yellow/20">
-          <div className="flex items-start gap-3">
-            <span className="w-6 h-6 text-aduffy-teal mt-1 flex-shrink-0">✨</span>
+        {/* BOX THAT CONTAINS WHAT MAKES ADUFFY SPECIAL? */}
+        <div className="aduffy-special-box">
+          <div className="aduffy-special-flex">
+            <span className="aduffy-special-sparkle" aria-hidden="true">✨</span>
             <div>
-              <h3 className="font-semibold text-aduffy-navy mb-2">What makes ADuffy Learning special?</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h3 className="aduffy-special-title">What makes ADuffy Learning special?</h3>
+              <ul className="aduffy-special-list">
                 <li className="flex items-center gap-2">
-                  <span className="w-4 h-4 text-aduffy-teal">✅</span>
+                  <span className="aduffy-special-check" aria-hidden="true">✔</span>
                   AI-powered personalized learning paths
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="w-4 h-4 text-aduffy-teal">✅</span>
+                  <span className="aduffy-special-check" aria-hidden="true">✔</span>
                   Real workplace scenarios and practice
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="w-4 h-4 text-aduffy-teal">✅</span>
+                  <span className="aduffy-special-check" aria-hidden="true">✔</span>
                   Voice interaction and pronunciation coaching
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="w-4 h-4 text-aduffy-teal">✅</span>
+                  <span className="aduffy-special-check" aria-hidden="true">✔</span>
                   Progress tracking and skill analytics
                 </li>
               </ul>
             </div>
           </div>
         </div>
+        
 
         {/* Quick start option after filling basic info */}
+        {/* SKIP TO DASHBOARD BOX */}
         {isStepValid() && (
-          <div className="bg-aduffy-teal/5 p-6 rounded-lg border border-aduffy-teal/20">
-            <div className="flex items-start gap-3">
-              <span className="w-6 h-6 text-aduffy-teal mt-1 flex-shrink-0">⚡</span>
+          <div className="quickstart-box">
+            <div className="quickstart-flex">
+              <span className="quickstart-icon" aria-hidden="true">⚡</span>
               <div className="flex-1">
-                <h3 className="font-semibold text-aduffy-navy mb-2">Want to get started quickly?</h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <h3 className="quickstart-title">Want to get started quickly?</h3>
+                <p className="quickstart-desc">
                   You can skip the detailed setup and start learning right away. We'll use smart defaults and you can always customize your preferences later in Settings.
                 </p>
                 <Button
                   onClick={handleSkipToEnd}
-                  className="teal-outline-btn"
+                  className="btn-outline-teal"
                 >
                   <span className="teal-outline-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{display: 'inline-block', verticalAlign: 'middle'}}>
@@ -375,14 +379,18 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               { value: "consulting", label: "🎯 Consulting" },
               { value: "other", label: "🌟 Other" },
             ].map(opt => (
-              <div className="flex items-center space-x-2" key={opt.value}>
-                <RadioGroupItem
+            <label className="radio-label" key={opt.value}>
+                <input
+                  type="radio"
+                  className="custom-radio"
                   checked={formData.field === opt.value}
                   onChange={() => updateFormData({ field: opt.value, fieldOfInterest: opt.value })}
-                  id={opt.value}
+                  name="field"
+                  value={opt.value}
                 />
-                <Label htmlFor={opt.value}>{opt.label}</Label>
-              </div>
+                {/* <span className="radio-icon">{opt.icon}</span> */}
+                {opt.label}
+              </label>
             ))}
           </RadioGroup>
         </div>
@@ -396,14 +404,17 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               { value: "senior", label: "Senior Level (8-12 years)" },
               { value: "executive", label: "Executive Level (13+ years)" },
             ].map(opt => (
-              <div className="flex items-center space-x-2" key={opt.value}>
-                <RadioGroupItem
-                  checked={formData.experienceLevel === opt.value}
-                  onChange={() => updateFormData({ experienceLevel: opt.value })}
-                  id={opt.value}
-                />
-                <Label htmlFor={opt.value}>{opt.label}</Label>
-              </div>
+              <label className="radio-label" key={opt.value}>
+    <input
+      type="radio"
+      className="custom-radio"
+      checked={formData.experienceLevel === opt.value}
+      onChange={() => updateFormData({ experienceLevel: opt.value })}
+      name="experienceLevel"
+      value={opt.value}
+    />
+    {opt.label}
+  </label>
             ))}
           </RadioGroup>
         </div>
@@ -483,14 +494,17 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               { value: "advanced", label: "Advanced - I'm confident but want to refine specific areas" },
               { value: "expert", label: "Expert - I want to master advanced techniques" },
             ].map(opt => (
-              <div className="flex items-center space-x-2" key={opt.value}>
-                <RadioGroupItem
-                  checked={formData.currentSkillLevel === opt.value}
-                  onChange={() => updateFormData({ currentSkillLevel: opt.value })}
-                  id={opt.value}
-                />
-                <Label htmlFor={opt.value}>{opt.label}</Label>
-              </div>
+              <label className="radio-label" key={opt.value}>
+              <input
+                type="radio"
+                className="custom-radio"
+                checked={formData.currentSkillLevel === opt.value}
+                onChange={() => updateFormData({ currentSkillLevel: opt.value })}
+                name="currentSkillLevel"
+                value={opt.value}
+              />
+              {opt.label}
+            </label>
             ))}
           </RadioGroup>
         </div>
@@ -722,9 +736,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-4 mb-6">
-            <div className="w-20 h-20 bg-gradient-learning rounded-xl flex items-center justify-center shadow-lg text-4xl">
+            {/* <div className="w-20 h-20 bg-gradient-learning rounded-xl flex items-center justify-center shadow-lg text-4xl">
               🧠
-            </div>
+            </div> */}
             <div className="text-center">
               <h1 className="hero-title">ADuffy Learning</h1>
               <p className="hero-subtitle">Professional Communication Excellence</p>
@@ -738,7 +752,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <h2 className="text-xl font-semibold text-aduffy-navy">
               {steps.find(s => s.key === currentStep)?.title}
             </h2>
-            <Badge className="aduffy-badge-primary">
+            <Badge className="soft-yellow-badge ">
               Step {currentStepIndex + 1} of {steps.length}
             </Badge>
           </div>

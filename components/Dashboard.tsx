@@ -224,6 +224,69 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
         </div>
       </div>
 
+      
+      
+        
+{/* NEW BLOCK */}
+      {/* Weekly Schedule */}
+      {/* <div className="card">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <h2 style={{ fontSize: "var(--font-size-xl)", fontWeight: "600" }}>Weekly Class Schedule</h2>
+          <div className="badge badge-primary">This Week</div>
+        </div>
+        
+        <table className="schedule-table">
+          <tbody>
+            {weeklySchedule.map((session) => (
+              <tr key={session.id} className="schedule-row">
+                <td className="schedule-cell">
+                  <div className="schedule-time">
+                    {session.time}
+                  </div>
+                  <div>{session.topic}</div>
+                </td>
+                <td className="schedule-cell">
+                  <div className="badge badge-primary">{session.type}</div>
+                </td>
+                <td className="schedule-cell" style={{ textAlign: "right" }}>
+                  <button className="button button-primary">Join</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div> */}
+
+      {/* Activities Section */}
+      <div className="activities-section">
+        <div className="activities-header">
+          <h2 className="activities-title">AI Learning Activities</h2>
+          <div className="nav-tabs">
+            {/* NEW BLOCK */}
+            {/* <button 
+              className={`nav-tab ${activeTab === 'main' ? 'active' : ''}`}
+              onClick={() => setActiveTab('main')}
+            >
+              📚 Main Activities
+            </button> */}
+            {/* NEW BLOCK */}
+            {/* <button 
+              className={`nav-tab ${activeTab === 'practice' ? 'active' : ''}`}
+              onClick={() => setActiveTab('practice')}
+            >
+              🎯 Practice Tools
+            </button> */}
+          </div>
+        </div>
+
+        <div className="activities-content">
+          {activeTab === 'main' ? (
+            mainActivities.map(renderActivityCard)
+          ) : (
+            practiceTools.map(renderActivityCard)
+          )}
+        </div>
+      </div>
       {/* Stats Grid */}
       <div className="stats-grid">
         <div className="card stat-card">
@@ -260,64 +323,6 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
           <div className="stat-value">{userStats.totalScore}</div>
           <div className="stat-label">Total Score</div>
           <div style={{ color: "var(--text-secondary)", fontSize: "var(--font-size-sm)" }}>Expert level: 3000</div>
-        </div>
-      </div>
-
-      {/* Weekly Schedule */}
-      <div className="card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-          <h2 style={{ fontSize: "var(--font-size-xl)", fontWeight: "600" }}>Weekly Class Schedule</h2>
-          <div className="badge badge-primary">This Week</div>
-        </div>
-        
-        <table className="schedule-table">
-          <tbody>
-            {weeklySchedule.map((session) => (
-              <tr key={session.id} className="schedule-row">
-                <td className="schedule-cell">
-                  <div className="schedule-time">
-                    {session.time}
-                  </div>
-                  <div>{session.topic}</div>
-                </td>
-                <td className="schedule-cell">
-                  <div className="badge badge-primary">{session.type}</div>
-                </td>
-                <td className="schedule-cell" style={{ textAlign: "right" }}>
-                  <button className="button button-primary">Join</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Activities Section */}
-      <div className="activities-section">
-        <div className="activities-header">
-          <h2 className="activities-title">Learning Activities</h2>
-          <div className="nav-tabs">
-            <button 
-              className={`nav-tab ${activeTab === 'main' ? 'active' : ''}`}
-              onClick={() => setActiveTab('main')}
-            >
-              📚 Main Activities
-            </button>
-            <button 
-              className={`nav-tab ${activeTab === 'practice' ? 'active' : ''}`}
-              onClick={() => setActiveTab('practice')}
-            >
-              🎯 Practice Tools
-            </button>
-          </div>
-        </div>
-
-        <div className="activities-content">
-          {activeTab === 'main' ? (
-            mainActivities.map(renderActivityCard)
-          ) : (
-            practiceTools.map(renderActivityCard)
-          )}
         </div>
       </div>
     </div>
