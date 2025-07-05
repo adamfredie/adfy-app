@@ -194,7 +194,9 @@
   margin-left: auto;
   margin-right: auto;
 }
-
+ml-auto{
+  margin-left: auto;
+}
 .my-auto {
   margin-top: auto;
   margin-bottom: auto;
@@ -249,7 +251,8 @@
   font-size: var(--font-size-2xl);
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: var(--space-6);
+  /* margin-bottom: var(--space-2); */
+  /* margin-bottom: var(--space-6); */
 }
 
 /* Pulse animation for playing audio */
@@ -551,12 +554,15 @@
   Custom progress bar for the storytelling activity
 */
 .progress-header-label {
-  display: flex;
+  /* display: flex; */
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--space-2);
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
+}
+.inline-flex{
+  display:inline-flex;
 }
 
 .progress-bar-container {
@@ -579,6 +585,9 @@
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--primary);
+  /* display:block; */
+  text-align: right;
+
 }
 
 /* 
@@ -878,6 +887,9 @@
 .grid-cols-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 
 .bg-muted\/50 {
   background-color: rgba(var(--muted-rgb), 0.5);
@@ -1035,7 +1047,8 @@
 }
 
 .aduffy-card.progress-summary-card {
-  padding: 1.2rem 1.5rem;
+  padding: 1.2rem 2rem 1.5rem 1.5rem;
+  margin-bottom:2rem;
 }
 
 .example-story-card {
@@ -1288,14 +1301,16 @@
 .continue-voice-btn {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   width: 100%;
   background: #fbb025;
   color: #222b3a;
   border: none;
-  border-radius: 1rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 1.1rem;
+  /* border-radius: 1rem; */
+  border-radius: 999px;
+  padding: 0.5rem 1.5rem;
+  /* padding: 0.5em 5.2em; */
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   gap: 1rem;
@@ -1614,6 +1629,30 @@
 }
 
 /* Custom RadioGroup for confidence scale */
+/* .confidence-radio-group {
+  display: flex;
+  gap: 2.2em;
+  margin-top: 0.5em;
+  align-items: flex-end;
+}
+.confidence-radio-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.confidence-radio-label {
+  font-weight: bold;
+  color: #222b3a;
+  font-size: 1.08em;
+  margin-top: 0.2em;
+}
+.confidence-radio-helper {
+  color: #64748b;
+  font-size: 0.98em;
+  margin-top: 0.2em;
+  min-height: 1.2em;
+} */
 .confidence-radio-group {
   display: flex !important;
   flex-direction: row !important;
@@ -1621,6 +1660,7 @@
   gap: 2.5rem !important;
   margin-top: 0.5rem !important;
 }
+ 
 .confidence-radio-item {
   display: flex !important;
   flex-direction: column !important;
@@ -1641,31 +1681,48 @@
   text-align: center !important;
   min-width: 70px !important;
 }
+/* Outer circle */
 .confidence-radio-dot {
-  width: 18px !important;
-  height: 18px !important;
-  border-radius: 50% !important;
-  border: 2px solid #e0e0e0 !important;
-  background: #fff !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: border 0.15s;
-  cursor: pointer;
-}
-.confidence-radio-dot[data-state='checked'] {
-  border: 2px solid #fbb040 !important;
-  background: #fff !important;
-}
-.confidence-radio-dot[data-state='checked']::after {
-  content: '';
-  display: block;
-  width: 10px;
-  height: 10px;
-  background: #fbb040;
+  /* width: 2.1em;
+  height: 2.1em; */
+  width: 1em;
+  height: 1em;
+  border: 2.5px solid #f3f3f3;
+  background: #fff;
   border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px 0 #f3f3f3;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* When checked, add yellow border */
+.confidence-radio-dot.checked {
+  border-color: #ffc107;
+  box-shadow: 0 2px 8px 0 #ffe9c7;
+}
+
+/* The dot (span) */
+.confidence-radio-dot .confidence-radio-dot-inner {
+  /* width: 1em;
+  height: 1em; */
+  width: 0.4em;
+  height: 0.4em;
+  background: #ffc107;
+  border-radius: 50%;
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5em;
+  line-height: 1em;
+  text-align: center;
+  color: #ffc107;
+}
 /* Skills Checkbox Grid and Labels */
 .skills-checkbox-grid {
   display: grid !important;
@@ -1679,8 +1736,10 @@
   border: 1.5px solid #e6f0f3 !important;
   border-radius: 16px !important;
   box-shadow: 0 2px 8px rgba(29, 181, 163, 0.04) !important;
-  padding: 1rem 1.2rem !important;
-  font-size: 1.08rem !important;
+  /* padding: 1rem 1.2rem !important; */
+  padding: 0.4rem 0.4rem !important;
+  /* font-size: 1.08rem !important; */
+  font-size: 1rem !important;
   font-weight: 500 !important;
   color: #222b3a !important;
   cursor: pointer !important;
@@ -1690,7 +1749,7 @@
 .skill-checkbox-label .skill-icon {
   font-size: 1.3em !important;
   color: #1db5a3 !important;
-  margin-right: 0.7em !important;
+  /* margin-right: 0.7em !important; */
   display: flex !important;
   align-items: center !important;
 }
@@ -1815,7 +1874,7 @@
 .final-score-label {
   font-size: 12px;
   font-weight: 600;
-  color: #8b6914;
+  color: #ae914e;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -2487,6 +2546,7 @@
   overflow: hidden;
   margin-top: 1em;
 }
+/* WRITING BLOCK IN LEARNING PAGE */
 .writing-instructions-box {
   background: #fff8ec;
   border-radius: 16px;
@@ -2521,4 +2581,279 @@
   color: #444;
   font-size: 1em;
   margin-top: 0.1em;
+}
+/* ADDING PADDING TO YOUR AI GENERATED STORY TOPIC */
+.ai-story-card-content {
+  padding: 1rem; /* or adjust as needed */
+}
+/* NEW TOPIC BUTTON IN LEARNING PAGE */
+.ai-story-new-topic-btn {
+  background: #fff;
+  color: #222b3a;
+  border: 1.5px solid #ffd166;
+  border-radius: 999px;
+  padding: 0.45em 1.3em;
+  font-weight: 500;
+  font-size: 1rem;
+  /* display: inline-flex; */
+  /* align-items: center; */
+  margin-left: auto;
+  gap: 0.5em;
+  box-shadow: none;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  cursor: pointer;
+}
+.ai-story-new-topic-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.ai-story-new-topic-btn svg {
+  margin-right: 0.5em;
+  width: 1.1em;
+  height: 1.1em;
+  display: inline-block;
+  vertical-align: middle;
+}
+/* THE CONTEXT AND CHALLENGE BOX STYLING THAT IS ABOVE WRITING INSTRUCTION BOX */
+.story-context-box {
+  background: linear-gradient(90deg, #fff 80%, #f9f7f3 100%);
+  border-left: 5px solid #222b3a;
+  border-radius: 16px 0 0 16px;
+  padding: 1.3em 2em 1.3em 1.5em;
+  margin-bottom: 1.2em;
+  box-shadow: none;
+}
+
+.story-context-title {
+  font-weight: bold;
+  color: #222b3a;
+  margin-bottom: 0.3em;
+  font-size: 1.15em;
+}
+
+.story-context-scenario {
+  color: #64748b;
+  margin-bottom: 0.7em;
+  font-size: 1.05em;
+}
+
+.story-context-label {
+  font-weight: bold;
+  color: #222b3a;
+}
+
+.story-context-value {
+  color: #374151;
+  font-weight: 400;
+}
+/* PROFESSIONAL STORY CARD STYLING IN LEARNING PAGE */
+.professional-story-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1.5px solid #f3f3f3;
+  padding: 2rem 2rem 1.5rem 2rem;
+  box-shadow: none;
+  margin-bottom: 2em;
+}
+
+.professional-story-title {
+  font-weight: bold;
+  color: #222b3a;
+  font-size: 1.18em;
+  margin-bottom: 0.2em;
+}
+
+.professional-story-desc {
+  color: #64748b;
+  font-size: 1.08em;
+  margin-bottom: 1.1em;
+}
+
+.professional-story-textarea {
+  width: 100%;
+  min-height: 180px;
+  background: #f7f7fa;
+  border: none;
+  border-radius: 12px;
+  padding: 1.1em 1.2em;
+  font-size: 1.05em;
+  color: #222b3a;
+  margin-bottom: 0.7em;
+  resize: vertical;
+  outline: none;
+  transition: box-shadow 0.2s;
+}
+
+.professional-story-textarea::placeholder {
+  color: #94a3b8;
+  font-size: 1em;
+}
+
+.professional-story-footer {
+  display: flex;
+  justify-content: space-between;
+  color: #94a3b8;
+  font-size: 0.98em;
+  margin-top: 0.2em;
+}
+/* STEP NAVIGATION STYLING */
+.step-nav {
+  display: flex;
+  align-items: center;
+  gap: 2.5em;
+}
+
+.step-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 1.08em;
+  font-weight: 500;
+  cursor: pointer;
+  opacity: 1;
+  transition: color 0.2s, opacity 0.2s;
+}
+
+.step-nav-item.completed {
+  color: #14b8a6; /* teal */
+}
+
+.step-nav-item.current {
+  color: #fbbf24; /* orange */
+}
+
+.step-nav-item.upcoming {
+  color: #d1d5db; /* gray-300 */
+  cursor: default;
+  opacity: 0.7;
+}
+
+.step-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3em;
+  height: 1.3em;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.step-nav-item.completed .step-nav-icon {
+  color: #14b8a6;
+}
+
+.step-nav-item.current .step-nav-icon {
+  color: #fbbf24;
+  background: #fef3c7;
+}
+
+.step-nav-item.upcoming .step-nav-icon {
+  color: #e5e7eb;
+  background: #f9fafb;
+}
+/* AI-GUIDED BADGE IN LEARNING PAGE */
+.ai-guided-badge {
+  background: #fff8ec;
+  color: #222b3a;
+  border-radius: 999px;
+  /* padding: 0.35em 1.2em 0.35em 1em; */
+  /* font-weight: bold; */
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  border: none;
+  box-shadow: none;
+  margin:0;
+}
+
+.ai-guided-badge .ai-guided-icon {
+  font-size: 1.2em;
+  margin-right: 0.5em;
+  display: flex;
+  align-items: center;
+}
+/* ANALYZE MY STORY BUTTON */
+.analyze-story-btn {
+  background: #ffb32c;           /* solid orange */
+  color: #222b3a;                /* black text */
+  border: none;
+  border-radius: 999px;          /* pill shape */
+  padding: 0.5em 5.4em;
+  font-size: 1rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7em;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.analyze-story-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.analyze-story-btn .analyze-icon {
+  color: #222b3a;
+  margin-right: 0.7em;
+  width: 1.2em;
+  height: 1.2em;
+  display: inline-block;
+  vertical-align: middle;
+}
+/* FINAL SCORE STYLING IN RESULT */
+.final-score-pill {
+  background: #fff2dc;           /* soft yellow */
+  color: #222b3a;                /* black text */
+  border-radius: 999px;          /* pill shape */
+  /* padding: 0.4em 1.3em 0.4em 1em; */
+  padding: 0.3em 1em 0.3em 1em;
+  /* font-size: 1.08rem; */
+  font-size: 1rem;
+  /* font-weight: bold; */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  border: none;
+  box-shadow: none;
+}
+
+.final-score-pill .final-score-star {
+  font-size: 1.1em;
+  margin-right: 0.5em;
+  display: flex;
+  align-items: center;
+  /* font-weight: lighter; */
+}
+/* BACK TO DASHBOARD BUTTON IN THE RESULT */
+.back-to-dashboard-btn-result {
+  background: #ffb32c;           /* solid orange */
+  color: #222b3a;                /* black text */
+  border: none;
+  border-radius: 999px;          /* pill shape */
+  /* padding: 0.7em 2.1em; */
+  padding: 0.5em 1.8em;
+  font-size: 1rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.back-to-dashboard-btn-result:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.back-to-dashboard-btn-result .arrow {
+  font-size: 1.2em;
+  margin-right: 0.3em;
+  display: flex;
+  align-items: center;
 }

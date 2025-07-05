@@ -1796,6 +1796,30 @@ export function StorytellingActivity({
                 {/* PROGRESS BAR FOR THE QUIZ */}
                 <Progress value={(currentQuestionIndex / learningQuestions.length) * 100} className="mt-4 quiz-progress-bar" />
               </CardHeader>
+              {/* NEW BLOXK */}
+              {/* FEEDBACK SECTION */}
+              {questionResults.length > 0 && (
+            <Card className="aduffy-card progress-summary-card">
+              <CardHeader>
+                <CardTitle className="text-aduffy-navy">Progress Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between text-sm">
+                  <span>Correct Answers:</span>
+                  <span className="font-medium text-success">
+                    {questionResults.filter(r => r.isCorrect).length} / {questionResults.length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm mt-2">
+                  <span>Accuracy:</span>
+                  <span className="font-medium">
+                    {Math.round((questionResults.filter(r => r.isCorrect).length / questionResults.length) * 100)}%
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+              {/* NEW BLOXK END */}
               {/* THIS IS THE QUIZ QUESTION CARD*/}
               <CardContent className="space-y-6">
                 <div className="text-lg font-medium text-aduffy-navy">
@@ -1884,7 +1908,7 @@ export function StorytellingActivity({
             </Card>
           )}
           {/* FEEDBACK SECTION */}
-          {questionResults.length > 0 && (
+          {/* {questionResults.length > 0 && (
             <Card className="aduffy-card progress-summary-card">
               <CardHeader>
                 <CardTitle className="text-aduffy-navy">Progress Summary</CardTitle>
@@ -1904,7 +1928,7 @@ export function StorytellingActivity({
                 </div>
               </CardContent>
             </Card>
-          )}
+          )} */}
         </TabsContent>
 {/* This is the example story tab */}
         <TabsContent tabValue="story" className="space-y-6 mt-8">
@@ -2005,8 +2029,15 @@ export function StorytellingActivity({
           <div className="text-left">
             <h2 className="storytelling-welcome-title">Write Your Story</h2>
             <div className="flex justify-center mt-1">
+              {/* AI-GUIDED BADGE  */}
               <span className="ai-guided-badge">
-                <span className="ai-guided-icon" role="img" aria-label="brain">🧠</span>
+                <span className="ai-guided-icon" aria-hidden="true">
+                  {/* Star SVG icon for best match */}
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                    <path d="M12 17.25L7.09 20l.93-5.43L4 10.97l5.46-.79L12 5.5l2.54 4.68 5.46.79-3.97 3.6.93 5.43z"
+                      stroke="#222b3a" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
+                  </svg>
+                </span>
                 AI-Guided Writing
               </span>
               {isViewOnly && (
@@ -2034,13 +2065,21 @@ export function StorytellingActivity({
       <div className="story-main-grid gap-8">
         <div className="space-y-6">
           {/* AI-Generated Story Topic */}
-          <Card className="aduffy-card">
+          <Card className="aduffy-card ai-story-card-content">
             <CardHeader>
-              <div className="ai-story-card-title">
+              <div className="ai-story-card-title ">
                 <span role="img" aria-label="lightbulb">💡</span>
                 Your AI-Generated Story Topic
                 {selectedTopic && !isViewOnly && (
-                  <button onClick={regenerateTopic} disabled={isGeneratingTopic} className="ai-story-new-topic-btn ml-auto">
+                  // <button onClick={regenerateTopic} disabled={isGeneratingTopic} className="ai-story-new-topic-btn ml-auto">
+                  //   {isGeneratingTopic ? 'Generating...' : 'New Topic'}
+                  // </button>
+                  // NEW BLOCK
+                  <button
+                    onClick={regenerateTopic}
+                    disabled={isGeneratingTopic}
+                    className="ai-story-new-topic-btn "
+                  >
                     {isGeneratingTopic ? 'Generating...' : 'New Topic'}
                   </button>
                 )}
@@ -2050,21 +2089,22 @@ export function StorytellingActivity({
               </div>
             </CardHeader>
             <CardContent>
-              <div className="ai-story-card-inner">
-                <div style={{ fontWeight: 700, marginBottom: 4 }}>{selectedTopic?.title}</div>
-                <div style={{ color: '#444', marginBottom: 6 }}>{selectedTopic?.scenario}</div>
-                <div><b>Context:</b> {selectedTopic?.context}</div>
-                <div><b>Your Challenge:</b> {selectedTopic?.challenge}</div>
+              {/* CONTEXT AND TEH CHALLENGE GENERATED BY THE NEW TOPIC */}
+              <div className="story-context-box">
+              <div className="story-context-title">{selectedTopic?.title}</div>
+              <div className="story-context-scenario">{selectedTopic?.scenario}</div>
+              <div>
+                <span className="story-context-label">Context:</span>
+                <span className="story-context-value"> {selectedTopic?.context}</span>
               </div>
-              {/* <div className="ai-story-card-instructions mt-4">
-                <span role="img" aria-label="writing">📝</span>
-                <span>
-                  <b>Writing Instructions:</b> {isViewOnly
-                    ? `You successfully incorporated all 5 vocabulary words into this scenario: ${dailyWords.map(w => w.word).join(', ')}`
-                    : `Create a compelling narrative that addresses this scenario while naturally incorporating all 5 vocabulary words: ${dailyWords.map(w => w.word).join(', ')}`}
-                </span>
-              </div> */}
-              {/* NEW BLOCK */}
+              <div>
+                <span className="story-context-label">Your Challenge:</span>
+                <span className="story-context-value"> {selectedTopic?.challenge}</span>
+              </div>
+            </div>
+
+             
+              {/* WRITING INSTRUCTION BLOCK*/}
               <div className="writing-instructions-box">
                 <span className="writing-instructions-icon" aria-hidden="true">✨</span>
                 <div className="writing-instructions-content">
@@ -2079,9 +2119,13 @@ export function StorytellingActivity({
             </CardContent>
           </Card>
           {/* Story Writing Area */}
-          <div className="story-card-writing">
-            <div className="story-card-writing-title">Your Professional Story</div>
-            <div className="story-card-writing-desc">
+          {/* <div className="story-card-writing"> */}
+          <div className="professional-story-card">
+            {/* <div className="story-card-writing-title">Your Professional Story</div>
+             */}
+               <div className="professional-story-title">Your Professional Story</div>
+            {/* <div className="story-card-writing-desc"> */}
+            <div className="professional-story-desc">
               {selectedTopic
                 ? `Write your story based on "${selectedTopic.title}" using all 5 vocabulary words`
                 : 'Write your story using all 5 vocabulary words'}
@@ -2092,10 +2136,12 @@ export function StorytellingActivity({
                 : 'Start your story here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.'}
               value={userStory}
               onChange={(e) => !isViewOnly && setUserStory(e.target.value)}
-              className={`story-textarea${isViewOnly ? ' opacity-60' : ''}`}
+              // className={`story-textarea${isViewOnly ? ' opacity-60' : ''}`}
+              className="professional-story-textarea"
               readOnly={isViewOnly}
             />
-            <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
+            <div className="professional-story-footer">
+            {/* <div className="flex items-center justify-between text-xs text-muted-foreground mt-2"> */}
               <span>Words: {userStory.split(' ').filter(word => word.trim()).length}</span>
               <span>Vocabulary used: {dailyWords.filter(word => userStory.toLowerCase().includes(word.word.toLowerCase())).length}/{dailyWords.length}</span>
             </div>
@@ -2197,7 +2243,7 @@ export function StorytellingActivity({
                 <Button
                   onClick={handleAnalyzeStory}
                   disabled={!userStory.trim() || isAnalyzing || !selectedTopic}
-                  className="w-full ai-story-new-topic-btn"
+                  className="analyze-story-btn"
                 >
                   {isAnalyzing ? (
                     <>
@@ -2483,7 +2529,7 @@ export function StorytellingActivity({
           </div>
           <div className="text-left">
             <h2 className="text-3xl font-bold text-aduffy-navy text-center">Learning Complete!</h2>
-            <div className="text-center">
+            {/* <div className="text-center">
               <div className="final-score-badge">
                 <div className="final-score-icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -2495,7 +2541,22 @@ export function StorytellingActivity({
                   <div className="final-score-value">{finalScore}/100</div>
                 </div>
               </div>
-            </div>
+            </div> */}
+            {/* NEW BLOCK */}
+            <div className="text-center">
+            <span className="final-score-pill">
+            <span className="final-score-star" aria-hidden="true">
+              {/* Star SVG icon */}
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                <path d="M12 17.25L7.09 20l.93-5.43L4 10.97l5.46-.79L12 5.5l2.54 4.68 5.46.79-3.97 3.6.93 5.43z"
+                  stroke="#222b3a" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
+              </svg>
+            </span>
+            Final Score: <span>{finalScore}/100</span>
+          </span>
+          </div>
+            {/* NEW BLOXK END */}
+
           </div>
         </div>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -2503,6 +2564,7 @@ export function StorytellingActivity({
         </p>
       </div>
 
+      {/* LEARNING< WRITING SPEAKING SCORE CARD */}
       <div className="w-full max-w-4xl mx-auto">
         <div className="grid grid-cols-3 gap-6">
           {/* learning */}
@@ -2517,13 +2579,13 @@ export function StorytellingActivity({
             </CardContent>
           </Card>
           {/* writing */}
-          <Card className="aduffy-card text-center">
-            <CardContent className="pt-6">
+          <Card className="aduffy-card text-center ">
+            <CardContent className="pt-6 pb-6">
               <div className="card-icon-circle card-icon-writing">
                 {/* book icon */}
                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M3 8.5h18" stroke="currentColor" strokeWidth="1.2"/><rect x="7.5" y="2.5" width="2" height="3" rx="1" fill="currentColor"/><rect x="14.5" y="2.5" width="2" height="3" rx="1" fill="currentColor"/></svg>
               </div>
-              <div className="card-title-writing">Writing</div>
+              <div className="card-title-writing ">Writing</div>
               <div className="card-subtitle">{storyAnalysis ? Math.round(((storyAnalysis?.creativity || 0) + (storyAnalysis?.grammar || 0) + (storyAnalysis?.coherence || 0) + (storyAnalysis?.topicAdherence || 0)) / 4) : 0}% quality</div>
             </CardContent>
           </Card>
@@ -2578,7 +2640,7 @@ export function StorytellingActivity({
 
       <div className="flex justify-center gap-4">
         <button
-          className="back-to-dashboard-btn"
+          className="back-to-dashboard-btn-result"
           onClick={onBack}
         >
           <span className="arrow" aria-hidden="true">
@@ -2629,62 +2691,58 @@ export function StorytellingActivity({
     }
   };
 
-  const renderStepNavigation = () => {
-    const steps: { key: StepType; label: string }[] = [
-      { key: 'words', label: 'Words' },
-      { key: 'learning', label: 'Learning' },
-      { key: 'writing', label: 'Writing' },
-      { key: 'voice', label: 'Voice Chat' },
-      { key: 'results', label: 'Results' }
-    ];
+  
 
-    return (
-      <div className="flex items-center gap-6">
-        {steps.map((step) => {
-          const status = getStepStatus(step.key);
-          const isClickable = status === 'completed' || status === 'current';
-          
-          return (
-            <div
-              key={step.key}
-              className={`flex items-center gap-2 transition-colors ${
-                isClickable 
-                  ? 'cursor-pointer hover:text-aduffy-yellow' 
-                  : 'cursor-default'
-              } ${
-                status === 'current' 
-                  ? 'text-aduffy-yellow font-medium' 
-                  : status === 'completed'
-                    ? 'text-aduffy-teal hover:text-aduffy-yellow'
-                    : 'text-muted-foreground'
-              }`}
-              onClick={() => isClickable && handleStepNavigation(step.key)}
-              title={
-                status === 'completed' 
-                  ? 'Click to view this completed step' 
-                  : status === 'current'
-                    ? 'Current step'
-                    : 'Step not yet available'
-              }
-            >
+//  FUNCTION FOR RENDERING STEP NAVIGATION
+ const renderStepNavigation = () => {
+  const steps: { key: StepType; label: string }[]=[
+    { key: 'words', label: 'Words' },
+    { key: 'learning', label: 'Learning' },
+    { key: 'writing', label: 'Writing' },
+    { key: 'voice', label: 'Voice Chat' },
+    { key: 'results', label: 'Results' }
+  ];
+
+  return (
+    <div className="step-nav">
+      {steps.map((step, idx) => {
+        const status = getStepStatus(step.key); // 'completed', 'current', 'upcoming'
+        return (
+          <div
+            key={step.key}
+            className={`step-nav-item ${status}`}
+            onClick={() => (status === 'completed' || status === 'current') && handleStepNavigation(step.key)}
+            style={{ pointerEvents: status === 'upcoming' ? 'none' : 'auto' }}
+          >
+            <span className="step-nav-icon">
               {status === 'completed' && (
-                <div className="w-4 h-4 text-aduffy-teal" />
+                // Checkmark icon
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                  <path d="M7 13l3 3 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               )}
               {status === 'current' && (
-                <div className="w-4 h-4 bg-aduffy-yellow rounded-full animate-pulse" />
+                // Filled circle
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="7" fill="currentColor"/>
+                </svg>
               )}
               {status === 'upcoming' && (
-                <div className="w-4 h-4 border-2 border-muted rounded-full" />
+                // Empty circle
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                </svg>
               )}
-              <span className="text-sm">{step.label}</span>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  // Add this useEffect to restore story topics
+            </span>
+            <span>{step.label}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+ // Add this useEffect to restore story topics
   useEffect(() => {
     const mockTopics: StoryTopic[] = [
       {
@@ -2742,8 +2800,16 @@ export function StorytellingActivity({
       {/* Progress Header */}
       <div className="space-y-4">
         <div>
-          <div className="progress-header-label">Overall Progress</div>
+          <div className="flex justify-between">
+          <div className="progress-header-label ">Overall Progress</div>
           <div className="progress-percentage">{Math.round(calculateProgress())}%</div>
+          </div>
+          {/* OLD BLOCK */}
+          {/* <div className="flex justify-end">
+            <div className="progress-percentage">{Math.round(calculateProgress())}%</div>
+          </div> */}
+          {/* <div className="progress-percentage ">{Math.round(calculateProgress())}%</div> */}
+          {/* OLD BLOCK END*/}
           <div className="progress-bar-container">
             <div
               className="progress-bar-fill"
@@ -2777,6 +2843,7 @@ export function StorytellingActivity({
         
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
+            {/* FUNCTION FOR RENDERING STEP NAVIGATION */}
             {renderStepNavigation()}
           </div>
         </div>
