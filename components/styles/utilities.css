@@ -697,6 +697,12 @@ ml-auto{
   color: var(--text-primary);
   margin-bottom: var(--space-2);
 }
+@media(max-width:400px){
+  .ai-story-card-title{
+  padding-left:0px;
+  padding-right:0px;
+  }
+}
 
 .ai-story-card-desc {
   font-size: var(--font-size-sm);
@@ -754,6 +760,13 @@ ml-auto{
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition-all);
+}
+@media(max-width:400px){
+  ai-story-new-topic-btn{
+    padding: .25em 1em;
+    font-size: .8rem;
+    
+  }
 }
 
 .ai-story-new-topic-btn:hover:not(:disabled) {
@@ -982,6 +995,16 @@ ml-auto{
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
   box-shadow: 0 1px 4px 0 rgba(0,0,0,0.03);
+}
+@media(max-width:400px){
+  .quiz-option{
+    font-size:0.9rem;
+    padding:0.4rem 0.6rem;
+    line-height: 1.1em;
+  }
+  .quiz-option .option-letter{
+    margin-right: 1rem;
+  }
 }
 .quiz-option:last-child {
   margin-bottom: 0;
@@ -2724,6 +2747,17 @@ ml-auto{
   display: flex;
   align-items: center;
   gap: 2.5em;
+  
+}
+@media(max-width:400px){
+  .step-nav{
+    gap:0.8em;
+    overflow-x:scroll;
+  }
+  .step-nav-item{
+    font-size:1em;
+    gap:0.2em;
+  }
 }
 
 .step-nav-item {
@@ -2928,6 +2962,12 @@ ml-auto{
   flex-direction: row;
   gap: 1rem; /* space between badges */
 }
+@media(max-width:400px){
+  .badges-row{
+    flex-direction: column;
+    gap:0.5rem;
+  }
+}
 /* TODAYS VOCABULARY WORDS CARD STYLING */
 .vocabulary-grid {
   display: grid;
@@ -3034,4 +3074,9 @@ ml-auto{
   color: var(--warning);
   padding: 0;
   font-size: var(--font-size-lg);
+}
+@media (max-width: 400px) {
+  .vocab-checklist-card {
+    display: none;
+  }
 }

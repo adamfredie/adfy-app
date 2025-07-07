@@ -21,10 +21,6 @@ export function Navigation({ currentActivity, onSignOut, onResetOnboarding }) {
         <button className="nav-icon-btn">
           <span role="img" aria-label="settings">⚙️</span>
         </button>
-        <div className="nav-level-badge">
-          <span role="img" aria-label="level">🎗️</span>
-          <span>Beginner Level</span>
-        </div>
         {/* User menu is now always visible, regardless of the current activity */}
         <div className="user-menu-container">
           <button className="user-menu-trigger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
