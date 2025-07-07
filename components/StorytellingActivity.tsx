@@ -245,7 +245,9 @@ export function StorytellingActivity({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const [transcript, setTranscript] = useState('');
-  
+  // NEW BLOCK
+ 
+ 
   // Check audio recording support on mount
   useEffect(() => {
     setAudioSupported(!!window.MediaRecorder && !!navigator.mediaDevices);
@@ -560,7 +562,15 @@ export function StorytellingActivity({
   // Word pronunciation state
   const [currentlyPlayingWord, setCurrentlyPlayingWord] = useState<number | null>(null);
   const [isPlayingSequence, setIsPlayingSequence] = useState(false);
-
+  // AUTO SCROLL
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  // FOR STORING WORDS GENERATED RANDOMLY BY GEMINI
+  const [previousWords,setPreviousWords]=useState<string[]>([])
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [voiceConversation]);
   // Step completion tracking - initialize from saved progress
   const [completedSteps, setCompletedSteps] = useState<Set<StepType>>(() => {
     if (savedProgress) {
@@ -1322,28 +1332,49 @@ export function StorytellingActivity({
     console.log('Permission status:', permissionStatus);
     
     try {
-      const initialPrompt = selectedTopic 
-        ? `Hello ${userProfile?.name} Let's have a conversation about your approach to this scenario I'll ask you questions and you should try to use each of our vocabulary words in your responses Here is the first question:How did you decide on your approach to handling this professional challenge?`
-        : `Hello ${userProfile?.name} Let's have a conversation about your approach to this scenario I'll ask you questions and you should try to use each of our vocabulary words in your responses Here is the first question:How did you decide on your approach to handling this professional challenge?`;
-      
-      console.log('Speaking initial prompt:', initialPrompt);
+      // const initialPrompt = selectedTopic 
+      //   ? `Hello ${userProfile?.name} Let's have a conversation about your approach to this scenario I'll ask you questions and you should try to use each of our vocabulary words in your responses Here is the first question:How did you decide on your approach to handling this professional challenge?`
+      //   : `Hello ${userProfile?.name} Let's have a conversation about your approach to this scenario I'll ask you questions and you should try to use each of our vocabulary words in your responses Here is the first question:How did you decide on your approach to handling this professional challenge?`;
+      const intro = `Hello ${userProfile?.name}! Let's have a conversation about your approach to this scenario. I'll ask you questions and you should try to use each of our vocabulary words in your responses.`;
+const firstQuestion = `Here is the first question: How did you decide on your approach to handling this professional challenge?`;
+      // console.log('Speaking initial prompt:', initialPrompt);
+      console.log('Speaking initial prompt:', intro,firstQuestion);
       
       // First set the conversation state
+      // setVoiceConversation([
+      //   { type: 'ai', content: initialPrompt, timestamp: new Date() }
+      // ]);
       setVoiceConversation([
-        { type: 'ai', content: initialPrompt, timestamp: new Date() }
+        { type: 'ai', content: intro, timestamp: new Date() },
+        { type: 'ai', content: firstQuestion, timestamp: new Date() }
       ]);
       
       // Then speak the prompt with error handling
       // await safeSpeak(initialPrompt);
       // USED ELEVENLABS FOR INITIAL PROMPT
       try {
-        const audioBlob = await getElevenLabsAudio(initialPrompt);
-        const url = URL.createObjectURL(audioBlob);
-        const audio = new Audio(url);
-        await audio.play();
+        // const audioBlob = await getElevenLabsAudio(initialPrompt);
+
+        // const url = URL.createObjectURL(audioBlob);
+        // const audio = new Audio(url);
+        // await audio.play();
+        // NEW BLOCK
+         // Play intro
+  const audioBlob1 = await getElevenLabsAudio(intro);
+  const url1 = URL.createObjectURL(audioBlob1);
+  const audio1 = new Audio(url1);
+  await audio1.play();
+
+  // Play first question after intro finishes
+  const audioBlob2 = await getElevenLabsAudio(firstQuestion);
+  const url2 = URL.createObjectURL(audioBlob2);
+  const audio2 = new Audio(url2);
+  await audio2.play();
       } catch (ttsError) {
         // Fallback to browser TTS if ElevenLabs fails
-        await safeSpeak(initialPrompt);
+        // await safeSpeak(initialPrompt);
+        await safeSpeak(intro);
+        await safeSpeak(firstQuestion);
       }
       
     } catch (error) {
@@ -1554,26 +1585,7 @@ export function StorytellingActivity({
           Master these 5 carefully selected vocabulary words to enhance your professional communication skills.
         </p>
       </div>
-
-      {/* Field Selector */}
-      <div className="learning-focus-card">
-        <div className="card-header">
-          <div className="card-title">
-            <div className="focus-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            Learning Focus
-            {isViewOnly && <div className="w-4 h-4 text-muted-foreground" />}
-          </div>
-          <div className="card-description">
-            {isViewOnly ? 'Field selection (view only)' : 'Choose your professional field to get relevant vocabulary'}
-          </div>
-        </div>
-        <div className="card-content">
-
-          <div className="generate-random-words-container">
+       <div className="generate-random-words-container">
           <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
             <button
              
@@ -1583,7 +1595,8 @@ export function StorytellingActivity({
               setLoadingRandomWords(true);
               try {
                 // Get random words from Gemini
-                const geminiWords = await getRandomWordsFromGemini(5);
+                const geminiWords = await getRandomWordsFromGemini(5,previousWords);
+                
                 // Optionally, get example sentences for each word
                 const wordsWithExamples = await Promise.all(
                   geminiWords.map(async (w: any) => ({
@@ -1592,6 +1605,10 @@ export function StorytellingActivity({
                     difficulty: 'beginner' // or set based on your logic
                   }))
                 );
+                // NEW BLOCK
+                const newWordStrings = wordsWithExamples.map(w => w.word.toLowerCase());
+setPreviousWords(prev => [...prev, ...newWordStrings]);
+// NEW BLOCK ENDED
                 setDailyWords(wordsWithExamples);
               } catch (err) {
                 alert('Could not fetch random words from Gemini.');
@@ -1607,54 +1624,6 @@ export function StorytellingActivity({
             </button>
           </div>
           </div>
-          {selectedField !== (userProfile?.field || 'marketing') && (
-            <div className="field-change-notice">
-              📝 Field changed from your profile setting
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Audio Controls */}
-      <Card className="card-soft-yellow-glass">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3 text-aduffy-navy">
-            <div className="audio-icon-yellow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path d="M3 10v4h4l5 5V5l-5 5H3z" fill="currentColor"/>
-                <path d="M16.5 12c0-1.77-1-3.29-2.5-4.03v8.06A4.978 4.978 0 0 0 16.5 12z" fill="currentColor"/>
-                <path d="M19.5 12c0-3.04-1.64-5.64-4.5-6.32v2.06c1.77.77 3 2.53 3 4.26s-1.23 3.49-3 4.26v2.06c2.86-.68 4.5-3.28 4.5-6.32z" fill="currentColor"/>
-              </svg>
-            </div>
-            Audio Learning
-          </CardTitle>
-          <CardDescription>
-            Listen to perfect pronunciation of all vocabulary words
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center">
-            <Button
-              onClick={playAllWords}
-              className="play-all-words-btn"
-              disabled={!isVoiceSupported}
-            >
-              <span className="play-icon" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <polygon points="5,3 16,10 5,17" fill="none" stroke="#222b3a" strokeWidth="2" strokeLinejoin="round"/>
-                </svg>
-              </span>
-              Play All Words
-            </Button>
-          </div>
-          {!isVoiceSupported && (
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Audio features may not be available in this browser
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
       <div className="vocabulary-grid">
         {dailyWords.map((word, index) => (
           <div key={index} className="vocabulary-card">
@@ -1729,18 +1698,6 @@ export function StorytellingActivity({
                 Interactive Learning
               </span>
               </Badge>
-              <button
-                type="button"
-                onClick={() => setShowLearningContent(!showLearningContent)}
-                className="hide-content-btn"
-              >
-                <span className="hide-content-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M17.94 17.94A10.06 10.06 0 0 1 12 20c-5.05 0-9.29-3.36-10-8 .21-1.32.7-2.56 1.44-3.66M6.1 6.1A9.97 9.97 0 0 1 12 4c5.05 0 9.29 3.36 10 8-.21 1.32-.7 2.56-1.44 3.66M1 1l22 22" stroke="#222b3a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </span>
-                {showLearningContent ? 'Hide' : 'Show'} Content
-              </button>
             </div>
           </div>
         </div>
@@ -1780,6 +1737,7 @@ export function StorytellingActivity({
                     </CardDescription>
                   </div>
                   {/* PRACTICE BADGE IN LEARNING PAGE */}
+                  <div className="badges-column">
                   <Badge className="aduffy-badge-primary">
                     <span className="practice-badge">
                       <span className="practice-badge-icon" aria-hidden="true">
@@ -1792,34 +1750,32 @@ export function StorytellingActivity({
                       Practice
                     </span>
                   </Badge>
+                  {/* NO>OF CORRECT QUESTIONS BADGE */}
+                  <div className="badges-row">
+                  {questionResults.length>0 &&(
+                  <Badge className="correct-answers-badge-soft">
+                  <span>Correct Answers: </span>
+                  <span>
+                  {/* <span className="font-medium text-success"> */}
+                    {questionResults.filter(r => r.isCorrect).length} / {questionResults.length}
+                  </span>
+                  </Badge>)} 
+                  {/* ACCURACY BADGE */}
+                  {questionResults.length>0 &&(
+                  <Badge className="accuracy-badge-soft">
+                  <span>Accuracy: </span>
+                  <span>
+                  {/* <span className="font-medium"> */}
+                    {Math.round((questionResults.filter(r => r.isCorrect).length / questionResults.length) * 100)}%
+                  </span>
+                  </Badge>
+                  )}
+                  </div>
+                  </div>
                 </div>
                 {/* PROGRESS BAR FOR THE QUIZ */}
                 <Progress value={(currentQuestionIndex / learningQuestions.length) * 100} className="mt-4 quiz-progress-bar" />
               </CardHeader>
-              {/* NEW BLOXK */}
-              {/* FEEDBACK SECTION */}
-              {questionResults.length > 0 && (
-            <Card className="aduffy-card progress-summary-card">
-              <CardHeader>
-                <CardTitle className="text-aduffy-navy">Progress Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between text-sm">
-                  <span>Correct Answers:</span>
-                  <span className="font-medium text-success">
-                    {questionResults.filter(r => r.isCorrect).length} / {questionResults.length}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm mt-2">
-                  <span>Accuracy:</span>
-                  <span className="font-medium">
-                    {Math.round((questionResults.filter(r => r.isCorrect).length / questionResults.length) * 100)}%
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-              {/* NEW BLOXK END */}
               {/* THIS IS THE QUIZ QUESTION CARD*/}
               <CardContent className="space-y-6">
                 <div className="text-lg font-medium text-aduffy-navy">
@@ -1827,7 +1783,8 @@ export function StorytellingActivity({
                   {learningQuestions[currentQuestionIndex]?.question}
                 </div>
                 
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid ">
+                {/* <div className="grid grid-cols-1 gap-3"> */}
                   {learningQuestions[currentQuestionIndex]?.options.map((option, index) => {
                     // HIGHLIGHTING THE OPTION THAT IS BEING SELECTED
                     const lastResult = questionResults[questionResults.length - 1];
@@ -2139,6 +2096,8 @@ export function StorytellingActivity({
               // className={`story-textarea${isViewOnly ? ' opacity-60' : ''}`}
               className="professional-story-textarea"
               readOnly={isViewOnly}
+              // TO PREVENT PASTING
+              onPaste={e => e.preventDefault()} 
             />
             <div className="professional-story-footer">
             {/* <div className="flex items-center justify-between text-xs text-muted-foreground mt-2"> */}
@@ -2196,11 +2155,13 @@ export function StorytellingActivity({
                   </ul>
                 </div>
                 {/* Render detailed feedback as markdown */}
-                {storyAnalysis?.detailedFeedback && (
+                {/* {storyAnalysis?.detailedFeedback && (
                   <div className="ai-analysis-detailed-feedback mt-6">
                     <ReactMarkdown>{storyAnalysis.detailedFeedback}</ReactMarkdown>
                   </div>
-                )}
+                )} */}
+                {/* NEW SHORT FEEDBACK */}
+                {/* <p className="text-muted-foreground">{storyAnalysis?.feedback || 'No feedback available.'}</p> */}
               </CardContent>
             </Card>
           )}
@@ -2333,7 +2294,7 @@ export function StorytellingActivity({
             </CardHeader>
             {/* .CONVERSATION AREA */}
             <CardContent className="space-y-4">
-              <div className="scrollable-fixed">
+              <div className="scrollable-fixed"  ref={chatContainerRef}>
                 {voiceConversation.length === 0 ? (
                   <div className="text-center text-muted-foreground py-8">
                     <div className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
@@ -2347,20 +2308,23 @@ export function StorytellingActivity({
                   </div>
                 ) : (
                   voiceConversation.map((message, index) => (
-
                     <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
               {/* ADDED INDENTATION */}
                       <div className={`chat-bubble ${message.type === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`}>
+
                         <p>
+                          {/* OLD BLOCK */}
                           {message.isAudio ? (
                             <span className="flex items-center gap-2">
-                             
+  
                               {message.content}
                             </span>
                           ) : (
                             message.content
                           )}
+                
                         </p>
+                        
                         {message.wordsUsed && message.wordsUsed.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-1">
                             {message.wordsUsed.map((word: any, wordIndex: number) => (
@@ -2378,6 +2342,18 @@ export function StorytellingActivity({
                     </div>
                   ))
                 )}
+                {/* NEW BLOCK */}
+                {!isViewOnly && voiceTranscript && (
+  <div className="flex justify-end">
+    <div className="chat-bubble chat-bubble-user">
+      {/* <div className="p-2 bg-muted/50 rounded-lg"> */}
+        {/* <div className="text-xs text-muted-foreground mb-1">Your speech (live):</div> */}
+        <p className="text-sm">{voiceTranscript}</p>
+      </div>
+    {/* </div> */}
+  </div>
+)}
+{/* new blcok neds */}
               </div>
               {/* CONVERSATION AREA ENDS */}
               {/* Audio recording controls */}
@@ -2443,13 +2419,14 @@ export function StorytellingActivity({
                   )}
                 </div>
               )}
-               {/* NEW BLOCKS */}
-               {!isViewOnly &&  voiceTranscript && (
+               {/* NEW BLOCKS VOICE TRANSCRIPT*/}
+               {/* OLD BLOCK OF VOICE TRANSCRIPT */}
+               {/* {!isViewOnly &&  voiceTranscript && (
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <div className="text-xs text-muted-foreground mb-1">Your speech:</div>
                   <p className="text-sm">{voiceTranscript}</p>
                 </div>
-              )}
+              )} */}
             </CardContent>
           </Card>
         </div>
@@ -2542,20 +2519,20 @@ export function StorytellingActivity({
                 </div>
               </div>
             </div> */}
-            {/* NEW BLOCK */}
-            <div className="text-center">
+            {/* FINAL SCORE BADGE */}
+            {/* <div className="text-center">
             <span className="final-score-pill">
             <span className="final-score-star" aria-hidden="true">
               {/* Star SVG icon */}
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+              {/* <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
                 <path d="M12 17.25L7.09 20l.93-5.43L4 10.97l5.46-.79L12 5.5l2.54 4.68 5.46.79-3.97 3.6.93 5.43z"
                   stroke="#222b3a" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
               </svg>
             </span>
             Final Score: <span>{finalScore}/100</span>
           </span>
-          </div>
-            {/* NEW BLOXK END */}
+          </div> */} 
+            {/* FINAL SCORE BADGE END */}
 
           </div>
         </div>
@@ -2563,7 +2540,47 @@ export function StorytellingActivity({
           Congratulations! You've completed today's vocabulary learning journey. Here's your comprehensive performance analysis.
         </p>
       </div>
-
+      {/* NEW BLOCK OF ACHEIVEMENT */}
+      <Card className="daily-achievement-card">
+        {/* <div className="confetti-icon" aria-hidden="true">🎉</div> */}
+        {/* <div className="achievement-title">Daily Learning Achievement Unlocked!</div> */}
+        <div className={`achievement-title ${finalScore<50?"text-red":finalScore<80?"text-orange":"text-green"}`}>
+          {finalScore<50?"Try Again":finalScore<80?"You can do better":"🎉 Good Job"}
+          </div>
+        {/* <div className="achievement-title">{finalScore<50?"Try Again":finalScore<80?"You can do better":"🎉 Good Job"}</div> */}
+        
+        <div className="score-section">
+          <div className="score-number">{finalScore}/100</div>
+          <div className="score-label">Overall Score</div>
+          <div className="soft-progress-bar">
+            <div
+              className="soft-progress-bar-fill"
+              style={{ width: `${finalScore}%` }}
+            />
+          </div>
+        </div>
+        <div className="achievement-grid">
+          <div>
+            <h4 className="font-medium text-aduffy-navy mb-3">Today's Achievements</h4>
+            <ul className="achievement-list">
+              <li><span className="checkmark">✔</span><span>Mastered 5 new vocabulary words</span></li>
+              <li><span className="checkmark">✔</span><span>Completed {learningQuestions.length} practice questions</span></li>
+              <li><span className="checkmark">✔</span><span>Created AI-guided story</span></li>
+              <li><span className="checkmark">✔</span><span>Practiced speaking skills</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-medium text-aduffy-navy mb-3">Story Topic Mastered</h4>
+            <div className="topic-mastered">
+              <p className="topic-title">{selectedTopic?.title || 'Professional Communication'}</p>
+              <p className="topic-desc">
+                Successfully addressed this professional scenario while incorporating vocabulary words
+              </p>
+            </div>
+          </div>
+        </div>
+      </Card>
+{/* NEW BLOCK OF ACHEIVEMENT ENDS */}
       {/* LEARNING< WRITING SPEAKING SCORE CARD */}
       <div className="w-full max-w-4xl mx-auto">
         <div className="grid grid-cols-3 gap-6">
@@ -2602,8 +2619,8 @@ export function StorytellingActivity({
           </Card>
         </div>
       </div>
-
-      <Card className="daily-achievement-card">
+              {/* DAILY ACEIVEMENT CARD IN THE RESULT PAGE */}
+      {/* <Card className="daily-achievement-card">
         <div className="confetti-icon" aria-hidden="true">🎉</div>
         <div className="achievement-title">Daily Learning Achievement Unlocked!</div>
         <div className="score-section">
@@ -2636,7 +2653,7 @@ export function StorytellingActivity({
             </div>
           </div>
         </div>
-      </Card>
+      </Card> */}
 
       <div className="flex justify-center gap-4">
         <button
@@ -2782,6 +2799,7 @@ export function StorytellingActivity({
     if (audioBlob && !audioLoading) {
       sendAudioToGemini(audioBlob);
       setAudioBlob(null); // Clear after submission
+      clearTranscript();
     }
   };
 

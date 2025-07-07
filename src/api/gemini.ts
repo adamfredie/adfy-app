@@ -341,7 +341,7 @@ export async function getGeminiExample(word: string, definition: string): Promis
     return `Try to use "${word}" in a professional sentence.`;
   }
 }
-export async function getRandomWordsFromGemini(count: number = 5) {
+export async function getRandomWordsFromGemini(count: number = 5,previousWords: string[] = []) {
   const prompt = `
 Give me ${count} random,different, professional English words. 
 For each word, provide:
@@ -353,7 +353,7 @@ Return the result as a JSON array, like:
   { "word": "...", "definition": "...", "partOfSpeech": "..." },
   ...
 ]
-  Do NOT repeat words from previous requests. Make sure the words are truly random and professional.
+Do NOT include any of these words: ${previousWords.join(", ")}Make sure the words are truly random and professional.
 `;
 
   const body = {
