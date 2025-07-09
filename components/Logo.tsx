@@ -8,6 +8,7 @@ export function Logo() {
       width="30" 
       height="30"
       style={{ borderRadius: '1px' }}
+      className="mobile-logo-img"
     />
   );
 } 

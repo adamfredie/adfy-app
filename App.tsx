@@ -148,6 +148,7 @@ export default function App() {
         currentActivity={currentActivity}
         onSignOut={handleSignOut}
         onResetOnboarding={handleResetOnboarding}
+        userProfile={userProfile}
       />
       <main className="main-content-column">
         {/* 

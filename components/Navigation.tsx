@@ -3,7 +3,7 @@ import './styles/main.css';
 import { Logo } from './Logo';
 import { UserMenu } from './UserMenu';
 
-export function Navigation({ currentActivity, onSignOut, onResetOnboarding }) {
+export function Navigation({ currentActivity, onSignOut, onResetOnboarding, userProfile }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -24,9 +24,18 @@ export function Navigation({ currentActivity, onSignOut, onResetOnboarding }) {
         {/* User menu is now always visible, regardless of the current activity */}
         <div className="user-menu-container">
           <button className="user-menu-trigger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            <div className="user-avatar">OW</div>
+            {/* <div className="user-avatar">OW</div>
+             */}
+             <div className="user-avatar">
+  {userProfile?.name
+    ? userProfile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : "U"}
+</div>
             <div className="user-info">
-              <span className="user-name">Owner</span>
+              {/* <span className="user-name">Owner</span> */}
+              <span className="user-name">
+          {userProfile?.name ? userProfile.name : "User"}
+        </span>
               <span className="user-role">Technology</span>
             </div>
           </button>

@@ -247,7 +247,43 @@ export function StorytellingActivity({
   const [transcript, setTranscript] = useState('');
   // NEW BLOCK
  
- 
+//  FUNCTION FOR TURNING START WRITING INTO COMPLETE PRACTICE AND NEXT QUESTION
+function getStepButtonProps() {
+  if (currentStep === 'learning') {
+    if (currentQuestionIndex < learningQuestions.length - 1) {
+      return {
+        label: 'Next Question',
+        icon: '→',
+        onClick: handleNextQuestion,
+        disabled: showQuestionFeedback === false // Only enable after answering
+      };
+    } else {
+      return {
+        label: 'Complete Practice',
+        icon: '✔',
+        onClick: () => {
+          setStepProgress(100);
+          handleNextStep();
+        },
+        disabled: showQuestionFeedback === false // Only enable after answering
+      };
+    }
+  }
+  if (currentStep === 'writing') {
+    return {
+      label: 'Start Writing',
+      icon: (
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+          <path d="M5 12h14M13 6l6 6-6 6" stroke="#222b3a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      onClick: handleNextStep,
+      disabled: stepProgress < 100 && showLearningContent
+    };
+  }
+  return null;
+}
+
   // Check audio recording support on mount
   useEffect(() => {
     setAudioSupported(!!window.MediaRecorder && !!navigator.mediaDevices);
@@ -1742,22 +1778,22 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                   <div className="badges-row">
                   {questionResults.length>0 &&(
                   <Badge className="correct-answers-badge-soft">
-                  <span>Correct Answers: </span>
+                  {/* <span>Correct Answers: </span> */}
+                  <span>Scores: &nbsp;</span>
                   <span>
                   {/* <span className="font-medium text-success"> */}
                     {questionResults.filter(r => r.isCorrect).length} / {questionResults.length}
                   </span>
                   </Badge>)} 
                   {/* ACCURACY BADGE */}
-                  {questionResults.length>0 &&(
+                  {/* {questionResults.length>0 &&(
                   <Badge className="accuracy-badge-soft">
                   <span>Accuracy: </span>
                   <span>
-                  {/* <span className="font-medium"> */}
                     {Math.round((questionResults.filter(r => r.isCorrect).length / questionResults.length) * 100)}%
                   </span>
                   </Badge>
-                  )}
+                  )} */}
                   </div>
                   </div>
                 </div>
@@ -1827,7 +1863,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                       {currentQuestionResult.explanation}
                     </div>
                     {/* CURRENT INDEX LESS THAN 4 NEXT QUESTION BUTTON IS DISPLAY WHEN IT REACHES 5 COMPLETE PRACTICE IS SHOWN WHICH TAKES THE USER TO THE NEXT STEP */}
-                    {!isViewOnly && (
+                    {/* {!isViewOnly && (
                     currentQuestionIndex < learningQuestions.length - 1 ? (
                       <button className="quiz-feedback-btn" onClick={handleNextQuestion}>
                         Next Question
@@ -1845,7 +1881,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                         <span style={{ display: 'inline-block', transform: 'translateY(1px)' }}>✔</span>
                       </button>
                     )
-                  )}
+                  )} */}
                   </div>
                 )}
               
@@ -1929,7 +1965,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
             >
               Skip Learning
             </button>
-            <button
+            {/* <button
               type="button"
               onClick={handleNextStep}
               className="start-writing-btn"
@@ -1941,7 +1977,23 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 </svg>
               </span>
               Start Writing
-            </button>
+            </button> */}
+            {/* NEW START WRITING COMPLETE PRACTICE BUTTON */}
+             {stepButton && (
+      <button
+        className="start-writing-btn"
+        onClick={stepButton.onClick}
+        disabled={stepButton.disabled}
+        type="button"
+      >
+        <span className="start-writing-icon" style={{ marginRight: 8 }}>
+          {typeof stepButton.icon === 'string'
+            ? <span style={{ display: 'inline-block', transform: 'translateY(1px)' }}>{stepButton.icon}</span>
+            : stepButton.icon}
+        </span>
+        {stepButton.label}
+      </button>
+    )}
           </>
         ) : (
           <div className="flex w-full justify-center">
@@ -1972,19 +2024,27 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
             <div className="w-8 h-8 text-aduffy-orange" />
           </div>
           <div className="text-left">
-            <h2 className="storytelling-welcome-title">Write Your Story</h2>
+            {/* <h2 className="storytelling-welcome-title">Write Your Story</h2> */}
+            <h2 className="ai-guided-title">
+            <span className="ai-guided-icon" aria-hidden="true">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                <path d="M12 17.25L7.09 20l.93-5.43L4 10.97l5.46-.79L12 5.5l2.54 4.68 5.46.79-3.97 3.6.93 5.43z"
+                  stroke="#222b3a" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
+              </svg>
+            </span>
+            AI-Guided Writing
+          </h2>
             <div className="flex justify-center mt-1">
               {/* AI-GUIDED BADGE  */}
-              <span className="ai-guided-badge">
+              {/* <span className="ai-guided-badge">
                 <span className="ai-guided-icon" aria-hidden="true">
-                  {/* Star SVG icon for best match */}
                   <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
                     <path d="M12 17.25L7.09 20l.93-5.43L4 10.97l5.46-.79L12 5.5l2.54 4.68 5.46.79-3.97 3.6.93 5.43z"
                       stroke="#222b3a" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
                   </svg>
                 </span>
                 AI-Guided Writing
-              </span>
+              </span> */}
               {isViewOnly && (
                 <Badge className="aduffy-badge-info ml-2">
                   <div className="w-3 h-3 mr-1 text-muted-foreground" />
@@ -2088,6 +2148,28 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
               // TO PREVENT PASTING
               onPaste={e => e.preventDefault()} 
             />
+
+            {/* FOR MOBILE VOCAB WORDS */}
+        {/* Mobile-only vocab checklist row */}
+<div className="mobile-vocab-row">
+  {dailyWords && dailyWords.length > 0 ? dailyWords.map((word, index) => {
+    const isUsed = userStory.toLowerCase().includes(word.word.toLowerCase());
+    return (
+      <div key={index} className={`mobile-vocab-pill${isUsed ? ' used' : ''}`}>
+        <span className="mobile-vocab-word">{word.word}</span>
+        {isUsed && (
+          <span className="mobile-vocab-check">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+              <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </span>
+        )}
+      </div>
+    );
+  }) : (
+    <span>Loading...</span>
+  )}
+</div>
             <div className="professional-story-footer">
             {/* <div className="flex items-center justify-between text-xs text-muted-foreground mt-2"> */}
               <span>Words: {userStory.split(' ').filter(word => word.trim()).length}</span>
@@ -2791,7 +2873,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       clearTranscript();
     }
   };
-
+  // START WRITING INTO COMPLETE PRACTICE
+  const stepButton = getStepButtonProps();
   return (
     <div className="space-y-8">
       {/* Top row: Back to Dashboard (left), Step badge (right) */}

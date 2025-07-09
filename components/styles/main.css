@@ -496,7 +496,14 @@ body {
   font-size: var(--font-size-xs);
   color: var(--text-secondary);
 }
-
+@media(max-width:500px){
+  .nav-brand-title{
+    display:none;
+  }
+  .nav-brand-subtitle{
+    display:none;
+  }
+}
 .nav-right {
   display: flex;
   align-items: center;
@@ -509,6 +516,11 @@ body {
   cursor: pointer;
   font-size: var(--font-size-xl);
   color: var(--text-secondary);
+}
+@media(max-width:500px){
+  .nav-icon-btn{
+    display:none;
+  }
 }
 
 .nav-level-badge {
