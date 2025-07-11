@@ -63,6 +63,8 @@ import ReactMarkdown from 'react-markdown';
 import { getElevenLabsAudio } from '../src/api/elevenlabs';
 //RANDOM WORDS FROM GEMINI IMPORTS
 import { getRandomWordsFromGemini, getGeminiExample } from '../src/api/gemini';
+// IMORTING GEMINI FUNCTION FOR GENERATING RANDOM TOPIC
+import { getRandomStoryTopics } from '../src/api/gemini';
 // ... inside your component
 
 
@@ -226,6 +228,18 @@ function generateLearningQuestions(words: DailyWord[]): LearningQuestion[] {
     }
   });
 }
+// MODAL FUNCTION
+function AnalysisModal({ open, onClose, children }) {
+  if (!open) return null;
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <button className="modal-close-btn" onClick={onClose}>×</button>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export function StorytellingActivity({ 
   onBack, 
@@ -245,7 +259,8 @@ export function StorytellingActivity({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const [transcript, setTranscript] = useState('');
-  // NEW BLOCK
+// MODAL USE STATE VARIABLE
+const [showAnalysisModal, setShowAnalysisModal] = useState(false);
  
 //  FUNCTION FOR TURNING START WRITING INTO COMPLETE PRACTICE AND NEXT QUESTION
 function getStepButtonProps() {
@@ -369,8 +384,18 @@ function getStepButtonProps() {
         audioBlob,
         conversationHistory: voiceConversation,
         vocabulary: dailyWords.map(w => w.word),
-        topic: selectedTopic?.title
+        topic: selectedTopic?.title,
+        approvedWords,
       });
+      console.log(aiResponse);
+      // APPROVED WORDS FUNCTION
+      const approvedWordsMatch = aiResponse.match(/APPROVED_WORDS:\s*(\[.*?\])/s);
+      if (approvedWordsMatch) {
+        try {
+          setApprovedWords(JSON.parse(approvedWordsMatch[1]));
+        } catch (e) { /* handle error */ }
+      }
+
       
       // Update the user message with transcribed text
       // Try to extract the transcription from Gemini's response
@@ -384,7 +409,6 @@ function getStepButtonProps() {
       const transcription = transcriptionMatch ? transcriptionMatch[1].trim() : '[Audio message]';
       setTranscript(transcription); // <-- Set transcript here
       const aiResponseText = responseMatch ? responseMatch[1].trim() : aiResponse;
-      
       // Update the user message with the transcription
       lastUserMessage.content = transcription;
       lastUserMessage.wordsUsed = dailyWords.filter(word => 
@@ -602,6 +626,8 @@ function getStepButtonProps() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   // FOR STORING WORDS GENERATED RANDOMLY BY GEMINI
   const [previousWords,setPreviousWords]=useState<string[]>([])
+  // APPROVED WORDS
+  const [approvedWords, setApprovedWords] = useState<string[]>([]);
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -1200,22 +1226,40 @@ function getStepButtonProps() {
       setIsGeneratingTopic(false);
     }, 1500);
   };
-
-  const regenerateTopic = () => {
-    // Don't allow regeneration in view-only mode
-    if (isViewOnly) return;
+// OLD GENERATING RANDOM TOPIC 
+  // const regenerateTopic = () => {
+  //   // Don't allow regeneration in view-only mode
+  //   if (isViewOnly) return;
     
+  //   setIsGeneratingTopic(true);
+  //   setSelectedTopic(null);
+    
+  //   setTimeout(() => {
+  //     // Filter out the currently selected topic to ensure we get a different one
+  //     const availableTopics = storyTopics.filter(topic => topic.id !== selectedTopic?.id);
+  //     const randomTopic = availableTopics[Math.floor(Math.random() * availableTopics.length)];
+  //     setSelectedTopic(randomTopic);
+  //     setIsGeneratingTopic(false);
+  //   }, 1500);
+  // };
+  // NEW GENERATING RANDOM TOPIC FUNCTION
+  const regenerateTopic = async () => {
+    if (isViewOnly) return;
     setIsGeneratingTopic(true);
     setSelectedTopic(null);
-    
-    setTimeout(() => {
-      // Filter out the currently selected topic to ensure we get a different one
-      const availableTopics = storyTopics.filter(topic => topic.id !== selectedTopic?.id);
-      const randomTopic = availableTopics[Math.floor(Math.random() * availableTopics.length)];
-      setSelectedTopic(randomTopic);
-      setIsGeneratingTopic(false);
-    }, 1500);
+  
+    try {
+      // Fetch 1 random topic from Gemini
+      const topics = await getRandomStoryTopics(1);
+      if (topics && topics.length > 0) {
+        setSelectedTopic(topics[0]);
+      }
+    } catch (error) {
+      alert('Could not fetch a new topic from Gemini.');
+    }
+    setIsGeneratingTopic(false);
   };
+
 //Event Handler
   const handleAnswerQuestion = (answerIndex: number) => {
     // Don't allow answering in view-only mode
@@ -1446,7 +1490,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           vocabulary: dailyWords.map(w => w.word),
           topic: selectedTopic?.title
         });
-        
+ 
         // Wait a moment before speaking the response
         await new Promise(resolve => setTimeout(resolve, 1000));
         
@@ -2151,31 +2195,32 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
 
             {/* FOR MOBILE VOCAB WORDS */}
         {/* Mobile-only vocab checklist row */}
-<div className="mobile-vocab-row">
-  {dailyWords && dailyWords.length > 0 ? dailyWords.map((word, index) => {
-    const isUsed = userStory.toLowerCase().includes(word.word.toLowerCase());
-    return (
-      <div key={index} className={`mobile-vocab-pill${isUsed ? ' used' : ''}`}>
-        <span className="mobile-vocab-word">{word.word}</span>
-        {isUsed && (
-          <span className="mobile-vocab-check">
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-              <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </span>
-        )}
-      </div>
-    );
-  }) : (
-    <span>Loading...</span>
-  )}
-</div>
+          <div className="mobile-vocab-row">
+            {dailyWords && dailyWords.length > 0 ? dailyWords.map((word, index) => {
+              const isUsed = userStory.toLowerCase().includes(word.word.toLowerCase());
+              return (
+                <div key={index} className={`mobile-vocab-pill${isUsed ? ' used' : ''}`}>
+                  <span className="mobile-vocab-word">{word.word}</span>
+                  {isUsed && (
+                    <span className="mobile-vocab-check">
+                      <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                        <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </span>
+                  )}
+                </div>
+              );
+            }) : (
+              <span>Loading...</span>
+            )}
+          </div>
             <div className="professional-story-footer">
             {/* <div className="flex items-center justify-between text-xs text-muted-foreground mt-2"> */}
               <span>Words: {userStory.split(' ').filter(word => word.trim()).length}</span>
               <span>Vocabulary used: {dailyWords.filter(word => userStory.toLowerCase().includes(word.word.toLowerCase())).length}/{dailyWords.length}</span>
             </div>
           </div>
+          <div className="ai-analysis-desktop">
           {storyAnalysis && (
             <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent">
               <CardHeader>
@@ -2237,6 +2282,62 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
             </Card>
           )}
         </div>
+        </div>
+          {/* MODAL SHOW BUTTON */}
+          {storyAnalysis && (
+  <div className="ai-analysis-mobile">
+    <button className="ai-analysis-popup-btn" onClick={() => setShowAnalysisModal(true)}>
+      View AI Feedback
+    </button>
+                <AnalysisModal open={showAnalysisModal} onClose={() => setShowAnalysisModal(false)}>
+        <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent">
+        <div className="w-6 h-6 text-aduffy-yellow" />
+                        AI Story Analysis
+                <div className="ai-analysis-header">
+                  <svg className="ai-analysis-trophy" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4V2h14v2h3v2c0 3.31-2.69 6-6 6h-2v2.09A7.001 7.001 0 0 1 12 22a7.001 7.001 0 0 1-2-13.91V10H8c-3.31 0-6-2.69-6-6V4h3zm2 0v2c0 2.21 1.79 4 4 4s4-1.79 4-4V4H7zm-3 2c0 2.21 1.79 4 4 4h2V4H4v2zm16-2h-6v4h2c2.21 0 4-1.79 4-4V4z"/></svg>
+                  <span>AI Story Analysis</span>
+                </div>
+                <div className="ai-analysis-scores-row">
+                  <div className="text-center">
+                    <div className="ai-analysis-score ai-analysis-score-creativity">{storyAnalysis?.creativity || 0}%</div>
+                    <div className="ai-analysis-label">Creativity</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="ai-analysis-score ai-analysis-score-grammar">{storyAnalysis?.grammar || 0}%</div>
+                    <div className="ai-analysis-label">Grammar</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="ai-analysis-score ai-analysis-score-coherence">{storyAnalysis?.coherence || 0}%</div>
+                    <div className="ai-analysis-label">Coherence</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="ai-analysis-score ai-analysis-score-topic">{storyAnalysis?.topicAdherence || 0}%</div>
+                    <div className="ai-analysis-label">Topic Match</div>
+                  </div>
+                </div>
+                <hr className="ai-analysis-divider" />
+                <div>
+                  <h4 className="font-medium text-aduffy-navy mb-2">Feedback</h4>
+                  <p className="text-muted-foreground">{storyAnalysis?.feedback || 'No feedback available.'}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-aduffy-navy mb-2">Suggestions for Improvement</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    {storyAnalysis?.suggestions && storyAnalysis.suggestions.length > 0 ? storyAnalysis.suggestions.map((suggestion: string, index: number) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <div className="w-2 h-2 bg-aduffy-yellow rounded-full mt-2 flex-shrink-0"></div>
+                        {suggestion}
+                      </li>
+                    )) : (
+                      <li className="text-muted-foreground">No specific suggestions available.</li>
+                    )}
+                  </ul>
+                </div>
+                </Card>
+              </AnalysisModal>
+              </div>
+          )}
+              {/* AI ANALYSIS VOCABULARY WORD CHECKLIST STARTS */}
         <div className="space-y-6">
           <div className="vocab-checklist-card">
             <div className="vocab-checklist-title">Vocabulary Checklist</div>
@@ -2245,7 +2346,9 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
             </div>
             <div className="vocab-checklist-list">
               {dailyWords && dailyWords.length > 0 ? dailyWords.map((word, index) => {
+
                 const isUsed = userStory.toLowerCase().includes(word.word.toLowerCase());
+                
                 return (
                   <div key={index} className="vocab-checklist-item">
                     <div>
@@ -2289,6 +2392,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                     </>
                   )}
                 </Button>
+
+                {/* CONTINUE TO VOICE CHAT BUTTON */}
                 {storyAnalysis && (
                   <button
                     type="button"
@@ -2316,6 +2421,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       </div>
     </div>
   );
+  {/* VOICE VOCABULARY WORD CHECKLIST ENDS */}
 // Voice conversation page starts from here
   const renderVoiceStep = () => (
     <div className="space-y-8">
@@ -2427,6 +2533,33 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
 {/* new blcok neds */}
               </div>
               {/* CONVERSATION AREA ENDS */}
+              {/* MOBILE VERSION VOCABULARY CHECKLIST */}
+              {/* Mobile-only word usage checklist */}
+<div className="mobile-word-usage-row">
+  {dailyWords.map((word, index) => {
+    // const isUsedInConversation = voiceConversation.some(msg => 
+    //   msg.type === 'user' && 
+    //   (msg.content.toLowerCase().includes(word.word.toLowerCase()) || 
+    //     (msg.wordsUsed && msg.wordsUsed.some((w) => w.word.toLowerCase() === word.word.toLowerCase())))
+    // );
+    const isApproved = approvedWords.includes(word.word);
+
+    return (
+      <div key={index} className={`mobile-word-pill${isApproved ? ' used' : ''}`}>
+        <span className="mobile-word-text">{word.word}</span>
+        {isApproved && (
+          <span className="mobile-word-check">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+              <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </span>
+        )}
+      </div>
+     
+    );
+  })}
+</div>
+
               {/* Audio recording controls */}
               {!isViewOnly && (
                 <div className="flex items-center gap-4 mt-4">
@@ -2501,9 +2634,19 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
             </CardContent>
           </Card>
         </div>
+        {/* COMPLETE AND GET RESULT BUTTON FOR MOBILE VERSION */}
+<button
+     type="button"
+     onClick={handleNextStep}
+     className="w-full soft-yellow-btn mobile-only-btn"
+     disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
+   >
+     <span className="soft-yellow-arrow">&#8594;</span>
+     Complete &amp; Get Results
+   </button>
 
         {/* Right: Word Usage Goal */}
-        {/* Check list for voice conversation */}
+        {/* CHECK LIST FOR VOICE CONVERSATION*/}
         <div className="word-usage-panel">
           <Card className="aduffy-card">
             <CardHeader>
@@ -2515,11 +2658,12 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
             <CardContent>
               {dailyWords.map((word, index) => {
                 // Checks if the word is used
-                const isUsedInConversation = voiceConversation.some(msg => 
-                  msg.type === 'user' && 
-                  (msg.content.toLowerCase().includes(word.word.toLowerCase()) || 
-                   (msg.wordsUsed && msg.wordsUsed.some((w: any) => w.word.toLowerCase() === word.word.toLowerCase())))
-                );
+                // const isUsedInConversation = voiceConversation.some(msg => 
+                //   msg.type === 'user' && 
+                //   (msg.content.toLowerCase().includes(word.word.toLowerCase()) || 
+                //    (msg.wordsUsed && msg.wordsUsed.some((w: any) => w.word.toLowerCase() === word.word.toLowerCase())))
+                // );
+                const isApproved = approvedWords.includes(word.word);
                 return (
                   <div key={index} className="word-usage-card">
                     {/* Displays the word and definition */}
@@ -2528,13 +2672,20 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                       <div className="word-usage-def">{word.definition}</div>
                     </div>
                     {/* Checkmark if the word is used */}
-                    <div className={`word-usage-indicator${isUsedInConversation ? ' checked' : ''}`}>
+                    {/* <div className={`word-usage-indicator${isUsedInConversation ? ' checked' : ''}`}>
                       {isUsedInConversation && (
                         <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
                           <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       )}
-                    </div>
+                    </div> */}
+                    <div className={`word-usage-indicator${isApproved ? ' checked' : ''}`}>
+                  {isApproved && (
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                      <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
                   </div>
                 );
               })}

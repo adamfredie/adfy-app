@@ -245,6 +245,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex flex-row gap-6 justify-center">
+        <div className="form-fields-row">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name *</Label>
             <Input
@@ -268,6 +269,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               className="input-neutral-bg"
             />
           </div>
+        </div>
         </div>
         {/* BOX THAT CONTAINS WHAT MAKES ADUFFY SPECIAL? */}
         <div className="aduffy-special-box">

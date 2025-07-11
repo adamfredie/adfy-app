@@ -231,12 +231,15 @@ export async function generateVoiceResponseFromAudio({
   audioBlob, 
   conversationHistory, 
   vocabulary, 
-  topic 
+  topic,
+  approvedWords = []
+
 }: {
   audioBlob: Blob;
   conversationHistory: Array<{ type: 'user' | 'ai', content: string }>;
   vocabulary: string[];
   topic?: string;
+  approvedWords?: string[];
 }) {
   if (!GEMINI_API_KEY) {
     throw new Error('Gemini API key is not configured. Please check your .env file.');
@@ -250,6 +253,7 @@ export async function generateVoiceResponseFromAudio({
     const prompt = `
 You are an AI language tutor having a conversation with a student. 
 The student is practicing using vocabulary words in a professional context.
+
 
 Core Function: Vocabulary Learning Only
 
@@ -269,23 +273,29 @@ Maintain Focus: If a user consistently goes off-topic, gently remind them of the
 Concise Feedback: Responses should be brief and directly address the user's sentence in relation to the vocabulary word and grammar. Avoid verbose explanations.
 
 Error Handling: If you cannot understand the user's speech or identify an off-topic query, politely state your inability to process and reiterate the chat's purpose.
-
 ${topic ? `Context: The conversation is about "${topic}"` : ''}
 Target Vocabulary: ${vocabulary.map(w => `"${w}"`).join(', ')}
 
 Previous conversation:
 ${conversationHistory.map(msg => `${msg.type === 'user' ? 'Student' : 'Tutor'}: ${msg.content}`).join('\n')}
-
+When a user has properly used the words then you put them in APPROVED _WORDS.
 The student's latest message is attached as an audio file. Please:
 
 1. First, transcribe the audio content
 2. Then analyze it according to the above instructions
-3. Finally, respond as a tutor
+3. Finally, respond as a tutor.
+If ALL target vocabulary words are now approved, respond with:
+TRANSCRIPTION: [the transcribed text]
+RESPONSE: Great job! You have used all the vocabulary words. See you next time.
+APPROVED_WORDS: [JSON array of all approved words]
+Do not continue the conversation after this message.
 
 Please format your response as:
 TRANSCRIPTION: [the transcribed text]
 RESPONSE: [your tutor response]
-
+APPROVED_WORDS: [JSON array of ${approvedWords.map(w => `"${w}"`).join(', ')}]
+Approved Words (already used correctly): ${approvedWords.map(w => `"${w}"`).join(', ')}
+After analyzing the student's message, update the approved words list if new words were used correctly.
 Keep responses conversational and under 2 sentences. Don't mention the vocabulary words explicitly unless the student asks. 
 `;
 
@@ -377,6 +387,48 @@ Do NOT include any of these words: ${previousWords.join(", ")}Make sure the word
     throw new Error('Could not parse Gemini response as JSON');
   } catch (error) {
     console.error('Gemini random words error:', error);
+    return [];
+  }
+}
+// GENERATING RANDOM TOPICS
+export async function getRandomStoryTopics(count: number = 4) {
+  const prompt = `
+Generate ${count} unique, realistic professional scenario topics for a business English learner. 
+For each topic, provide:
+- id (unique string)
+- title (short, catchy)
+- scenario (one sentence summary)
+- context (one sentence background)
+- challenge (one sentence describing the main challenge)
+
+Return the result as a JSON array, like:
+[
+  { "id": "...", "title": "...", "scenario": "...", "context": "...", "challenge": "..." },
+  ...
+]
+`;
+
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }]
+  };
+
+  try {
+    const response = await axios.post(
+      `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+      body,
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    const data = response.data;
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const jsonStart = text.indexOf('[');
+    const jsonEnd = text.lastIndexOf(']');
+    if (jsonStart !== -1 && jsonEnd !== -1) {
+      const jsonString = text.substring(jsonStart, jsonEnd + 1);
+      return JSON.parse(jsonString);
+    }
+    throw new Error('Could not parse Gemini response as JSON');
+  } catch (error) {
+    console.error('Gemini random topics error:', error);
     return [];
   }
 }
