@@ -499,6 +499,9 @@ function getStepButtonProps() {
       console.log('Parsed analysis:', analysis);
       
       setStoryAnalysis(analysis);
+      if (isMobile) {
+        setShowAnalysisModal(true);
+      }
     } catch (err) {
       console.error('Story analysis error:', err);
       // Show error to user
@@ -2332,9 +2335,9 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
           {/* MODAL SHOW BUTTON */}
           {storyAnalysis && (
   <div className="ai-analysis-mobile">
-    <button className="ai-analysis-popup-btn" onClick={() => setShowAnalysisModal(true)}>
+    {/* <button className="ai-analysis-popup-btn" onClick={() => setShowAnalysisModal(true)}>
       View AI Feedback
-    </button>
+    </button> */}
                 <AnalysisModal open={showAnalysisModal} onClose={() => setShowAnalysisModal(false)}>
         <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent">
         <div className="w-6 h-6 text-aduffy-yellow" />

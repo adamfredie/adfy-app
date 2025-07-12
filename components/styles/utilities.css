@@ -700,7 +700,7 @@ ml-auto{
   color: var(--text-primary);
   margin-bottom: var(--space-2);
 }
-@media(max-width:400px){
+@media(max-width:700px){
   .ai-story-card-title{
   padding-left:0px;
   padding-right:0px;
@@ -764,7 +764,7 @@ ml-auto{
   cursor: pointer;
   transition: var(--transition-all);
 }
-@media(max-width:400px){
+@media(max-width:700px){
   ai-story-new-topic-btn{
     padding: .25em 1em;
     font-size: .8rem;
@@ -1004,7 +1004,7 @@ ml-auto{
   transition: background 0.2s, border-color 0.2s;
   box-shadow: 0 1px 4px 0 rgba(0,0,0,0.03);
 }
-@media(max-width:400px){
+@media(max-width:700px){
   .quiz-option{
     font-size:0.9rem;
     padding:0.4rem 0.6rem;
@@ -1345,7 +1345,7 @@ ml-auto{
   align-items: center;
   justify-content: center;
 }
-@media(max-width:500px){
+@media(max-width:700px){
   .start-writing-btn{
     padding:8px;
 
@@ -1945,7 +1945,7 @@ ml-auto{
 }
 
 /* Responsive adjustments */
-@media (max-width: 640px) {
+@media (max-width: 700px) {
   .final-score-badge {
     padding: 6px 12px;
     gap: 6px;
@@ -2621,7 +2621,7 @@ ml-auto{
   align-items: flex-start;
   gap: 0.7em;
 }
-@media(max-width:500px){
+@media(max-width:700px){
   .writing-instructions-box{
   display:none;
   }
@@ -2772,7 +2772,7 @@ ml-auto{
   gap: 2.5em;
   
 }
-@media(max-width:400px){
+@media(max-width:700px){
   .step-nav{
     gap:0.8em;
     overflow-x:scroll;
@@ -2870,9 +2870,10 @@ ml-auto{
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
-@media(max-width:500px){
+@media(max-width:700px){
   .analyze-story-btn{
   font-size:0.978rem;
+  width:100%;
 }
 }
 
@@ -2998,7 +2999,7 @@ ml-auto{
   flex-direction: row;
   gap: 1rem; /* space between badges */
 }
-@media(max-width:400px){
+@media(max-width:700px){
   .badges-row{
     flex-direction: column;
     gap:0.5rem;
@@ -3111,7 +3112,7 @@ ml-auto{
   padding: 0;
   font-size: var(--font-size-lg);
 }
-@media (max-width: 400px) {
+@media (max-width: 700px) {
   .vocab-checklist-card {
     display: none;
   }
@@ -3121,7 +3122,7 @@ ml-auto{
   display: none;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   .mobile-vocab-row {
     display: flex;
     flex-wrap: wrap;
@@ -3155,7 +3156,7 @@ ml-auto{
     align-items: center;
   }
 }
-@media(max-width:500px){
+@media(max-width:700px){
   .mobile-logo-img{
     width:auto;
     height:40px;
@@ -3228,7 +3229,7 @@ ml-auto{
   flex-direction: column;
   gap: 1rem;
 }
-@media (min-width: 640px) {
+@media (min-width: 700px) {
   .form-fields-row {
     flex-direction: row;
     gap: 2rem;
