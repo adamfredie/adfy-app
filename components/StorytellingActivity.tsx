@@ -66,6 +66,8 @@ import { getRandomWordsFromGemini, getGeminiExample } from '../src/api/gemini';
 // IMORTING GEMINI FUNCTION FOR GENERATING RANDOM TOPIC
 import { getRandomStoryTopics } from '../src/api/gemini';
 // ... inside your component
+// AUTO SCROLl
+import { ScrollToTop } from "./ScrollToTop";
 
 
 
@@ -258,6 +260,8 @@ export function StorytellingActivity({
   const [audioSupported, setAudioSupported] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  // AUTO SCROLL FOR VOICE CONVERSATION
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
   const [transcript, setTranscript] = useState('');
 // MODAL USE STATE VARIABLE
 const [showAnalysisModal, setShowAnalysisModal] = useState(false);
@@ -368,12 +372,10 @@ function getStepButtonProps() {
     setAudioLoading(true);
     try {
       // Add a placeholder message to show recording was received
-      //Loading
       const newConversation = [...voiceConversation];
       newConversation.push({
         type: 'user',
         content: "",
-        // content: "Loading",
         timestamp: new Date(),
         isAudio: true
       });
@@ -388,6 +390,7 @@ function getStepButtonProps() {
         approvedWords,
       });
       console.log(aiResponse);
+      
       // APPROVED WORDS FUNCTION
       const approvedWordsMatch = aiResponse.match(/APPROVED_WORDS:\s*(\[.*?\])/s);
       if (approvedWordsMatch) {
@@ -396,30 +399,34 @@ function getStepButtonProps() {
         } catch (e) { /* handle error */ }
       }
 
-      
-      // Update the user message with transcribed text
-      // Try to extract the transcription from Gemini's response
-      const updatedConversation = [...newConversation];
-      const lastUserMessage = updatedConversation[updatedConversation.length - 1];
-      
       // Parse the response to extract transcription and AI response
       const transcriptionMatch = aiResponse.match(/TRANSCRIPTION:\s*(.+?)(?=\nRESPONSE:|$)/s);
       const responseMatch = aiResponse.match(/RESPONSE:\s*(.+?)(?=\n|$)/s);
       
       const transcription = transcriptionMatch ? transcriptionMatch[1].trim() : '[Audio message]';
-      setTranscript(transcription); // <-- Set transcript here
+      setTranscript(transcription);
       const aiResponseText = responseMatch ? responseMatch[1].trim() : aiResponse;
-      // Update the user message with the transcription
-      lastUserMessage.content = transcription;
-      lastUserMessage.wordsUsed = dailyWords.filter(word => 
-        transcription.toLowerCase().includes(word.word.toLowerCase())
-      );
+      
+      // Create a NEW conversation array with the updated user message
+      const updatedConversation = [...newConversation];
+      const lastMessageIndex = updatedConversation.length - 1;
+      
+      // Replace the last message with a new object (don't mutate)
+      updatedConversation[lastMessageIndex] = {
+        ...updatedConversation[lastMessageIndex],
+        content: transcription,
+        wordsUsed: dailyWords.filter(word => 
+          transcription.toLowerCase().includes(word.word.toLowerCase())
+        )
+      };
+      
+      // Update the conversation state - this will trigger the auto-scroll
+      setVoiceConversation(updatedConversation);
       
       // Wait a moment before speaking the response
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // await safeSpeak(aiResponseText);
-      //USED ELEVENLABS AUDIO FOR THE AI RESPONSE
+      // USED ELEVENLABS AUDIO FOR THE AI RESPONSE
       try {
         const audioBlob = await getElevenLabsAudio(aiResponseText);
         const url = URL.createObjectURL(audioBlob);
@@ -429,14 +436,16 @@ function getStepButtonProps() {
         // Fallback to browser TTS if ElevenLabs fails
         await safeSpeak(aiResponseText);
       }
+      
       // Add AI response
-      updatedConversation.push({
+      const finalConversation = [...updatedConversation];
+      finalConversation.push({
         type: 'ai',
         content: aiResponseText,
         timestamp: new Date()
       });
       
-      setVoiceConversation(updatedConversation);
+      setVoiceConversation(finalConversation);
       
     } catch (error) {
       console.warn('Audio response error:', error);
@@ -638,11 +647,9 @@ function getStepButtonProps() {
       conversationCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  }, [voiceConversation]);
+  
+
+    // AUTO SCROLL FOR VOICE CONVERSATION TEXT BOX ENDS
   // Step completion tracking - initialize from saved progress
   const [completedSteps, setCompletedSteps] = useState<Set<StepType>>(() => {
     if (savedProgress) {
@@ -682,6 +689,35 @@ function getStepButtonProps() {
     requestPermission,
     stopSpeaking
   } = useVoiceInteraction();
+  // AUTO SCROLL FOR VOICE CONVERSATION TEXT BOX
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      // Scroll immediately when conversation updates
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [voiceConversation]);
+
+  useEffect(() => {
+    if (chatContainerRef.current && voiceTranscript) {
+      // Scroll immediately when transcript updates
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [voiceTranscript]);
+
+  // Add a more robust auto-scroll function
+  const scrollToBottom = useCallback(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, []);
+
+  // Scroll to bottom when new messages are added
+  useEffect(() => {
+    // Use requestAnimationFrame to ensure DOM is updated
+    requestAnimationFrame(() => {
+      scrollToBottom();
+    });
+  }, [voiceConversation, scrollToBottom]); 
 
 
   // Generate words based on selected field and user level
@@ -2232,7 +2268,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
           </div>
           <div className="ai-analysis-desktop">
           {storyAnalysis && (
-            <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent">
+            <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent mobile-padding-feedback">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-aduffy-navy">
                   <div className="w-6 h-6 text-aduffy-yellow" />
@@ -2494,7 +2530,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                    
                   </div>
                 ) : (
-                  voiceConversation.map((message, index) => (
+                  voiceConversation.map((message, index) => ( 
                     <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
               {/* ADDED INDENTATION */}
                       <div className={`chat-bubble ${message.type === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`}>
@@ -2531,27 +2567,27 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 )}
                 {/* NEW BLOCK */}
                 {!isViewOnly && voiceTranscript && (
-  <div className="flex justify-end">
-    <div className="chat-bubble chat-bubble-user">
-      {/* <div className="p-2 bg-muted/50 rounded-lg"> */}
-        {/* <div className="text-xs text-muted-foreground mb-1">Your speech (live):</div> */}
-        <p className="text-sm">{voiceTranscript}</p>
-      </div>
-    {/* </div> */}
-  </div>
-)}
-{/* new blcok neds */}
-              </div>
-              {/* CONVERSATION AREA ENDS */}
-              {/* MOBILE VERSION VOCABULARY CHECKLIST */}
-              {/* Mobile-only word usage checklist */}
-<div className="mobile-word-usage-row">
-  {dailyWords.map((word, index) => {
-    // const isUsedInConversation = voiceConversation.some(msg => 
-    //   msg.type === 'user' && 
-    //   (msg.content.toLowerCase().includes(word.word.toLowerCase()) || 
-    //     (msg.wordsUsed && msg.wordsUsed.some((w) => w.word.toLowerCase() === word.word.toLowerCase())))
-    // );
+                <div className="flex justify-end">
+                  <div className="chat-bubble chat-bubble-user">
+                    {/* <div className="p-2 bg-muted/50 rounded-lg"> */}
+                      {/* <div className="text-xs text-muted-foreground mb-1">Your speech (live):</div> */}
+                      <p className="text-sm">{voiceTranscript}</p>
+                    </div>
+                  {/* </div> */}
+                </div>
+                  )}
+                  {/* new blcok neds */}
+                  </div>
+                  {/* CONVERSATION AREA ENDS */}
+                  {/* MOBILE VERSION VOCABULARY CHECKLIST */}
+                  {/* Mobile-only word usage checklist */}
+                  <div className="mobile-word-usage-row">
+                    {dailyWords.map((word, index) => {
+                      // const isUsedInConversation = voiceConversation.some(msg => 
+                      //   msg.type === 'user' && 
+                      //   (msg.content.toLowerCase().includes(word.word.toLowerCase()) || 
+                      //     (msg.wordsUsed && msg.wordsUsed.some((w) => w.word.toLowerCase() === word.word.toLowerCase())))
+                      // );
     const isApproved = approvedWords.includes(word.word);
 
     return (
@@ -3041,6 +3077,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
   const stepButton = getStepButtonProps();
   return (
     <div className="space-y-8">
+      {/* AUTO SCROLL */}
+      <ScrollToTop trigger={currentStep} />
       {/* Top row: Back to Dashboard (left), Step badge (right) */}
       <div className="flex items-center justify-between mt-2 mb-1">
         <button className="back-to-dashboard-btn ml-1" onClick={onBack}>

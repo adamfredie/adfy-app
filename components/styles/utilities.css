@@ -887,6 +887,11 @@ ml-auto{
   gap: 2.5rem;
   margin-bottom: 1.5rem;
 }
+@media(max-width: 700px){
+  .ai-analysis-scores-row{
+    gap:0px;
+  }
+}
 /* @media (max-width: 600px) {
   .ai-analysis-scores-row {
     flex-direction: column;
@@ -3271,4 +3276,9 @@ ml-auto{
   .mobile-only-btn {
     display: none;
   }
+}
+@media(width:700px){
+.mobile-padding-feedback{
+  padding:4px
+}
 }

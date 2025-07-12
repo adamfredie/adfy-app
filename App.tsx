@@ -9,6 +9,7 @@ import { InterviewPrep } from "./components/InterviewPrep";
 import { VoiceConversation } from "./components/VoiceConversation";
 import { PronunciationPractice } from "./components/PronunciationPractice";
 import { Navigation } from './components/Navigation';
+import { ScrollToTop } from "./components/ScrollToTop";
 
 type ActivityType = 'dashboard' | 'storytelling' | 'quiz' | 'interview' | 'voice-conversation' | 'pronunciation' | 'settings';
 //Why is the activity Progress only for storttelling?
@@ -143,7 +144,9 @@ export default function App() {
   }
 
   return (
+
     <div className="app-container-column">
+      <ScrollToTop trigger={currentActivity} />
       <Navigation 
         currentActivity={currentActivity}
         onSignOut={handleSignOut}
