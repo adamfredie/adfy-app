@@ -624,10 +624,20 @@ function getStepButtonProps() {
   const [isPlayingSequence, setIsPlayingSequence] = useState(false);
   // AUTO SCROLL
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  // AUTO_SCROLL VOICE CONVERSATION PAGE
+  const conversationCardRef = useRef<HTMLDivElement | null>(null);
   // FOR STORING WORDS GENERATED RANDOMLY BY GEMINI
   const [previousWords,setPreviousWords]=useState<string[]>([])
   // APPROVED WORDS
   const [approvedWords, setApprovedWords] = useState<string[]>([]);
+  // VOICE CONVERSATION AUTO SCROLL FUNCTION
+  const scrollToConversationCard = () => {
+    if (conversationCardRef.current) {
+      // conversationCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // conversationCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      conversationCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -2463,8 +2473,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       {renderVoicePermissionAlert()}
 
       <div className="conversation-main-grid">
-        {/* Left: Voice Conversation */}
-        <div className="conversation-panel">
+        {/* LEFT: VOICE CONVERSATION*/}
+        <div className="conversation-panel" ref={conversationCardRef}>
           <Card className="aduffy-card">
             <CardHeader>
               <CardTitle className="text-aduffy-navy">Conversation</CardTitle>
@@ -3015,9 +3025,12 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
     ];
     setStoryTopics(mockTopics);
   }, []);
-
+  // VOICE CONVERSATION AUTO SCROLL MOBILE VARIABLE
+  const isMobile = window.innerWidth <= 768;
   const handleSubmitAudio = () => {
-    
+    if (isMobile) {
+      scrollToConversationCard();
+    }
     if (audioBlob && !audioLoading) {
       sendAudioToGemini(audioBlob);
       setAudioBlob(null); // Clear after submission
