@@ -810,9 +810,25 @@ ml-auto{
 @media (min-width: 768px) {
   .hero-title {
     font-size: 2.231rem;
-    /* font-size: 4.5rem; */
   }
 }
+@media (max-width: 769px) {
+  .hero-title {
+    display:none;
+  }
+}
+.hero-title-mobile {
+  display: flex;
+  justify-content: center;
+  align-items: center; /* optional, for vertical centering if needed */
+  margin-bottom: 6px;
+}
+@media (min-width: 700px) {
+  .hero-title-mobile {
+    display: none;
+  }
+}
+
 /* Aduffy SUBTITLE STYLING IN ONBOARDING */
 .hero-subtitle {
   font-size: 1.5rem;
@@ -827,6 +843,11 @@ ml-auto{
 @media (min-width: 768px) {
   .hero-subtitle {
     font-size: 1rem;
+  }
+}
+@media (max-width: 769px) {
+  .hero-subtitle {
+    display:none;
   }
 }
 
@@ -1661,6 +1682,11 @@ ml-auto{
   color: #1793b6 !important;
   font-size: 1.05rem !important;
 }
+@media(max-width:700px){
+  .view-mode-alert .alert-content{
+ font-size:0.8rem !important;
+  }
+}
 .view-mode-alert .alert-lock-icon {
   display: flex !important;
   align-items: center !important;
@@ -1680,6 +1706,12 @@ ml-auto{
   gap: 0.5em !important;
   cursor: pointer !important;
   transition: background 0.15s, border 0.15s !important;
+}
+@media(max-width:700px){
+  .view-mode-alert .alert-action-btn {
+   display:none !important;
+
+  }
 }
 .view-mode-alert .alert-action-btn:hover {
   background: #eaf7fa !important;
@@ -1786,6 +1818,11 @@ ml-auto{
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
   gap: 1.2rem !important;
+}
+@media(max-width:700px){
+  .skills-checkbox-grid{
+    grid-template-columns: 1fr  !important;
+  }
 }
 .skill-checkbox-label {
   display: flex !important;
@@ -2130,11 +2167,17 @@ ml-auto{
   align-items: center;
 }
 .daily-achievement-card .topic-mastered {
-  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+   gap: 12px;
+  /* background: #f8fafc; */
+  /* background: #f9fafb; */
   border-radius: 12px;
-  padding: 1.1em 1.2em;
+  /* padding: 1.1em 1.2em; */
+  /* padding: 0px; */
   margin-top: 0.2em;
-  box-shadow: 0 1px 4px 0 rgba(30, 80, 160, 0.04);
+  /* box-shadow: 0 1px 4px 0 rgba(30, 80, 160, 0.04); */
+  /* box-shadow:#e5e7eb; */
 }
 .daily-achievement-card .topic-title {
   font-weight: 600;
@@ -3282,4 +3325,42 @@ ml-auto{
 .mobile-padding-feedback{
   padding:4px
 }
+}
+/* STYLING FOR THE WORDS LEARNED IN THE RESULT PAGE */
+.words-learned-card {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 18px 20px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+.words-learned-badge {
+  background: #e0f7fa;
+  color: #00796b;
+  border-radius: 12px;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+.result-words-learned{
+  color:#22b573;
+}
+@media(max-width:700px){
+  .progress-bar-responsive{
+    width: 96%;
+    margin-left: 7px;
+
+
+  }
+}
+.challenge-label {
+  white-space: normal;
+  word-break: break-word;
+  max-width: 100%;
+  flex-wrap: wrap;
 }

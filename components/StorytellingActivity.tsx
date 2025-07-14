@@ -1475,7 +1475,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
       // ]);
       setVoiceConversation([
         { type: 'ai', content: intro, timestamp: new Date() },
-        { type: 'ai', content: firstQuestion, timestamp: new Date() }
+        // { type: 'ai', content: firstQuestion, timestamp: new Date() }
       ]);
       
       // Then speak the prompt with error handling
@@ -1493,6 +1493,11 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
   const url1 = URL.createObjectURL(audioBlob1);
   const audio1 = new Audio(url1);
   await audio1.play();
+  // 3. After intro is spoken, add the first question to the conversation
+  setVoiceConversation(prev => [
+    ...prev,
+    { type: 'ai', content: firstQuestion, timestamp: new Date() }
+  ]);
 
   // Play first question after intro finishes
   const audioBlob2 = await getElevenLabsAudio(firstQuestion);
@@ -1503,6 +1508,11 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
         // Fallback to browser TTS if ElevenLabs fails
         // await safeSpeak(initialPrompt);
         await safeSpeak(intro);
+        // await safeSpeak(firstQuestion);
+        setVoiceConversation(prev => [
+          ...prev,
+          { type: 'ai', content: firstQuestion, timestamp: new Date() }
+        ]);
         await safeSpeak(firstQuestion);
       }
       
@@ -2279,10 +2289,10 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 </CardTitle>
               </CardHeader>
               <CardContent className="ai-analysis-card space-y-6">
-                <div className="ai-analysis-header">
+                {/* <div className="ai-analysis-header">
                   <svg className="ai-analysis-trophy" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4V2h14v2h3v2c0 3.31-2.69 6-6 6h-2v2.09A7.001 7.001 0 0 1 12 22a7.001 7.001 0 0 1-2-13.91V10H8c-3.31 0-6-2.69-6-6V4h3zm2 0v2c0 2.21 1.79 4 4 4s4-1.79 4-4V4H7zm-3 2c0 2.21 1.79 4 4 4h2V4H4v2zm16-2h-6v4h2c2.21 0 4-1.79 4-4V4z"/></svg>
                   <span>AI Story Analysis</span>
-                </div>
+                </div> */}
                 <div className="ai-analysis-scores-row">
                   <div className="text-center">
                     <div className="ai-analysis-score ai-analysis-score-creativity">{storyAnalysis?.creativity || 0}%</div>
@@ -2341,7 +2351,6 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 <AnalysisModal open={showAnalysisModal} onClose={() => setShowAnalysisModal(false)}>
         <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent">
         <div className="w-6 h-6 text-aduffy-yellow" />
-                        AI Story Analysis
                 <div className="ai-analysis-header">
                   <svg className="ai-analysis-trophy" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4V2h14v2h3v2c0 3.31-2.69 6-6 6h-2v2.09A7.001 7.001 0 0 1 12 22a7.001 7.001 0 0 1-2-13.91V10H8c-3.31 0-6-2.69-6-6V4h3zm2 0v2c0 2.21 1.79 4 4 4s4-1.79 4-4V4H7zm-3 2c0 2.21 1.79 4 4 4h2V4H4v2zm16-2h-6v4h2c2.21 0 4-1.79 4-4V4z"/></svg>
                   <span>AI Story Analysis</span>
@@ -2460,10 +2469,12 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
               </>
             ) : (
               // Return Button View Only
+              <div className="flex w-full justify-center">
               <Button onClick={handleReturnToFurthest} className="return-btn">
                 <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
                 Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
               </Button>
+              </div>
             )}
           </div>
         </div>
@@ -2551,7 +2562,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 
                         </p>
                         
-                        {message.wordsUsed && message.wordsUsed.length > 0 && (
+                        {/* {message.wordsUsed && message.wordsUsed.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-1">
                             {message.wordsUsed.map((word: any, wordIndex: number) => (
                               <Badge key={wordIndex} className="aduffy-badge-success text-xs">
@@ -2559,7 +2570,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                               </Badge>
                             ))}
                           </div>
-                        )}
+                        )} */}
                         {/* This is used for displaying the time in the chat */}
                         <div className="chat-timestamp">
                           {message.timestamp.toLocaleTimeString()}
@@ -2840,7 +2851,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
               <li><span className="checkmark">✔</span><span>Practiced speaking skills</span></li>
             </ul>
           </div>
-          <div>
+          {/* <div>
             <h4 className="font-medium text-aduffy-navy mb-3">Story Topic Mastered</h4>
             <div className="topic-mastered">
               <p className="topic-title">{selectedTopic?.title || 'Professional Communication'}</p>
@@ -2848,7 +2859,19 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 Successfully addressed this professional scenario while incorporating vocabulary words
               </p>
             </div>
+          </div> */}
+          <div>
+          <h4 className="font-medium text-aduffy-navy mb-3">Words You Learned</h4>
+          {/* <div className="flex flex-wrap gap-2"> */}
+          <div className="topic-mastered">
+            {dailyWords.map((word, idx) => (
+              <span key={idx} className="result-words-learned">
+                <span className="checkmark">✔&nbsp;&nbsp;&nbsp;</span>
+                {word.word}
+              </span>
+            ))}
           </div>
+        </div>
         </div>
       </Card>
 {/* NEW BLOCK OF ACHEIVEMENT ENDS */}
@@ -2938,6 +2961,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
         </button>
         <button
           onClick={() => {
+            localStorage.removeItem("aduffy-activity-progress");
             setCurrentStep('words');
             setStepProgress(0);
             setUserStory('');
@@ -2950,6 +2974,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
             setCurrentQuestionResult(null);
             setCompletedSteps(new Set());
             setFurthestStep('words');
+            setApprovedWords([]);
+            clearTranscript();
           }}
           className="try-again-btn"
         >

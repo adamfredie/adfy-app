@@ -343,6 +343,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex flex-row gap-6 justify-center">
+        <div className="form-fields-row">
           <div className="space-y-2">
             <Label htmlFor="jobTitle">Job Title *</Label>
             <Input
@@ -366,6 +367,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               placeholder="Your company name"
             />
           </div>
+        </div>
         </div>
 
         <div className="space-y-3">
@@ -527,7 +529,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       </CardHeader>
       <CardContent className="space-y-8">
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
+          <div className="flex  challenge-label items-center gap-2">
             <span className="w-5 h-5 text-aduffy-orange">⚠️</span>
             <Label className="text-base font-medium">What communication challenges do you currently face? *</Label>
           </div>
@@ -747,6 +749,10 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             </div>
           </div>
         </div>
+        <div className="hero-title-mobile">
+          <img style={{ width: "200px", height: "auto", }} src="https://aduffylearning.com/wp-content/uploads/2023/12/aduffy-logo.png" alt="AduffyLogo"/>
+
+        </div>
 
         {/* Progress */}
         <div className="max-w-4xl mx-auto mb-12">
@@ -758,7 +764,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               Step {currentStepIndex + 1} of {steps.length}
             </Badge>
           </div>
-          <Progress value={progress} className="h-3 mb-2" />
+          <Progress value={progress} className="h-3 mb-2 progress-bar-responsive" />
           <p className="text-sm text-muted-foreground text-center">
             {steps.find(s => s.key === currentStep)?.description}
           </p>
