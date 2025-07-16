@@ -302,7 +302,8 @@ function getStepButtonProps() {
   }
   return null;
 }
-
+  // P-1 STARTS
+// THIS PIECE OF CODE IS USED FOR RECORDING THE USER"S VOICE AND SENDING IT TO GEMINI IN AUDIO BLOB FORM AND THEN GETTING REPSONSE FROM GEMINI
   // Check audio recording support on mount
   useEffect(() => {
     setAudioSupported(!!window.MediaRecorder && !!navigator.mediaDevices);
@@ -331,7 +332,9 @@ function getStepButtonProps() {
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const mimeType = mediaRecorder.mimeType || audioChunksRef.current[0]?.type || '';
+        console.log("MediaRecorder mimeType:", mimeType); // Optional: for debugging
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
         setAudioBlob(blob);
         setRecording(false);
         // Stop all tracks to release microphone
@@ -390,7 +393,7 @@ function getStepButtonProps() {
         approvedWords,
       });
       console.log(aiResponse);
-      
+      // P-2 ENDS
       // APPROVED WORDS FUNCTION
       const approvedWordsMatch = aiResponse.match(/APPROVED_WORDS:\s*(\[.*?\])/s);
       if (approvedWordsMatch) {
@@ -1493,17 +1496,31 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
   const url1 = URL.createObjectURL(audioBlob1);
   const audio1 = new Audio(url1);
   await audio1.play();
+// OLD BLOCK
   // 3. After intro is spoken, add the first question to the conversation
-  setVoiceConversation(prev => [
-    ...prev,
-    { type: 'ai', content: firstQuestion, timestamp: new Date() }
-  ]);
+  // setVoiceConversation(prev => [
+  //   ...prev,
+  //   { type: 'ai', content: firstQuestion, timestamp: new Date() }
+  // ]);
 
   // Play first question after intro finishes
-  const audioBlob2 = await getElevenLabsAudio(firstQuestion);
+  // const audioBlob2 = await getElevenLabsAudio(firstQuestion);
+  // const url2 = URL.createObjectURL(audioBlob2);
+  // const audio2 = new Audio(url2);
+  // await audio2.play();
+  // OLD BLOCK ENDED
+  audio1.onended = async () => {
+    // 3. After intro finishes, add first question to chat
+    setVoiceConversation(prev => [
+      ...prev,
+      { type: "ai", content: firstQuestion, timestamp: new Date() }
+      
+    ]);
+   const audioBlob2 = await getElevenLabsAudio(firstQuestion);
   const url2 = URL.createObjectURL(audioBlob2);
   const audio2 = new Audio(url2);
   await audio2.play();
+}
       } catch (ttsError) {
         // Fallback to browser TTS if ElevenLabs fails
         // await safeSpeak(initialPrompt);
@@ -1711,7 +1728,8 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                 5 Professional Words
               </Badge>
               {isViewOnly && (
-                <Badge className="aduffy-badge-info">
+                // <Badge className="aduffy-badge-info ml-2">
+                <Badge className="view-only-badge">
                   <div className="w-3 h-3 mr-1 text-muted-foreground" />
                   View Only
                 </Badge>
@@ -1837,6 +1855,13 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 Interactive Learning
               </span>
               </Badge>
+              {isViewOnly && (
+                // <Badge className="aduffy-badge-info ml-2">
+                <Badge className="view-only-badge">
+                  <div className="w-3 h-3 mr-1 text-muted-foreground" />
+                  View Only
+                </Badge>
+              )}
             </div>
           </div>
         </div>
@@ -2149,7 +2174,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 AI-Guided Writing
               </span> */}
               {isViewOnly && (
-                <Badge className="aduffy-badge-info ml-2">
+                // <Badge className="aduffy-badge-info ml-2">
+                <Badge className="view-only-badge">
                   <div className="w-3 h-3 mr-1 text-muted-foreground" />
                   View Only
                 </Badge>
@@ -2503,13 +2529,14 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 </span>
                 Interactive Speaking
               </span>
-            </div>
             {isViewOnly && (
-              <Badge className="aduffy-badge-info">
-                <div className="w-3 h-3 mr-1 text-muted-foreground" />
-                View Only
-              </Badge>
-            )}
+                // <Badge className="aduffy-badge-info ml-2">
+                <Badge className="view-only-badge">
+                  <div className="w-3 h-3 mr-1 text-muted-foreground" />
+                  View Only
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -2646,14 +2673,16 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
                                 <rect x="6" y="6" width="12" height="12" rx="2" fill="#222" />
                               </svg>
-                              Listening
+                              {/* Listening */}
+                              {audioLoading ? 'Thinking' : 'Listening'}
                             </>
                           ) : (
                             <>
                               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
                                 <path d="M8 5v14l11-7z" fill="#222"/>
                               </svg>
-                              {audioLoading ? 'Listening...' : 'Talk'}
+                              {/* {audioLoading ? 'Listening...' : 'Talk'} */}
+                              {audioLoading ? 'Thinking...' : 'Talk'}
                             </>
                           )}
                         </button>
@@ -3141,7 +3170,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
         <div className="flex items-center justify-between">
           <div></div>
           <div className="flex items-center gap-2">
-            {isViewOnly && (
+            {/* {isViewOnly && (
               <Badge className="view-only-badge">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -3158,7 +3187,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 </svg>
                 View Only
               </Badge>
-            )}
+            )} */}
           </div>
         </div>
         

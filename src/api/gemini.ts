@@ -352,8 +352,9 @@ export async function getGeminiExample(word: string, definition: string): Promis
   }
 }
 export async function getRandomWordsFromGemini(count: number = 5,previousWords: string[] = []) {
+  // Give me ${count} random,different, professional English words everytime.
   const prompt = `
-Give me ${count} random,different, professional English words. 
+ You are a professional English dictionary. Give me ${count} random, different, professional English words that you have not given before. 
 For each word, provide:
 - word
 - definition
@@ -364,10 +365,12 @@ Return the result as a JSON array, like:
   ...
 ]
 Do NOT include any of these words: ${previousWords.join(", ")}Make sure the words are truly random and professional.
+
 `;
 
   const body = {
-    contents: [{ parts: [{ text: prompt }] }]
+    contents: [{ parts: [{ text: prompt }] }],
+    // generationConfig: { temperature: 1.0 }
   };
 
   try {

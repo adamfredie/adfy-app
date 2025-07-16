@@ -2,6 +2,7 @@ const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
 const voiceId = "69nXRvRvFpjSXhH7IM5l"; // Replace with your chosen voice ID
 
 export async function getElevenLabsAudio(text: string): Promise<Blob> {
+  console.log("VITE_ELEVENLABS_API_KEY:", apiKey);
   const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
     method: "POST",
     headers: {
