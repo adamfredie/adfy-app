@@ -1467,7 +1467,7 @@ function getStepButtonProps() {
       // const initialPrompt = selectedTopic 
       //   ? `Hello ${userProfile?.name} Let's have a conversation about your approach to this scenario I'll ask you questions and you should try to use each of our vocabulary words in your responses Here is the first question:How did you decide on your approach to handling this professional challenge?`
       //   : `Hello ${userProfile?.name} Let's have a conversation about your approach to this scenario I'll ask you questions and you should try to use each of our vocabulary words in your responses Here is the first question:How did you decide on your approach to handling this professional challenge?`;
-      const intro = `Hello ${userProfile?.name}! Let's have a conversation about your approach to this scenario. I'll ask you questions and you should try to use each of our vocabulary words in your responses.`;
+      const intro = `Hello ${userProfile?.name|| "user"}! Let's have a conversation about your approach to this scenario. I'll ask you questions and you should try to use each of our vocabulary words in your responses.`;
 const firstQuestion = `Here is the first question: How did you decide on your approach to handling this professional challenge?`;
       // console.log('Speaking initial prompt:', initialPrompt);
       console.log('Speaking initial prompt:', intro,firstQuestion);
@@ -2068,7 +2068,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 </div>
                 <div className="mt-6">
                   <div className="font-semibold mb-2">Vocabulary Words Used:</div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap-example gap-2">
                     {dailyWords.map((word, index) => (
                       <span key={index} className="vocab-badge-success">
                         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" style={{marginRight: 4, verticalAlign: 'middle'}}><path d="M5 13l4 4L19 7" stroke="#22b573" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -2728,7 +2728,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
      type="button"
      onClick={handleNextStep}
      className="w-full soft-yellow-btn mobile-only-btn"
-     disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
+    //  disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
+    disabled={approvedWords.length < 2}
    >
      <span className="soft-yellow-arrow">&#8594;</span>
      Complete &amp; Get Results
@@ -2979,7 +2980,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       </Card> */}
 
       <div className="flex justify-center gap-4">
-        <button
+        {/* <button
           className="back-to-dashboard-btn-result"
           onClick={onBack}
         >
@@ -2987,7 +2988,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
             ←
           </span>
           Back to Dashboard
-        </button>
+        </button> */}
         <button
           onClick={() => {
             localStorage.removeItem("aduffy-activity-progress");
@@ -3138,11 +3139,12 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       {/* AUTO SCROLL */}
       <ScrollToTop trigger={currentStep} />
       {/* Top row: Back to Dashboard (left), Step badge (right) */}
-      <div className="flex items-center justify-between mt-2 mb-1">
-        <button className="back-to-dashboard-btn ml-1" onClick={onBack}>
+      <div className="flex justify-end mt-2 mb-1">
+      {/* <div className="flex items-center justify-between mt-2 mb-1"> */}
+        {/* <button className="back-to-dashboard-btn ml-1" onClick={onBack}>
           <span className="arrow">←</span>
           Back to Dashboard
-        </button>
+        </button> */}
         <span className="step-badge">
           Step {getStepNumber(currentStep)} of 5
         </span>

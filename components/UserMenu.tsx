@@ -1,7 +1,7 @@
 import React from 'react';
 import './styles/main.css';
 
-export function UserMenu({ onSignOut, onResetOnboarding }) {
+export function UserMenu({ userProfile, onSignOut, onResetOnboarding }) {
   return (
     <div className="user-menu">
       <div className="user-menu-header">

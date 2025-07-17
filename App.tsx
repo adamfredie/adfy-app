@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Header } from "./components/Header";
-import { Dashboard } from "./components/Dashboard";
-import { Onboarding, OnboardingData } from "./components/Onboarding";
+// import { Dashboard } from "./components/Dashboard";
+// import { Onboarding, OnboardingData } from "./components/Onboarding";
 import { Settings } from "./components/Settings";
 import { StorytellingActivity } from "./components/StorytellingActivity";
 import { VocabularyQuiz } from "./components/VocabularyQuiz";
@@ -11,7 +11,7 @@ import { PronunciationPractice } from "./components/PronunciationPractice";
 import { Navigation } from './components/Navigation';
 import { ScrollToTop } from "./components/ScrollToTop";
 
-type ActivityType = 'dashboard' | 'storytelling' | 'quiz' | 'interview' | 'voice-conversation' | 'pronunciation' | 'settings';
+type ActivityType ='storytelling' | 'quiz' | 'interview' | 'voice-conversation' | 'pronunciation' | 'settings';
 //Why is the activity Progress only for storttelling?
 interface ActivityProgress {
   storytelling?: {
@@ -25,34 +25,18 @@ interface ActivityProgress {
 }
 
 export default function App() {
-  const [currentActivity, setCurrentActivity] = useState<ActivityType>('dashboard');
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(false);
-  const [userProfile, setUserProfile] = useState<OnboardingData | null>(null);
+  const [currentActivity, setCurrentActivity] = useState<ActivityType>('storytelling');
+  // const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(false);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(true);
+  const [userProfile, setUserProfile] = useState(null);
   const [activityProgress, setActivityProgress] = useState<ActivityProgress>({});
 
   // Check if user has completed onboarding on app load
   useEffect(() => {
-    const onboardingStatus = localStorage.getItem('aduffy-onboarding-completed');
-    const savedProfile = localStorage.getItem('aduffy-user-profile');
-    const savedProgress = localStorage.getItem('aduffy-activity-progress');
-    
-    if (onboardingStatus === 'true' && savedProfile) {
-      setHasCompletedOnboarding(true);
-      setUserProfile(JSON.parse(savedProfile));
-    }
-
+    const savedProgress = localStorage.getItem("aduffy-activity-progress");
     if (savedProgress) {
       setActivityProgress(JSON.parse(savedProgress));
     }
-  }, []);
-
-  const handleOnboardingComplete = useCallback((data: OnboardingData) => {
-    // Save onboarding completion status and user profile
-    localStorage.setItem('aduffy-onboarding-completed', 'true');
-    localStorage.setItem('aduffy-user-profile', JSON.stringify(data));
-    
-    setUserProfile(data);
-    setHasCompletedOnboarding(true);
   }, []);
 
   const handleActivitySelect = useCallback((activity: string) => {
@@ -60,10 +44,10 @@ export default function App() {
   }, []);
 
   const handleBackToDashboard = useCallback(() => {
-    setCurrentActivity('dashboard');
+    setCurrentActivity('storytelling');
   }, []);
 
-  const handleProfileUpdate = useCallback((updatedProfile: OnboardingData) => {
+  const handleProfileUpdate = useCallback((updatedProfile: any) => {
     // Update user profile in state and localStorage
     localStorage.setItem('aduffy-user-profile', JSON.stringify(updatedProfile));
     setUserProfile(updatedProfile);
@@ -129,7 +113,7 @@ export default function App() {
     });
     
     // Reset all state
-    setHasCompletedOnboarding(false);
+    setHasCompletedOnboarding(true);
     setUserProfile(null);
     setActivityProgress({});
     setCurrentActivity('dashboard');
@@ -137,12 +121,6 @@ export default function App() {
     // Reload the page to ensure complete reset
     window.location.reload();
   }, []);
-
-  // Show onboarding flow for first-time users
-  if (!hasCompletedOnboarding) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
-  }
-
   return (
 
     <div className="app-container-column">
@@ -160,23 +138,23 @@ export default function App() {
           - This was requested to create a cleaner UI for these specific activities
           - Header only shows on other activities (quiz, interview, voice-conversation, pronunciation, settings)
         */}
-        {currentActivity !== 'dashboard' && currentActivity !== 'storytelling' && (
-          <Header 
-            currentActivity={currentActivity} 
-            onNavigateHome={currentActivity !== 'dashboard' ? handleBackToDashboard : undefined}
-            onNavigateToSettings={() => setCurrentActivity('settings')}
-            onResetOnboarding={handleResetOnboarding}//passed centralized function
-            userProfile={userProfile}
-          />
-        )}
+       {currentActivity !== "storytelling" && (
+  <Header
+    currentActivity={currentActivity}
+    onNavigateHome={handleBackToDashboard}
+    onNavigateToSettings={() => setCurrentActivity("settings")}
+    onResetOnboarding={handleResetOnboarding}
+    userProfile={userProfile}
+  />
+)}
         <div className="container mx-auto px-4 py-8 max-w-6xl">
-          {currentActivity === 'dashboard' && (
+          {/* {currentActivity === 'dashboard' && (
             <Dashboard 
               onSelectActivity={handleActivitySelect} 
               userProfile={userProfile}
               activityProgress={activityProgress}
             />
-          )}
+          )} */}
           
           {currentActivity === 'settings' && (
             <Settings 

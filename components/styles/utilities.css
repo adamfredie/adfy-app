@@ -15,7 +15,9 @@
 */
 
 /* Utility Classes */
-
+.flex-wrap-example{
+  flex-wrap: wrap;
+}
 /* Text Utilities */
 .text-center {
   text-align: center;
