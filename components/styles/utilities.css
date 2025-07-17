@@ -1334,14 +1334,14 @@ ml-auto{
   background: #fff;
 }
 /*Styling for the skip learning button in learning page ends here*/
-
 .start-writing-btn {
   display: inline-flex;
   align-items: center;
   background: #fbb025;
   color: #222b3a;
   border: none;
-  border-radius: 9999px;
+  /* border-radius: 9999px; */
+  border-radius: 12px;
   padding: 0.5rem 1.75rem;
   font-size: 1.1rem;
   font-weight: 500;
@@ -1370,13 +1370,13 @@ ml-auto{
 }
 @media(max-width:700px){
   .start-writing-btn{
-    padding:8px;
+    padding:10px 5px;
 
 
   }
-  .start-writing-btn .start-writing-icon{
+  /* .start-writing-btn .start-writing-icon{
     display:none;
-  }
+  } */
 }
 
 .continue-voice-btn {
@@ -2197,7 +2197,8 @@ ml-auto{
   display: inline-flex;
   align-items: center;
   gap: 0.6em;
-  background: #fff;
+  /* background: #fff; */
+  background: #fbb025;
   border: 1.5px solid #ffe6b0;
   color: #222b3a;
   border-radius: 0.9em;
@@ -2211,6 +2212,8 @@ ml-auto{
 @media(max-width:700px){
   .try-again-btn{
     padding: 0.4rem 0.8rem;
+    width:100%;
+    justify-content:center;
   }
 }
 .try-again-btn:hover, .try-again-btn:focus {
@@ -3365,4 +3368,10 @@ ml-auto{
   word-break: break-word;
   max-width: 100%;
   flex-wrap: wrap;
+}
+.font-size-quiz{
+  font-size:16px
+}
+.no-box-shadow{
+  box-shadow: none !important;
 }

@@ -271,10 +271,10 @@ function getStepButtonProps() {
   if (currentStep === 'learning') {
     if (currentQuestionIndex < learningQuestions.length - 1) {
       return {
-        label: 'Next Question',
+        label: 'Next',
         icon: '→',
         onClick: handleNextQuestion,
-        disabled: showQuestionFeedback === false // Only enable after answering
+        disabled: showQuestionFeedback === false, // Only enable after answering
       };
     } else {
       return {
@@ -1815,8 +1815,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       <div className="flex justify-center">
         {!isViewOnly ? (
           <Button onClick={handleNextStep} className="orange-action-btn">
-            <span style={{fontSize: '1.1em', display: 'inline-block', transform: 'translateY(1px)'}}>→</span>
             Continue to Learning Activities
+            <span style={{fontSize: '1.1em', display: 'inline-block', transform: 'translateY(1px)'}}>→</span>
           </Button>
         ) : (
           // Return Button View Only
@@ -1865,7 +1865,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
             </div>
           </div>
         </div>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-muted-foreground max-w-2xl mx-auto font-size-quiz">
         {/* <p className="text-lg text-muted-foreground max-w-2xl mx-auto"> */}
           {isViewOnly 
             ? "Review your completed learning session. All answers and content are shown in view-only mode."
@@ -2108,18 +2108,19 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
             </button> */}
             {/* NEW START WRITING COMPLETE PRACTICE BUTTON */}
              {stepButton && (
+              
       <button
         className="start-writing-btn"
         onClick={stepButton.onClick}
         disabled={stepButton.disabled}
         type="button"
       >
+        {stepButton.label}
         <span className="start-writing-icon" style={{ marginRight: 8 }}>
           {typeof stepButton.icon === 'string'
             ? <span style={{ display: 'inline-block', transform: 'translateY(1px)' }}>{stepButton.icon}</span>
             : stepButton.icon}
         </span>
-        {stepButton.label}
       </button>
     )}
           </>
@@ -2375,10 +2376,11 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       View AI Feedback
     </button> */}
                 <AnalysisModal open={showAnalysisModal} onClose={() => setShowAnalysisModal(false)}>
-        <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent">
+        <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent no-box-shadow">
         <div className="w-6 h-6 text-aduffy-yellow" />
                 <div className="ai-analysis-header">
-                  <svg className="ai-analysis-trophy" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4V2h14v2h3v2c0 3.31-2.69 6-6 6h-2v2.09A7.001 7.001 0 0 1 12 22a7.001 7.001 0 0 1-2-13.91V10H8c-3.31 0-6-2.69-6-6V4h3zm2 0v2c0 2.21 1.79 4 4 4s4-1.79 4-4V4H7zm-3 2c0 2.21 1.79 4 4 4h2V4H4v2zm16-2h-6v4h2c2.21 0 4-1.79 4-4V4z"/></svg>
+                  {/* <svg className="ai-analysis-trophy" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4V2h14v2h3v2c0 3.31-2.69 6-6 6h-2v2.09A7.001 7.001 0 0 1 12 22a7.001 7.001 0 0 1-2-13.91V10H8c-3.31 0-6-2.69-6-6V4h3zm2 0v2c0 2.21 1.79 4 4 4s4-1.79 4-4V4H7zm-3 2c0 2.21 1.79 4 4 4h2V4H4v2zm16-2h-6v4h2c2.21 0 4-1.79 4-4V4z"/></svg> */}
+                  <span className="ai-analysis-trophy">🎖</span>
                   <span>AI Story Analysis</span>
                 </div>
                 <div className="ai-analysis-scores-row">
@@ -2484,12 +2486,12 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                     onClick={handleNextStep}
                     className="continue-voice-btn"
                   >
+                    Continue to Voice Chat
                     <span className="continue-voice-icon">
                       <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
                         <path d="M5 12h14M13 6l6 6-6 6" stroke="#222b3a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </span>
-                    Continue to Voice Chat
                   </button>
                 )}
               </>
@@ -2731,8 +2733,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
     //  disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
     disabled={approvedWords.length < 2}
    >
-     <span className="soft-yellow-arrow">&#8594;</span>
      Complete &amp; Get Results
+     <span className="soft-yellow-arrow">&#8594;</span>
    </button>
 
         {/* Right: Word Usage Goal */}
@@ -2789,8 +2791,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 className="w-full soft-yellow-btn"
                 disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
               >
-                <span className="soft-yellow-arrow">&#8594;</span>
                 Complete &amp; Get Results
+                <span className="soft-yellow-arrow">&#8594;</span>
               </button>
             ) : (
               // Return Button View Only
@@ -3139,16 +3141,17 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       {/* AUTO SCROLL */}
       <ScrollToTop trigger={currentStep} />
       {/* Top row: Back to Dashboard (left), Step badge (right) */}
-      <div className="flex justify-end mt-2 mb-1">
+      {/* BACK TO DASHBOARD AND STEP BADGE  */}
+      {/* <div className="flex justify-end mt-2 mb-1"> */}
       {/* <div className="flex items-center justify-between mt-2 mb-1"> */}
         {/* <button className="back-to-dashboard-btn ml-1" onClick={onBack}>
           <span className="arrow">←</span>
           Back to Dashboard
         </button> */}
-        <span className="step-badge">
+        {/* <span className="step-badge">
           Step {getStepNumber(currentStep)} of 5
         </span>
-      </div>
+      </div> */}
       {/* Progress Header */}
       <div className="space-y-4">
         <div>

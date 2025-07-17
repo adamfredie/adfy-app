@@ -11,28 +11,26 @@ export function Navigation({ currentActivity, onSignOut, onResetOnboarding, user
       <div className="nav-left">
         <a href="/" className="nav-brand">
           <Logo />
-          <div className="nav-brand-text">
+          {/* <div className="nav-brand-text">
             <span className="nav-brand-title">Aduffy Learning</span>
             <span className="nav-brand-subtitle">Professional Vocabulary Mastery</span>
-          </div>
+          </div> */}
         </a>
       </div>
       <div className="nav-right">
-        <button className="nav-icon-btn">
+        {/* <button className="nav-icon-btn">
           <span role="img" aria-label="settings">⚙️</span>
-        </button>
+        </button> */}
         {/* User menu is now always visible, regardless of the current activity */}
-        <div className="user-menu-container">
+        {/* <div className="user-menu-container">
           <button className="user-menu-trigger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {/* <div className="user-avatar">OW</div>
-             */}
+           
              <div className="user-avatar">
   {userProfile?.name
     ? userProfile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : "U"}
 </div>
             <div className="user-info">
-              {/* <span className="user-name">Owner</span> */}
               <span className="user-name">
           {userProfile?.name ? userProfile.name : "User"}
         </span>
@@ -40,7 +38,7 @@ export function Navigation({ currentActivity, onSignOut, onResetOnboarding, user
             </div>
           </button>
           {isMenuOpen && <UserMenu onSignOut={onSignOut} onResetOnboarding={onResetOnboarding} />}
-        </div>
+        </div> */}
       </div>
     </header>
   );
