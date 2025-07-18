@@ -395,11 +395,18 @@ function getStepButtonProps() {
       console.log(aiResponse);
       // P-2 ENDS
       // APPROVED WORDS FUNCTION
-      const approvedWordsMatch = aiResponse.match(/APPROVED_WORDS:\s*(\[.*?\])/s);
+      // const approvedWordsMatch = aiResponse.match(/APPROVED_WORDS:\s*(\[.*?\])/s);
+      console.log(aiResponse);
+      const approvedWordsMatch = aiResponse.match(/APPROVED_WORDS:\s*(\[[\s\S]*?\])/);
       if (approvedWordsMatch) {
         try {
-          setApprovedWords(JSON.parse(approvedWordsMatch[1]));
+          // setApprovedWords(JSON.parse(approvedWordsMatch[1]));
+          const jsonString = approvedWordsMatch[1].replace(/'/g, '"');
+          setApprovedWords(JSON.parse(jsonString));
         } catch (e) { /* handle error */ }
+      }
+      if (!approvedWordsMatch) {
+        console.warn('Could not find APPROVED_WORDS in AI response:', aiResponse);
       }
 
       // Parse the response to extract transcription and AI response
@@ -563,7 +570,8 @@ function getStepButtonProps() {
       if (suggestionsMatch) {
         suggestions = suggestionsMatch[1]
           .split('\n')
-          .map(line => line.replace(/^[•\-\*]\s*/, '').trim())
+          // .map(line => line.replace(/^[•\-\*]\s*/, '').trim())
+          .map(line => line.replace(/^[•\-\*]\s*/, '').replace(/^\*/, '').trim())
           .filter(line => line.length > 0);
       }
       
@@ -1062,60 +1070,79 @@ function getStepButtonProps() {
   }, []);
 
 
-  const playWordPronunciation = useCallback(async (wordIndex: number) => {
-    if (wordIndex < 0 || wordIndex >= dailyWords.length) {
-      console.warn('Invalid word index:', wordIndex);
-      return;
-    }
+  // const playWordPronunciation = useCallback(async (wordIndex: number) => {
+  //   if (wordIndex < 0 || wordIndex >= dailyWords.length) {
+  //     console.warn('Invalid word index:', wordIndex);
+  //     return;
+  //   }
 
-    const word = dailyWords[wordIndex];
-    if (!word) {
-      console.warn('No word found at index:', wordIndex);
-      return;
-    }
+  //   const word = dailyWords[wordIndex];
+  //   if (!word) {
+  //     console.warn('No word found at index:', wordIndex);
+  //     return;
+  //   }
 
-    // If this word is currently playing, stop it
-    if (currentlyPlayingWord === wordIndex) {
-      window.speechSynthesis.cancel();
-      setCurrentlyPlayingWord(null);
-      return;
-    }
+  //   // If this word is currently playing, stop it
+  //   if (currentlyPlayingWord === wordIndex) {
+  //     window.speechSynthesis.cancel();
+  //     setCurrentlyPlayingWord(null);
+  //     return;
+  //   }
 
-    try {
-      await safeSpeak(`${word.word}. ${word.definition}`, wordIndex);
-    } catch (error) {
-      console.error('Error playing word pronunciation:', error);
-    }
-  }, [dailyWords, safeSpeak, currentlyPlayingWord]);
+  //   try {
+  //     await safeSpeak(`${word.word}. ${word.definition}`, wordIndex);
+  //   } catch (error) {
+  //     console.error('Error playing word pronunciation:', error);
+  //   }
+  // }, [dailyWords, safeSpeak, currentlyPlayingWord]);
 
-  const playAllWords = useCallback(async () => {
-    if (isPlayingSequence) {
-      console.log('Already playing sequence, stopping...');
-      window.speechSynthesis.cancel();
-      setIsPlayingSequence(false);
-      setCurrentlyPlayingWord(null);
-      return;
-    }
 
-    setIsPlayingSequence(true);
+// ELEVEN LABS AUDIO FOR RANDOM WORDS
+// E-11 STARTS
+const playWordWithElevenLabs = async (wordIndex: number) => {
+  const word = dailyWords[wordIndex];
+  if (!word) return;
+  try {
+    // You can use just the word, or word + definition for richer audio
+    const audioBlob = await getElevenLabsAudio(`${word.word}. ${word.definition}`);
+    const url = URL.createObjectURL(audioBlob);
+    const audio = new Audio(url);
+    await audio.play();
+  } catch (error) {
+    console.error('Error playing ElevenLabs audio:', error);
+    // Optionally fallback to browser TTS
+    await safeSpeak(`${word.word}. ${word.definition}`, wordIndex);
+  }
+};
+// E-11 ENDS
+  // const playAllWords = useCallback(async () => {
+  //   if (isPlayingSequence) {
+  //     console.log('Already playing sequence, stopping...');
+  //     window.speechSynthesis.cancel();
+  //     setIsPlayingSequence(false);
+  //     setCurrentlyPlayingWord(null);
+  //     return;
+  //   }
 
-    try {
-      for (let i = 0; i < dailyWords.length; i++) {
-        if (!isPlayingSequence) break; // Check if cancelled
+  //   setIsPlayingSequence(true);
+
+  //   try {
+  //     for (let i = 0; i < dailyWords.length; i++) {
+  //       if (!isPlayingSequence) break; // Check if cancelled
         
-        const word = dailyWords[i];
-        await safeSpeak(`Word ${i + 1}: ${word.word}. ${word.definition}`, i);
+  //       const word = dailyWords[i];
+  //       await safeSpeak(`Word ${i + 1}: ${word.word}. ${word.definition}`, i);
         
-        // Add small pause between words
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-    } catch (error) {
-      console.error('Error playing all words:', error);
-    } finally {
-      setIsPlayingSequence(false);
-      setCurrentlyPlayingWord(null);
-    }
-  }, [dailyWords, isPlayingSequence, safeSpeak]);
+  //       // Add small pause between words
+  //       await new Promise(resolve => setTimeout(resolve, 500));
+  //     }
+  //   } catch (error) {
+  //     console.error('Error playing all words:', error);
+  //   } finally {
+  //     setIsPlayingSequence(false);
+  //     setCurrentlyPlayingWord(null);
+  //   }
+  // }, [dailyWords, isPlayingSequence, safeSpeak]);
 
   // Cleanup speech synthesis on unmount
   useEffect(() => {
@@ -1651,11 +1678,14 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
     if (permissionStatus === 'prompt' || permissionStatus === 'unknown') {
       return (
         <Alert className="mb-6">
-          <div className="flex items-center justify-between text-muted-foreground text-sm mt-2">
+          {/* <div className="flex items-center justify-between text-muted-foreground text-sm mt-2 allow-access-div"> */}
+          <div className="flex items-center justify-between allow-access-div">
+          {/* <div className="allow-access-div"> */}
             <span>Microphone access is required for audio recording and voice conversations.</span>
             <Button
               onClick={requestPermission}
-              className="aduffy-button-outline ml-4"
+              // className="aduffy-button-outline ml-4"
+              className="allow-access-btn"
             >
               Allow Access
             </Button>
@@ -1753,6 +1783,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
               try {
                 // Get random words from Gemini
                 const geminiWords = await getRandomWordsFromGemini(5,previousWords);
+                console.log('Gemini words:', geminiWords);
                 
                 // Optionally, get example sentences for each word
                 const wordsWithExamples = await Promise.all(
@@ -1764,10 +1795,11 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                 );
                 // NEW BLOCK
                 const newWordStrings = wordsWithExamples.map(w => w.word.toLowerCase());
-setPreviousWords(prev => [...prev, ...newWordStrings]);
+                setPreviousWords(prev => [...prev, ...newWordStrings]);
 // NEW BLOCK ENDED
                 setDailyWords(wordsWithExamples);
               } catch (err) {
+                console.error('Error fetching random words from Gemini:', err);
                 alert('Could not fetch random words from Gemini.');
               }
               setLoadingRandomWords(false);
@@ -1791,7 +1823,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
             <div className="vocabulary-word">
               {word.word}
               <button
-                onClick={() => playWordPronunciation(index)}
+                // onClick={() => playWordPronunciation(index)}
+                onClick={() => playWordWithElevenLabs(index)}
                 disabled={!isVoiceSupported}
                 className="audio-button"
                 title="Listen to pronunciation"
@@ -2344,7 +2377,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                   <p className="text-muted-foreground">{storyAnalysis?.feedback || 'No feedback available.'}</p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-aduffy-navy mb-2">Suggestions for Improvement</h4>
+                  <h4 className="font-medium text-aduffy-navy mb-2 ">Suggestions for Improvement</h4>
                   <ul className="space-y-1 text-muted-foreground">
                     {storyAnalysis?.suggestions && storyAnalysis.suggestions.length > 0 ? storyAnalysis.suggestions.map((suggestion: string, index: number) => (
                       <li key={index} className="flex items-start gap-2">
@@ -2369,6 +2402,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
           )}
         </div>
         </div>
+
           {/* MODAL SHOW BUTTON */}
           {storyAnalysis && (
   <div className="ai-analysis-mobile">
@@ -2407,7 +2441,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                   <p className="text-muted-foreground">{storyAnalysis?.feedback || 'No feedback available.'}</p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-aduffy-navy mb-2">Suggestions for Improvement</h4>
+                  <h4 className="font-medium text-aduffy-navy mb-2 m-t">Suggestions for Improvement</h4>
                   <ul className="space-y-1 text-muted-foreground">
                     {storyAnalysis?.suggestions && storyAnalysis.suggestions.length > 0 ? storyAnalysis.suggestions.map((suggestion: string, index: number) => (
                       <li key={index} className="flex items-start gap-2">
@@ -2631,8 +2665,11 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                       //   (msg.content.toLowerCase().includes(word.word.toLowerCase()) || 
                       //     (msg.wordsUsed && msg.wordsUsed.some((w) => w.word.toLowerCase() === word.word.toLowerCase())))
                       // );
-    const isApproved = approvedWords.includes(word.word);
-
+    // const isApproved = approvedWords.includes(word.word);
+    // const isApproved = approvedWords.map(w => w.toLowerCase()).includes(word.word.toLowerCase());
+    const capitalize = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word));
+    
     return (
       <div key={index} className={`mobile-word-pill${isApproved ? ' used' : ''}`}>
         <span className="mobile-word-text">{word.word}</span>
@@ -2648,6 +2685,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
     );
   })}
 </div>
+
 
               {/* Audio recording controls */}
               {!isViewOnly && (
@@ -2755,7 +2793,10 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
                 //   (msg.content.toLowerCase().includes(word.word.toLowerCase()) || 
                 //    (msg.wordsUsed && msg.wordsUsed.some((w: any) => w.word.toLowerCase() === word.word.toLowerCase())))
                 // );
-                const isApproved = approvedWords.includes(word.word);
+                // const isApproved = approvedWords.includes(word.word);
+                // const isApproved = approvedWords.map(w => w.toLowerCase()).includes(word.word.toLowerCase());
+                const capitalize = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word));
                 return (
                   <div key={index} className="word-usage-card">
                     {/* Displays the word and definition */}
@@ -2810,7 +2851,19 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       </div>
     </div>
   );
-
+  // WRITING SCORE 
+  const writingScore = storyAnalysis
+  ? Math.round(
+      ((storyAnalysis?.creativity || 0) +
+        (storyAnalysis?.grammar || 0) +
+        (storyAnalysis?.coherence || 0) +
+        (storyAnalysis?.topicAdherence || 0)) / 4
+    )
+  : 0;
+  const capitalize = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+const allWordsApproved = dailyWords.every(word =>
+  approvedWords.map(capitalize).includes(capitalize(word.word))
+);
   const renderResultsStep = () => (
     <div className="space-y-8">
       <div className="text-center space-y-4">
@@ -2820,32 +2873,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
           </div>
           <div className="text-left">
             <h2 className="text-3xl font-bold text-aduffy-navy text-center">Learning Complete!</h2>
-            {/* <div className="text-center">
-              <div className="final-score-badge">
-                <div className="final-score-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M5 4V2h14v2h3v2c0 3.31-2.69 6-6 6h-2v2.09A7.001 7.001 0 0 1 12 22a7.001 7.001 0 0 1-2-13.91V10H8c-3.31 0-6-2.69-6-6V4h3zm2 0v2c0 2.21 1.79 4 4 4s4-1.79 4-4V4H7zm-3 2c0 2.21 1.79 4 4 4h2V4H4v2zm16-2h-6v4h2c2.21 0 4-1.79 4-4V4z" fill="currentColor"/>
-                  </svg>
-                </div>
-                <div className="final-score-content">
-                  <div className="final-score-label">Final Score</div>
-                  <div className="final-score-value">{finalScore}/100</div>
-                </div>
-              </div>
-            </div> */}
-            {/* FINAL SCORE BADGE */}
-            {/* <div className="text-center">
-            <span className="final-score-pill">
-            <span className="final-score-star" aria-hidden="true">
-              {/* Star SVG icon */}
-              {/* <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-                <path d="M12 17.25L7.09 20l.93-5.43L4 10.97l5.46-.79L12 5.5l2.54 4.68 5.46.79-3.97 3.6.93 5.43z"
-                  stroke="#222b3a" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
-              </svg>
-            </span>
-            Final Score: <span>{finalScore}/100</span>
-          </span>
-          </div> */} 
+         
             {/* FINAL SCORE BADGE END */}
 
           </div>
@@ -2856,8 +2884,6 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       </div>
       {/* NEW BLOCK OF ACHEIVEMENT */}
       <Card className="daily-achievement-card">
-        {/* <div className="confetti-icon" aria-hidden="true">🎉</div> */}
-        {/* <div className="achievement-title">Daily Learning Achievement Unlocked!</div> */}
         <div className={`achievement-title ${finalScore<50?"text-red":finalScore<80?"text-orange":"text-green"}`}>
           {finalScore<50?"Try Again":finalScore<80?"You can do better":"🎉 Good Job"}
           </div>
@@ -2877,21 +2903,32 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
           <div>
             <h4 className="font-medium text-aduffy-navy mb-3">Today's Achievements</h4>
             <ul className="achievement-list">
-              <li><span className="checkmark">✔</span><span>Mastered 5 new vocabulary words</span></li>
-              <li><span className="checkmark">✔</span><span>Completed {learningQuestions.length} practice questions</span></li>
-              <li><span className="checkmark">✔</span><span>Created AI-guided story</span></li>
-              <li><span className="checkmark">✔</span><span>Practiced speaking skills</span></li>
+              <li><span className="checkmark">✔</span><span>Learned 5 new vocabulary words</span></li>
+              {/* <li><span className="checkmark">✔</span><span>Completed {learningQuestions.length} practice questions</span></li>
+               */}
+               <li >
+                  {/* <span className="checkmark"> */}
+                  <span className={questionResults.length === learningQuestions.length ? "" : "text-error"}>
+                    {questionResults.length === learningQuestions.length ? '✔' : '✖'}
+                  </span>
+                  <span>
+                    Completed {learningQuestions.length} practice questions
+                  </span>
+                </li>
+              {/* <li><span className="checkmark">✔</span><span>Created AI-guided story</span></li> */}
+              <li>
+              <span className={storyAnalysis && writingScore >= 50 ? "checkmark" : "crossmark"}>
+                {storyAnalysis && writingScore >= 50 ? '✔' : '✖'}
+              </span>
+              <span>Created AI-guided story</span>
+            </li>
+              {/* <li><span className="checkmark">✔</span><span>Practiced speaking skills</span></li> */}
+              <li >
+  <span className={allWordsApproved ? "checkmark" : "text-error"}>{allWordsApproved ? '✔' : '✖'}</span>
+  <span>Practiced speaking skills</span>
+</li>
             </ul>
           </div>
-          {/* <div>
-            <h4 className="font-medium text-aduffy-navy mb-3">Story Topic Mastered</h4>
-            <div className="topic-mastered">
-              <p className="topic-title">{selectedTopic?.title || 'Professional Communication'}</p>
-              <p className="topic-desc">
-                Successfully addressed this professional scenario while incorporating vocabulary words
-              </p>
-            </div>
-          </div> */}
           <div>
           <h4 className="font-medium text-aduffy-navy mb-3">Words You Learned</h4>
           {/* <div className="flex flex-wrap gap-2"> */}
@@ -3048,7 +3085,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
     { key: 'voice', label: 'Speak' },
     { key: 'results', label: 'Results' }
   ];
-
+ 
+// STORYTELLING RETURN
   return (
     <div className="step-nav">
       {steps.map((step, idx) => {

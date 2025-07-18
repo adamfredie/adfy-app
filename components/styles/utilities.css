@@ -44,6 +44,7 @@
 }
 
 /* Spacing Utilities */
+
 .mt-1 { margin-top: var(--space-1); }
 .mt-2 { margin-top: var(--space-2); }
 .mt-3 { margin-top: var(--space-3); }
@@ -1374,9 +1375,9 @@ ml-auto{
 
 
   }
-  /* .start-writing-btn .start-writing-icon{
+  .start-writing-btn .start-writing-icon{
     display:none;
-  } */
+  }
 }
 
 .continue-voice-btn {
@@ -2197,8 +2198,8 @@ ml-auto{
   display: inline-flex;
   align-items: center;
   gap: 0.6em;
-  /* background: #fff; */
-  background: #a39c8f;
+  background: #fff;
+  /* background: #a39c8f; */
   border: 1.5px solid #ffe6b0;
   color: #222b3a;
   border-radius: 0.9em;
@@ -2820,16 +2821,32 @@ ml-auto{
   gap: 2.5em;
   
 }
-@media(max-width:700px){
+/* S-1 SCROLL BAR STYLING OLD */
+/* @media(max-width:700px){
   .step-nav{
     gap:0.8em;
     overflow-x:scroll;
+    
   }
   .step-nav-item{
     font-size:1em;
     gap:0.2em;
   }
+} */
+ /* S-1 ENDS */
+ /* S-2 NEW SCROLL BAR WITH DISPLAY NONE */
+ @media (max-width: 700px) {
+  .step-nav {
+    gap: 0.8em;
+    overflow-x: auto; /* or scroll, but auto is better for hiding */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  .step-nav::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
 }
+/* S-2 ENDS */
 
 .step-nav-item {
   display: flex;
@@ -3191,10 +3208,10 @@ ml-auto{
     gap: 6px;
   }
   .mobile-vocab-pill.used {
-    background: #1793b6;
+    background: #14b8a6;
     color: #fff;
     font-weight: bold;
-    border-color: #1793b6;
+    border-color: #14b8a6;
   }
   .mobile-vocab-word {
     margin-right: 4px;
@@ -3375,3 +3392,26 @@ ml-auto{
 .no-box-shadow{
   box-shadow: none !important;
 }
+  .m-t{
+    margin-top:20px;
+  }
+  .allow-access-btn{
+    padding: 1px 9px;
+    background-color: #F9A825;
+    border: none;
+    border-radius: 0.75rem;
+    font-size: 15px;
+
+  }
+  .allow-access-div{
+      background: linear-gradient(135deg, #fffbe6, #fff);
+      box-shadow: 0 4px 24px #ffc1071a;
+      padding: 10px;
+      border-radius: 12px;
+  }
+  .text-error {
+    color: #b91c1c; /* or your preferred red */
+  }
+  .crossmark{
+    color: #b91c1c; 
+  }

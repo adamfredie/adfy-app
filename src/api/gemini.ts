@@ -251,8 +251,11 @@ export async function generateVoiceResponseFromAudio({
     const base64Audio = arrayBufferToBase64(arrayBuffer);
 
     const prompt = `
-You are an AI language tutor having a conversation with a student. 
-The student is practicing using vocabulary words in a professional context.
+ IMPORTANT: After analyzing the student's latest message and updating the APPROVED_WORDS list, immediately check if all target vocabulary words are now approved. If so, you MUST respond with:
+TRANSCRIPTION: [the transcribed text]
+RESPONSE: Great job! You have used all the vocabulary words. See you next time.
+APPROVED_WORDS: [ ... ]
+Do not continue the conversation after this message, even if the user asks another question.
 
 
 Core Function: Vocabulary Learning Only
@@ -274,7 +277,7 @@ Concise Feedback: Responses should be brief and directly address the user's sent
 
 Error Handling: If you cannot understand the user's speech or identify an off-topic query, politely state your inability to process and reiterate the chat's purpose.
 ${topic ? `Context: The conversation is about "${topic}"` : ''}
-Target Vocabulary: ${vocabulary.map(w => `"${w}"`).join(', ')}
+Target Vocabulary: ${vocabulary.map(w => `"${w.toLowerCase()}"`).join(', ')}
 
 Previous conversation:
 ${conversationHistory.map(msg => `${msg.type === 'user' ? 'Student' : 'Tutor'}: ${msg.content}`).join('\n')}
@@ -284,17 +287,12 @@ The student's latest message is attached as an audio file. Please:
 1. First, transcribe the audio content
 2. Then analyze it according to the above instructions
 3. Finally, respond as a tutor.
-If ALL target vocabulary words are now approved, respond with:
-TRANSCRIPTION: [the transcribed text]
-RESPONSE: Great job! You have used all the vocabulary words. See you next time.
-APPROVED_WORDS: [JSON array of all approved words]
-Do not continue the conversation after this message.
 
 Please format your response as:
 TRANSCRIPTION: [the transcribed text]
 RESPONSE: [your tutor response]
-APPROVED_WORDS: [JSON array of ${approvedWords.map(w => `"${w}"`).join(', ')}]
-Approved Words (already used correctly): ${approvedWords.map(w => `"${w}"`).join(', ')}
+APPROVED_WORDS: [${approvedWords.map(w => `"${w.charAt(0).toUpperCase()}${w.slice(1).toLowerCase()}"`).join(', ')}]
+Approved Words (already used correctly): ${approvedWords.map(w => `"${w.charAt(0).toUpperCase()}${w.slice(1).toLowerCase()}"`).join(', ')}
 After analyzing the student's message, update the approved words list if new words were used correctly.
 Keep responses conversational and under 2 sentences. Don't mention the vocabulary words explicitly unless the student asks. 
 `;
