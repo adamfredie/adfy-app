@@ -334,7 +334,7 @@ function getStepButtonProps() {
         audioChunksRef.current.push(e.data);
       };
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async  () => {
         const mimeType = mediaRecorder.mimeType || audioChunksRef.current[0]?.type || '';
         console.log("MediaRecorder mimeType:", mimeType); // Optional: for debugging
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
@@ -343,6 +343,16 @@ function getStepButtonProps() {
         // Stop all tracks to release microphone
         stream.getTracks().forEach(track => track.stop());
         // setTranscript(transcribedText); // <-- Remove this line, transcript is set after AI response
+        if (isMobile) {
+          if (!audioLoading) {
+            clearTranscript();
+            await sendAudioToGemini(blob);
+            setAudioBlob(null);
+            scrollToConversationCard();
+          }
+        } else {
+          setAudioBlob(blob);
+        }
       };
     } catch (error) {
       console.error('Error starting recording:', error);
@@ -2671,7 +2681,8 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
             {/* .CONVERSATION AREA */}
             <CardContent className="space-y-4">
               <div className="scrollable-fixed"  ref={chatContainerRef}>
-                {voiceConversation.length === 0 ? (
+                {voiceConversation.length === 0 ?
+                 (
                   <div className="text-center text-muted-foreground py-8">
                     <div className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
                     <p>
@@ -2682,7 +2693,8 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                     </p>
                    
                   </div>
-                ) : (
+                ) :
+                 (
                   voiceConversation.map((message, index) => ( 
                     <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
               {/* ADDED INDENTATION */}
@@ -2761,10 +2773,6 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
     );
   })}
 </div>
-
-
-              {/* Audio recording controls */}
-              // ... existing code ...
               {/* Audio recording controls */}
               {!isViewOnly && (
                 <>
@@ -2772,15 +2780,15 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                   {isMobile ? (
                     <div className="flex flex-col items-center justify-center w-full mt-4">
                       {voiceConversation.length === 0 ? (
-                        <button
-                          type="button"
-                          className="orange-action-btn"
-                          onClick={startVoiceConversation}
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}><path d="M8 5v14l11-7z" fill="#222"/></svg>
-                          Start Conversation
-                        </button>
-                      ) : (
+                    <button
+                      type="button"
+                      className="orange-action-btn"
+                      onClick={startVoiceConversation}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}><path d="M8 5v14l11-7z" fill="#222"/></svg>
+                      Start Conversation
+                    </button>
+                  ) :  (
                         <div className="voice-recorder-container">
                           <button
                             onClick={recording ? stopRecording : startRecording}
@@ -2788,13 +2796,17 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                             className={`voice-recorder-button ${recording ? 'is-recording' : ''}`}
                             aria-label={recording ? 'Stop Recording' : 'Start Recording'}
                           >
-                            {audioLoading ? (
+                            {/* {audioLoading ? (
                               <div className="w-8 h-8 border-4 border-gray-800 border-t-white rounded-full animate-spin"></div>
                             ) : (
                               <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z" />
                               </svg>
-                            )}
+                            )} */}
+                           <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z" />
+</svg>
+                           
                           </button>
                           <p className="voice-recorder-label">
                             {!audioSupported
