@@ -41,7 +41,7 @@
   - Voice Step: Voice conversation practice
   - Results Step: Final analysis and completion
 */
-
+// I-1 START
 import React from "react";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
@@ -54,24 +54,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Alert } from "./ui/alert";
 // import { Select } from "./ui/select";
 import { OnboardingData } from "./Onboarding";
+// I-2 STARTS
 import { useVoiceInteraction } from "../hooks/useVoiceInteraction";
+// I-2 ENDS
+// I-3 STARTS
 import { analyzeStoryWithGemini, generateVoiceResponse, generateVoiceResponseFromAudio } from '../src/api/gemini';
-// import { CustomSelect } from "./ui/CustomSelect";
-import ReactMarkdown from 'react-markdown';
-// import { getGeminiExample } from '../src/api/gemini';
-//Elevens Lab 
-import { getElevenLabsAudio } from '../src/api/elevenlabs';
-//RANDOM WORDS FROM GEMINI IMPORTS
 import { getRandomWordsFromGemini, getGeminiExample } from '../src/api/gemini';
-// IMORTING GEMINI FUNCTION FOR GENERATING RANDOM TOPIC
 import { getRandomStoryTopics } from '../src/api/gemini';
-// ... inside your component
-// AUTO SCROLl
+// I-3 ENDS
+//I-4 STARTS
+import { getElevenLabsAudio } from '../src/api/elevenlabs';
+// I-4 ENDS
+// I-5 STARTS
 import { ScrollToTop } from "./ScrollToTop";
+// I-5 ENDS
+// I-1 ENDS
 
 
-
-
+// STORY-1 STARTS
 interface StorytellingActivityProps {
   onBack: () => void;
   userProfile?: OnboardingData | null;
@@ -93,7 +93,8 @@ interface StorytellingActivityProps {
   }) => void;
   onComplete?: () => void;
 }
-
+// STORY-1 ENDS
+// WORDS-1 STARTS
 interface DailyWord {
   word: string;
   definition: string;
@@ -101,7 +102,7 @@ interface DailyWord {
   example: string;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
 }
-
+// WORDS-1 ENDS
 interface LearningQuestion {
   id: string;
   wordIndex: number;
@@ -265,6 +266,8 @@ export function StorytellingActivity({
   const [transcript, setTranscript] = useState('');
 // MODAL USE STATE VARIABLE
 const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+const [writingStarted, setWritingStarted] = useState(false);
+const [topicCollapsed, setTopicCollapsed] = useState(false);
  
 //  FUNCTION FOR TURNING START WRITING INTO COMPLETE PRACTICE AND NEXT QUESTION
 function getStepButtonProps() {
@@ -735,234 +738,234 @@ function getStepButtonProps() {
 
 
   // Generate words based on selected field and user level
-  const generateVocabularyWords = (field: string) => {
-    const fieldBasedWords = {
-      marketing: [
-        {
-          word: "Segmentation",
-          definition: "The process of dividing a market into distinct groups of consumers",
-          partOfSpeech: "noun",
-          example: "Market segmentation helped the company target specific customer demographics.",
-          difficulty: "intermediate" as const
-        },
-        {
-          word: "Attribution",
-          definition: "The process of determining which marketing efforts led to a sale",
-          partOfSpeech: "noun",
-          example: "Attribution analysis revealed that social media campaigns had the highest conversion rate.",
-          difficulty: "advanced" as const
-        },
-        {
-          word: "Optimization",
-          definition: "The action of making the best or most effective use of a situation",
-          partOfSpeech: "noun",
-          example: "Campaign optimization resulted in a 40% increase in click-through rates.",
-          difficulty: "intermediate" as const
-        },
-        {
-          word: "Conversion",
-          definition: "The process of turning prospects into customers",
-          partOfSpeech: "noun",
-          example: "The new landing page improved conversion rates by 25%.",
-          difficulty: "beginner" as const
-        },
-        {
-          word: "Engagement",
-          definition: "The level of interaction and involvement with content or campaigns",
-          partOfSpeech: "noun",
-          example: "Social media engagement increased significantly after the brand refresh.",
-          difficulty: "beginner" as const
-        }
-      ],
-      technology: [
-        {
-          word: "Scalability",
-          definition: "The ability of a system to handle increased workload",
-          partOfSpeech: "noun",
-          example: "The application's scalability was tested under high user traffic.",
-          difficulty: "intermediate" as const
-        },
-        {
-          word: "Redundancy",
-          definition: "The duplication of critical components of a system",
-          partOfSpeech: "noun",
-          example: "Database redundancy ensures data availability during system failures.",
-          difficulty: "advanced" as const
-        },
-        {
-          word: "Integration",
-          definition: "The process of combining different systems to work together",
-          partOfSpeech: "noun",
-          example: "API integration allows seamless data flow between applications.",
-          difficulty: "intermediate" as const
-        },
-        {
-          word: "Deployment",
-          definition: "The process of making software available for use",
-          partOfSpeech: "noun",
-          example: "The deployment of the new feature was completed without downtime.",
-          difficulty: "beginner" as const
-        },
-        {
-          word: "Architecture",
-          definition: "The fundamental structure and design of a system",
-          partOfSpeech: "noun",
-          example: "The microservices architecture improved system maintainability.",
-          difficulty: "advanced" as const
-        }
-      ],
-      sales: [
-        {
-          word: "Prospecting",
-          definition: "The process of identifying and qualifying potential customers",
-          partOfSpeech: "noun",
-          example: "Effective prospecting increased the sales team's qualified leads by 30%.",
-          difficulty: "intermediate" as const
-        },
-        {
-          word: "Pipeline",
-          definition: "A visual representation of sales opportunities in various stages",
-          partOfSpeech: "noun",
-          example: "The sales pipeline showed strong growth in Q3 opportunities.",
-          difficulty: "beginner" as const
-        },
-        {
-          word: "Objection",
-          definition: "A concern or resistance expressed by a potential customer",
-          partOfSpeech: "noun",
-          example: "The sales rep skillfully addressed every pricing objection during the call.",
-          difficulty: "intermediate" as const
-        },
-        {
-          word: "Upselling",
-          definition: "The practice of selling additional or upgraded products to existing customers",
-          partOfSpeech: "noun",
-          example: "Upselling premium features increased average deal size by 45%.",
-          difficulty: "advanced" as const
-        },
-        {
-          word: "Closing",
-          definition: "The final stage of completing a sale",
-          partOfSpeech: "noun",
-          example: "The closing technique used sealed the deal with the enterprise client.",
-          difficulty: "beginner" as const
-        }
-      ],
-      product: [
-        {
-          word: "Roadmap",
-          definition: "A strategic plan that defines product development goals and timeline",
-          partOfSpeech: "noun",
-          example: "The product roadmap outlined key features for the next six months.",
-          difficulty: "beginner" as const
-        },
-        {
-          word: "Iteration",
-          definition: "A repetitive process of refining and improving a product",
-          partOfSpeech: "noun",
-          example: "Each iteration brought the app closer to user expectations.",
-          difficulty: "intermediate" as const
-        },
-        {
-          word: "Backlog",
-          definition: "A prioritized list of features and tasks to be completed",
-          partOfSpeech: "noun",
-          example: "The product backlog was groomed to focus on high-impact features.",
-          difficulty: "intermediate" as const
-        },
-        {
-          word: "Validation",
-          definition: "The process of testing assumptions about user needs and market demand",
-          partOfSpeech: "noun",
-          example: "User validation confirmed the need for the new search feature.",
-          difficulty: "advanced" as const
-        },
-        {
-          word: "Positioning",
-          definition: "How a product is perceived in the market relative to competitors",
-          partOfSpeech: "noun",
-          example: "The positioning strategy differentiated the product in a crowded market.",
-          difficulty: "advanced" as const
-        }
-      ],
-      finance: [
-        {
-          word: "Liquidity",
-          definition: "The ease with which an asset can be converted into cash",
-          partOfSpeech: "noun",
-          example: "The company maintained high liquidity to handle unexpected expenses.",
-          difficulty: "intermediate" as const
-        },
-        {
-          word: "Diversification",
-          definition: "The practice of spreading investments across various assets",
-          partOfSpeech: "noun",
-          example: "Portfolio diversification reduced overall investment risk.",
-          difficulty: "advanced" as const
-        },
-        {
-          word: "Forecasting",
-          definition: "The process of predicting future financial performance",
-          partOfSpeech: "noun",
-          example: "Accurate forecasting helped the company prepare for market changes.",
-          difficulty: "intermediate" as const
-        },
-        {
-          word: "Allocation",
-          definition: "The distribution of resources or capital among different uses",
-          partOfSpeech: "noun",
-          example: "Budget allocation prioritized high-growth initiatives.",
-          difficulty: "beginner" as const
-        },
-        {
-          word: "Valuation",
-          definition: "The process of determining the worth of an asset or company",
-          partOfSpeech: "noun",
-          example: "The startup's valuation increased after the successful product launch.",
-          difficulty: "advanced" as const
-        }
-      ],
-      operations: [
-        {
-          word: "Optimization",
-          definition: "The process of making something as effective as possible",
-          partOfSpeech: "noun",
-          example: "Process optimization reduced operational costs by 20%.",
-          difficulty: "intermediate" as const
-        },
-        {
-          word: "Efficiency",
-          definition: "The ability to accomplish a job with minimum expenditure of time and effort",
-          partOfSpeech: "noun",
-          example: "Workflow efficiency improved after implementing the new system.",
-          difficulty: "beginner" as const
-        },
-        {
-          word: "Standardization",
-          definition: "The process of establishing common standards across operations",
-          partOfSpeech: "noun",
-          example: "Standardization of procedures ensured consistent quality across all locations.",
-          difficulty: "advanced" as const
-        },
-        {
-          word: "Scalability",
-          definition: "The capacity to be changed in size or scale",
-          partOfSpeech: "noun",
-          example: "The operation's scalability was tested during peak demand periods.",
-          difficulty: "intermediate" as const
-        },
-        {
-          word: "Logistics",
-          definition: "The coordination of complex operations involving people, facilities, and supplies",
-          partOfSpeech: "noun",
-          example: "Improved logistics reduced delivery times by 30%.",
-          difficulty: "intermediate" as const
-        }
-      ]
-    };
+  // const generateVocabularyWords = (field: string) => {
+  //   const fieldBasedWords = {
+  //     marketing: [
+  //       {
+  //         word: "Segmentation",
+  //         definition: "The process of dividing a market into distinct groups of consumers",
+  //         partOfSpeech: "noun",
+  //         example: "Market segmentation helped the company target specific customer demographics.",
+  //         difficulty: "intermediate" as const
+  //       },
+  //       {
+  //         word: "Attribution",
+  //         definition: "The process of determining which marketing efforts led to a sale",
+  //         partOfSpeech: "noun",
+  //         example: "Attribution analysis revealed that social media campaigns had the highest conversion rate.",
+  //         difficulty: "advanced" as const
+  //       },
+  //       {
+  //         word: "Optimization",
+  //         definition: "The action of making the best or most effective use of a situation",
+  //         partOfSpeech: "noun",
+  //         example: "Campaign optimization resulted in a 40% increase in click-through rates.",
+  //         difficulty: "intermediate" as const
+  //       },
+  //       {
+  //         word: "Conversion",
+  //         definition: "The process of turning prospects into customers",
+  //         partOfSpeech: "noun",
+  //         example: "The new landing page improved conversion rates by 25%.",
+  //         difficulty: "beginner" as const
+  //       },
+  //       {
+  //         word: "Engagement",
+  //         definition: "The level of interaction and involvement with content or campaigns",
+  //         partOfSpeech: "noun",
+  //         example: "Social media engagement increased significantly after the brand refresh.",
+  //         difficulty: "beginner" as const
+  //       }
+  //     ],
+  //     technology: [
+  //       {
+  //         word: "Scalability",
+  //         definition: "The ability of a system to handle increased workload",
+  //         partOfSpeech: "noun",
+  //         example: "The application's scalability was tested under high user traffic.",
+  //         difficulty: "intermediate" as const
+  //       },
+  //       {
+  //         word: "Redundancy",
+  //         definition: "The duplication of critical components of a system",
+  //         partOfSpeech: "noun",
+  //         example: "Database redundancy ensures data availability during system failures.",
+  //         difficulty: "advanced" as const
+  //       },
+  //       {
+  //         word: "Integration",
+  //         definition: "The process of combining different systems to work together",
+  //         partOfSpeech: "noun",
+  //         example: "API integration allows seamless data flow between applications.",
+  //         difficulty: "intermediate" as const
+  //       },
+  //       {
+  //         word: "Deployment",
+  //         definition: "The process of making software available for use",
+  //         partOfSpeech: "noun",
+  //         example: "The deployment of the new feature was completed without downtime.",
+  //         difficulty: "beginner" as const
+  //       },
+  //       {
+  //         word: "Architecture",
+  //         definition: "The fundamental structure and design of a system",
+  //         partOfSpeech: "noun",
+  //         example: "The microservices architecture improved system maintainability.",
+  //         difficulty: "advanced" as const
+  //       }
+  //     ],
+  //     sales: [
+  //       {
+  //         word: "Prospecting",
+  //         definition: "The process of identifying and qualifying potential customers",
+  //         partOfSpeech: "noun",
+  //         example: "Effective prospecting increased the sales team's qualified leads by 30%.",
+  //         difficulty: "intermediate" as const
+  //       },
+  //       {
+  //         word: "Pipeline",
+  //         definition: "A visual representation of sales opportunities in various stages",
+  //         partOfSpeech: "noun",
+  //         example: "The sales pipeline showed strong growth in Q3 opportunities.",
+  //         difficulty: "beginner" as const
+  //       },
+  //       {
+  //         word: "Objection",
+  //         definition: "A concern or resistance expressed by a potential customer",
+  //         partOfSpeech: "noun",
+  //         example: "The sales rep skillfully addressed every pricing objection during the call.",
+  //         difficulty: "intermediate" as const
+  //       },
+  //       {
+  //         word: "Upselling",
+  //         definition: "The practice of selling additional or upgraded products to existing customers",
+  //         partOfSpeech: "noun",
+  //         example: "Upselling premium features increased average deal size by 45%.",
+  //         difficulty: "advanced" as const
+  //       },
+  //       {
+  //         word: "Closing",
+  //         definition: "The final stage of completing a sale",
+  //         partOfSpeech: "noun",
+  //         example: "The closing technique used sealed the deal with the enterprise client.",
+  //         difficulty: "beginner" as const
+  //       }
+  //     ],
+  //     product: [
+  //       {
+  //         word: "Roadmap",
+  //         definition: "A strategic plan that defines product development goals and timeline",
+  //         partOfSpeech: "noun",
+  //         example: "The product roadmap outlined key features for the next six months.",
+  //         difficulty: "beginner" as const
+  //       },
+  //       {
+  //         word: "Iteration",
+  //         definition: "A repetitive process of refining and improving a product",
+  //         partOfSpeech: "noun",
+  //         example: "Each iteration brought the app closer to user expectations.",
+  //         difficulty: "intermediate" as const
+  //       },
+  //       {
+  //         word: "Backlog",
+  //         definition: "A prioritized list of features and tasks to be completed",
+  //         partOfSpeech: "noun",
+  //         example: "The product backlog was groomed to focus on high-impact features.",
+  //         difficulty: "intermediate" as const
+  //       },
+  //       {
+  //         word: "Validation",
+  //         definition: "The process of testing assumptions about user needs and market demand",
+  //         partOfSpeech: "noun",
+  //         example: "User validation confirmed the need for the new search feature.",
+  //         difficulty: "advanced" as const
+  //       },
+  //       {
+  //         word: "Positioning",
+  //         definition: "How a product is perceived in the market relative to competitors",
+  //         partOfSpeech: "noun",
+  //         example: "The positioning strategy differentiated the product in a crowded market.",
+  //         difficulty: "advanced" as const
+  //       }
+  //     ],
+  //     finance: [
+  //       {
+  //         word: "Liquidity",
+  //         definition: "The ease with which an asset can be converted into cash",
+  //         partOfSpeech: "noun",
+  //         example: "The company maintained high liquidity to handle unexpected expenses.",
+  //         difficulty: "intermediate" as const
+  //       },
+  //       {
+  //         word: "Diversification",
+  //         definition: "The practice of spreading investments across various assets",
+  //         partOfSpeech: "noun",
+  //         example: "Portfolio diversification reduced overall investment risk.",
+  //         difficulty: "advanced" as const
+  //       },
+  //       {
+  //         word: "Forecasting",
+  //         definition: "The process of predicting future financial performance",
+  //         partOfSpeech: "noun",
+  //         example: "Accurate forecasting helped the company prepare for market changes.",
+  //         difficulty: "intermediate" as const
+  //       },
+  //       {
+  //         word: "Allocation",
+  //         definition: "The distribution of resources or capital among different uses",
+  //         partOfSpeech: "noun",
+  //         example: "Budget allocation prioritized high-growth initiatives.",
+  //         difficulty: "beginner" as const
+  //       },
+  //       {
+  //         word: "Valuation",
+  //         definition: "The process of determining the worth of an asset or company",
+  //         partOfSpeech: "noun",
+  //         example: "The startup's valuation increased after the successful product launch.",
+  //         difficulty: "advanced" as const
+  //       }
+  //     ],
+  //     operations: [
+  //       {
+  //         word: "Optimization",
+  //         definition: "The process of making something as effective as possible",
+  //         partOfSpeech: "noun",
+  //         example: "Process optimization reduced operational costs by 20%.",
+  //         difficulty: "intermediate" as const
+  //       },
+  //       {
+  //         word: "Efficiency",
+  //         definition: "The ability to accomplish a job with minimum expenditure of time and effort",
+  //         partOfSpeech: "noun",
+  //         example: "Workflow efficiency improved after implementing the new system.",
+  //         difficulty: "beginner" as const
+  //       },
+  //       {
+  //         word: "Standardization",
+  //         definition: "The process of establishing common standards across operations",
+  //         partOfSpeech: "noun",
+  //         example: "Standardization of procedures ensured consistent quality across all locations.",
+  //         difficulty: "advanced" as const
+  //       },
+  //       {
+  //         word: "Scalability",
+  //         definition: "The capacity to be changed in size or scale",
+  //         partOfSpeech: "noun",
+  //         example: "The operation's scalability was tested during peak demand periods.",
+  //         difficulty: "intermediate" as const
+  //       },
+  //       {
+  //         word: "Logistics",
+  //         definition: "The coordination of complex operations involving people, facilities, and supplies",
+  //         partOfSpeech: "noun",
+  //         example: "Improved logistics reduced delivery times by 30%.",
+  //         difficulty: "intermediate" as const
+  //       }
+  //     ]
+  //   };
 
-    return fieldBasedWords[field as keyof typeof fieldBasedWords] || fieldBasedWords.marketing;
-  };
+  //   return fieldBasedWords[field as keyof typeof fieldBasedWords] || fieldBasedWords.marketing;
+  // };
 
   // Memoize the current progress object to prevent unnecessary updates
   const currentProgress = useMemo(() => {
@@ -1156,13 +1159,13 @@ const playWordWithElevenLabs = async (wordIndex: number) => {
   }, []);
 
   // Load vocabulary words based on selected field
-  useEffect(() => {
-    // Always generate words if we don't have any or if the field changed
-    if (!dailyWords || dailyWords.length === 0) {
-      const words = generateVocabularyWords(selectedField);
-      setDailyWords(words);
-    }
-  }, [selectedField, savedProgress]);
+  // useEffect(() => {
+  //   // Always generate words if we don't have any or if the field changed
+  //   if (!dailyWords || dailyWords.length === 0) {
+  //     const words = generateVocabularyWords(selectedField);
+  //     setDailyWords(words);
+  //   }
+  // }, [selectedField, savedProgress]);
 
   // Generate learning questions and story topics
   useEffect(() => {
@@ -1218,26 +1221,26 @@ const playWordWithElevenLabs = async (wordIndex: number) => {
     }
   };
 //Event Handler
-  const handleFieldChange = (newField: string) => {
-    // Don't allow field changes in view-only mode
-    if (isViewOnly) return;
+  // const handleFieldChange = (newField: string) => {
+  //   // Don't allow field changes in view-only mode
+  //   if (isViewOnly) return;
     
-    if (newField !== selectedField) {
-      setSelectedField(newField);
-      // Generate new words for the selected field
-      const newWords = generateVocabularyWords(newField);
-      setDailyWords(newWords);
+  //   if (newField !== selectedField) {
+  //     setSelectedField(newField);
+  //     // Generate new words for the selected field
+  //     const newWords = generateVocabularyWords(newField);
+  //     setDailyWords(newWords);
       
-      // Reset progress if changing field mid-activity
-      if (currentStep !== 'words') {
-        setCurrentStep('words');
-        setStepProgress(0);
-        setQuestionResults([]);
-        setUserStory('');
-        setCurrentQuestionIndex(0);
-      }
-    }
-  };
+  //     // Reset progress if changing field mid-activity
+  //     if (currentStep !== 'words') {
+  //       setCurrentStep('words');
+  //       setStepProgress(0);
+  //       setQuestionResults([]);
+  //       setUserStory('');
+  //       setCurrentQuestionIndex(0);
+  //     }
+  //   }
+  // };
 //Event Handler
   const handleNextStep = () => {
     // Don't allow navigation in view-only mode
@@ -1798,6 +1801,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                 setPreviousWords(prev => [...prev, ...newWordStrings]);
 // NEW BLOCK ENDED
                 setDailyWords(wordsWithExamples);
+                localStorage.setItem('aduffy-activity-words', JSON.stringify(wordsWithExamples));
               } catch (err) {
                 console.error('Error fetching random words from Gemini:', err);
                 alert('Could not fetch random words from Gemini.');
@@ -1847,10 +1851,12 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
 
       <div className="flex justify-center">
         {!isViewOnly ? (
+           dailyWords.length > 0 && (
           <Button onClick={handleNextStep} className="orange-action-btn">
             Continue to Learning Activities
             <span style={{fontSize: '1.1em', display: 'inline-block', transform: 'translateY(1px)'}}>→</span>
           </Button>
+           )
         ) : (
           // Return Button View Only
           <Button onClick={handleReturnToFurthest} className="return-btn">
@@ -2238,6 +2244,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
               <div className="ai-story-card-title ">
                 <span role="img" aria-label="lightbulb">💡</span>
                 Your Story Topic
+             
                 {selectedTopic && !isViewOnly && (
                   // <button onClick={regenerateTopic} disabled={isGeneratingTopic} className="ai-story-new-topic-btn ml-auto">
                   //   {isGeneratingTopic ? 'Generating...' : 'New Topic'}
@@ -2251,11 +2258,22 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                     {isGeneratingTopic ? 'Generating...' : 'Change Topic'}
                   </button>
                 )}
+                   {isMobile && writingStarted && (
+      <button
+        onClick={() => setTopicCollapsed(c => !c)}
+        className="ai-story-new-topic-btn-collapse"
+        style={{ marginLeft: 8 }}
+        aria-label={topicCollapsed ? "Expand Topic" : "Collapse Topic"}
+      >
+        {topicCollapsed ? "▼" : "▲"}
+      </button>
+    )}
               </div>
               {/* <div className="ai-story-card-desc">
                 Use this professional scenario as the foundation for your story
               </div> */}
             </CardHeader>
+            {!topicCollapsed && (
             <CardContent>
               {/* CONTEXT AND TEH CHALLENGE GENERATED BY THE NEW TOPIC */}
               <div className="story-context-box">
@@ -2285,60 +2303,109 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                 </div>
               </div>
             </CardContent>
+            )}
           </Card>
           {/* Story Writing Area */}
-          {/* <div className="story-card-writing"> */}
-          <div className="professional-story-card">
-            {/* <div className="story-card-writing-title">Your Professional Story</div>
-             */}
-               <div className="professional-story-title">Your Professional Story</div>
-            {/* <div className="story-card-writing-desc"> */}
-            <div className="professional-story-desc">
-              {/* {selectedTopic
-                ? `Write your story based on "${selectedTopic.title}" using all 5 vocabulary words`
-                : 'Write your story using all 5 vocabulary words'} */}
-                <p>Write a story and include all the vocabulary words</p>
+          {isMobile ? (
+  !writingStarted ? (
+    <Button
+      className="start-writing-btn"
+      onClick={() => {setWritingStarted(true);
+        setTopicCollapsed(true);
+      }}
+      type="button"
+      style={{ width: "100%", marginBottom: 16 }}
+    >
+      Start Writing
+    </Button>
+  ) : (
+    <div className="professional-story-card">
+      {/* ...all the story card content (your existing code here)... */}
+      <div className="professional-story-title">Your Professional Story</div>
+      <div className="professional-story-desc">
+        <p>Write a story and include all the vocabulary words</p>
+      </div>
+      <Textarea
+        placeholder={selectedTopic
+          ? (isViewOnly ? "Your story is displayed above..." : `Start your story about \"${selectedTopic.title}\" here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.`)
+          : 'Start your story here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.'}
+        value={userStory}
+        onChange={(e) => !isViewOnly && setUserStory(e.target.value)}
+        className="professional-story-textarea"
+        readOnly={isViewOnly}
+        onPaste={e => e.preventDefault()} 
+      />
+      {/* ...rest of your mobile vocab row and footer... */}
+      <div className="mobile-vocab-row">
+        {dailyWords && dailyWords.length > 0 ? dailyWords.map((word, index) => {
+          const isUsed = userStory.toLowerCase().includes(word.word.toLowerCase());
+          return (
+            <div key={index} className={`mobile-vocab-pill${isUsed ? ' used' : ''}`}>
+              <span className="mobile-vocab-word">{word.word}</span>
+              {isUsed && (
+                <span className="mobile-vocab-check">
+                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                    <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
+              )}
             </div>
-            <Textarea
-              placeholder={selectedTopic
-                ? (isViewOnly ? "Your story is displayed above..." : `Start your story about \"${selectedTopic.title}\" here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.`)
-                : 'Start your story here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.'}
-              value={userStory}
-              onChange={(e) => !isViewOnly && setUserStory(e.target.value)}
-              // className={`story-textarea${isViewOnly ? ' opacity-60' : ''}`}
-              className="professional-story-textarea"
-              readOnly={isViewOnly}
-              // TO PREVENT PASTING
-              onPaste={e => e.preventDefault()} 
-            />
-
-            {/* FOR MOBILE VOCAB WORDS */}
-        {/* Mobile-only vocab checklist row */}
-          <div className="mobile-vocab-row">
-            {dailyWords && dailyWords.length > 0 ? dailyWords.map((word, index) => {
-              const isUsed = userStory.toLowerCase().includes(word.word.toLowerCase());
-              return (
-                <div key={index} className={`mobile-vocab-pill${isUsed ? ' used' : ''}`}>
-                  <span className="mobile-vocab-word">{word.word}</span>
-                  {isUsed && (
-                    <span className="mobile-vocab-check">
-                      <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-                        <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </span>
-                  )}
-                </div>
-              );
-            }) : (
-              <span>Loading...</span>
+          );
+        }) : (
+          <span>Loading...</span>
+        )}
+      </div>
+      <div className="professional-story-footer">
+        <span>Words: {userStory.split(' ').filter(word => word.trim()).length}</span>
+        <span>Vocabulary used: {dailyWords.filter(word => userStory.toLowerCase().includes(word.word.toLowerCase())).length}/{dailyWords.length}</span>
+      </div>
+    </div>
+  )
+) : (
+  // Desktop: always show the card
+  <div className="professional-story-card">
+    {/* ...all the story card content (your existing code here)... */}
+    <div className="professional-story-title">Your Professional Story</div>
+    <div className="professional-story-desc">
+      <p>Write a story and include all the vocabulary words</p>
+    </div>
+    <Textarea
+      placeholder={selectedTopic
+        ? (isViewOnly ? "Your story is displayed above..." : `Start your story about \"${selectedTopic.title}\" here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.`)
+        : 'Start your story here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.'}
+      value={userStory}
+      onChange={(e) => !isViewOnly && setUserStory(e.target.value)}
+      className="professional-story-textarea"
+      readOnly={isViewOnly}
+      onPaste={e => e.preventDefault()} 
+    />
+    {/* ...rest of your mobile vocab row and footer... */}
+    <div className="mobile-vocab-row">
+      {dailyWords && dailyWords.length > 0 ? dailyWords.map((word, index) => {
+        const isUsed = userStory.toLowerCase().includes(word.word.toLowerCase());
+        return (
+          <div key={index} className={`mobile-vocab-pill${isUsed ? ' used' : ''}`}>
+            <span className="mobile-vocab-word">{word.word}</span>
+            {isUsed && (
+              <span className="mobile-vocab-check">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                  <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
             )}
           </div>
-            <div className="professional-story-footer">
-            {/* <div className="flex items-center justify-between text-xs text-muted-foreground mt-2"> */}
-              <span>Words: {userStory.split(' ').filter(word => word.trim()).length}</span>
-              <span>Vocabulary used: {dailyWords.filter(word => userStory.toLowerCase().includes(word.word.toLowerCase())).length}/{dailyWords.length}</span>
-            </div>
-          </div>
+        );
+      }) : (
+        <span>Loading...</span>
+      )}
+    </div>
+    <div className="professional-story-footer">
+      <span>Words: {userStory.split(' ').filter(word => word.trim()).length}</span>
+      <span>Vocabulary used: {dailyWords.filter(word => userStory.toLowerCase().includes(word.word.toLowerCase())).length}/{dailyWords.length}</span>
+    </div>
+  </div>
+)}
+          {/* AI STORY ANALYSIS FOR DESKTOP */}
           <div className="ai-analysis-desktop">
           {storyAnalysis && (
             <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent mobile-padding-feedback">
@@ -2452,6 +2519,13 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                       <li className="text-muted-foreground">No specific suggestions available.</li>
                     )}
                   </ul>
+                    <div className="flex justify-end mt-6">
+                 <button
+                 onClick={() => setShowAnalysisModal(false)}
+                 className="orange-action-btn">
+                  close
+                 </button>
+                      </div>
                 </div>
                 </Card>
               </AnalysisModal>
@@ -2494,6 +2568,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           </div>
           <div className="space-y-4">
             {!isViewOnly ? (
+                (!isMobile || writingStarted) && (
               <>
                 <Button
                   onClick={handleAnalyzeStory}
@@ -2529,6 +2604,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                   </button>
                 )}
               </>
+                )
             ) : (
               // Return Button View Only
               <div className="flex w-full justify-center">
@@ -2688,70 +2764,110 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
 
 
               {/* Audio recording controls */}
+              // ... existing code ...
+              {/* Audio recording controls */}
               {!isViewOnly && (
-                <div className="flex items-center gap-4 mt-4">
-                  {voiceConversation.length === 0 ? (
-                    <button
-                      type="button"
-                      className="orange-action-btn"
-                      onClick={startVoiceConversation}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}><path d="M8 5v14l11-7z" fill="#222"/></svg>
-                      Start Conversation
-                    </button>
-                  ) : (
-                    <>
-                      {audioSupported ? (
+                <>
+                  {/* --- MOBILE UI --- */}
+                  {isMobile ? (
+                    <div className="flex flex-col items-center justify-center w-full mt-4">
+                      {voiceConversation.length === 0 ? (
                         <button
                           type="button"
-                          onClick={recording ? stopRecording : startRecording}
                           className="orange-action-btn"
-                          disabled={audioLoading}
+                          onClick={startVoiceConversation}
                         >
-                          {recording ? (
-                            <>
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
-                                <rect x="6" y="6" width="12" height="12" rx="2" fill="#222" />
-                              </svg>
-                              {/* Listening */}
-                              {audioLoading ? 'Thinking' : 'Listening'}
-                            </>
-                          ) : (
-                            <>
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
-                                <path d="M8 5v14l11-7z" fill="#222"/>
-                              </svg>
-                              {/* {audioLoading ? 'Listening...' : 'Talk'} */}
-                              {audioLoading ? 'Thinking...' : 'Talk'}
-                            </>
-                          )}
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}><path d="M8 5v14l11-7z" fill="#222"/></svg>
+                          Start Conversation
                         </button>
                       ) : (
-                        <div className="text-sm text-muted-foreground">
-                          Audio recording not supported in this browser
+                        <div className="voice-recorder-container">
+                          <button
+                            onClick={recording ? stopRecording : startRecording}
+                            disabled={audioLoading || !audioSupported}
+                            className={`voice-recorder-button ${recording ? 'is-recording' : ''}`}
+                            aria-label={recording ? 'Stop Recording' : 'Start Recording'}
+                          >
+                            {audioLoading ? (
+                              <div className="w-8 h-8 border-4 border-gray-800 border-t-white rounded-full animate-spin"></div>
+                            ) : (
+                              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z" />
+                              </svg>
+                            )}
+                          </button>
+                          <p className="voice-recorder-label">
+                            {!audioSupported
+                              ? 'Audio not supported'
+                              : audioLoading
+                              ? 'Thinking...'
+                              : recording
+                              ? 'Listening...'
+                              : 'Tap to Speak'}
+                          </p>
                         </div>
                       )}
-                      
-                      {/* {audioLoading && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                          Sending to AI...
-                        </div>
-                      )} */}
-                      {audioBlob && !audioLoading && (
+                    </div>
+                  ) : (
+                    /* --- DESKTOP UI --- */
+                    <div className="flex items-center gap-4 mt-4">
+                      {voiceConversation.length === 0 ? (
                         <button
                           type="button"
                           className="orange-action-btn"
-                          onClick={handleSubmitAudio}
+                          onClick={startVoiceConversation}
                         >
-                          Submit
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}><path d="M8 5v14l11-7z" fill="#222"/></svg>
+                          Start Conversation
                         </button>
+                      ) : (
+                        <>
+                          {audioSupported ? (
+                            <button
+                              type="button"
+                              onClick={recording ? stopRecording : startRecording}
+                              className="orange-action-btn"
+                              disabled={audioLoading}
+                            >
+                              {recording ? (
+                                <>
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
+                                    <rect x="6" y="6" width="12" height="12" rx="2" fill="#222" />
+                                  </svg>
+                                  {audioLoading ? 'Thinking' : 'Listening'}
+                                </>
+                              ) : (
+                                <>
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
+                                    <path d="M8 5v14l11-7z" fill="#222"/>
+                                  </svg>
+                                  {audioLoading ? 'Thinking...' : 'Talk'}
+                                </>
+                              )}
+                            </button>
+                          ) : (
+                            <div className="text-sm text-muted-foreground">
+                              Audio recording not supported in this browser
+                            </div>
+                          )}
+                          
+                          {audioBlob && !audioLoading && (
+                            <button
+                              type="button"
+                              className="orange-action-btn"
+                              onClick={handleSubmitAudio}
+                            >
+                              Submit
+                            </button>
+                          )}
+                        </>
                       )}
-                      
-                    </>
+                    </div>
                   )}
-                </div>
+                </>
               )}
+
+
                {/* NEW BLOCKS VOICE TRANSCRIPT*/}
                {/* OLD BLOCK OF VOICE TRANSCRIPT */}
                {/* {!isViewOnly &&  voiceTranscript && (
@@ -3044,7 +3160,11 @@ const allWordsApproved = dailyWords.every(word =>
             setCompletedSteps(new Set());
             setFurthestStep('words');
             setApprovedWords([]);
+            setDailyWords([]);       
+            setPreviousWords([]);
             clearTranscript();
+            localStorage.removeItem('aduffy-activity-words');
+
           }}
           className="try-again-btn"
         >
@@ -3085,7 +3205,14 @@ const allWordsApproved = dailyWords.every(word =>
     { key: 'voice', label: 'Speak' },
     { key: 'results', label: 'Results' }
   ];
- 
+  useEffect(() => {
+    if (dailyWords.length === 0) {
+      const savedWords = localStorage.getItem('aduffy-activity-words');
+      if (savedWords) {
+        setDailyWords(JSON.parse(savedWords));
+      }
+    }
+  }, []);
 // STORYTELLING RETURN
   return (
     <div className="step-nav">

@@ -116,7 +116,7 @@ export default function App() {
     setHasCompletedOnboarding(true);
     setUserProfile(null);
     setActivityProgress({});
-    setCurrentActivity('dashboard');
+    setCurrentActivity('storytelling');
     
     // Reload the page to ensure complete reset
     window.location.reload();

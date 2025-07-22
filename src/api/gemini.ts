@@ -217,6 +217,7 @@ Keep responses conversational and under 2 sentences. Don't mention the vocabular
 }
 
 // Utility function to safely convert ArrayBuffer to base64
+// V-1 STARTS
 function arrayBufferToBase64(buffer: ArrayBuffer) {
   let binary = '';
   const bytes = new Uint8Array(buffer);
@@ -226,8 +227,10 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
   }
   return btoa(binary);
 }
-
+// V-1 ENDS
+// V-1 STARTS
 export async function generateVoiceResponseFromAudio({ 
+  // V-11 STARTS
   audioBlob, 
   conversationHistory, 
   vocabulary, 
@@ -240,16 +243,20 @@ export async function generateVoiceResponseFromAudio({
   vocabulary: string[];
   topic?: string;
   approvedWords?: string[];
+  // V-11 ENDS
+  // V-12 STARTS
 }) {
   if (!GEMINI_API_KEY) {
     throw new Error('Gemini API key is not configured. Please check your .env file.');
   }
-
+// V-12 ENDS
   try {
+    // V-13 STARTS
     // Convert audio blob to base64
     const arrayBuffer = await audioBlob.arrayBuffer();
     const base64Audio = arrayBufferToBase64(arrayBuffer);
-
+// V-13 ENDS
+// V-14 STARTS
     const prompt = `
  IMPORTANT: After analyzing the student's latest message and updating the APPROVED_WORDS list, immediately check if all target vocabulary words are now approved. If so, you MUST respond with:
 TRANSCRIPTION: [the transcribed text]
@@ -296,7 +303,8 @@ Approved Words (already used correctly): ${approvedWords.map(w => `"${w.charAt(0
 After analyzing the student's message, update the approved words list if new words were used correctly.
 Keep responses conversational and under 2 sentences. Don't mention the vocabulary words explicitly unless the student asks. 
 `;
-
+// V-14 ENDS
+// V-15 STARTS
     const response = await axios.post(
       `${GEMINI_AUDIO_API_URL}?key=${GEMINI_API_KEY}`,
       {
@@ -313,8 +321,11 @@ Keep responses conversational and under 2 sentences. Don't mention the vocabular
         }]
       }
     );
-    
+    // V-15 ENDS
+    // V-16 STARTS
     return response.data.candidates[0].content.parts[0].text;
+    // V-16 ENDS
+    // V-17 STARTS
   } catch (error) {
     console.error('Gemini Audio API error:', error);
     if (axios.isAxiosError(error)) {
@@ -322,7 +333,9 @@ Keep responses conversational and under 2 sentences. Don't mention the vocabular
     }
     throw error;
   }
+  // V-17 ENDS
 }
+// V-1 ENDS
 // For getting the example for the words
 export async function getGeminiExample(word: string, definition: string): Promise<string> {
   const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';

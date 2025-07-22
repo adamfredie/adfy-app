@@ -1372,6 +1372,7 @@ ml-auto{
 @media(max-width:700px){
   .start-writing-btn{
     padding:10px 5px;
+    justify-content: center;
 
 
   }
@@ -3415,3 +3416,49 @@ ml-auto{
   .crossmark{
     color: #b91c1c; 
   }
+  .ai-story-new-topic-btn-collapse {
+    background-color: #fffaf3; /* soft off-white with hint of yellow */
+    border: 1px solid #fcefc1; /* light yellow border */
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+  
+  .ai-story-new-topic-btn-collapse:hover {
+    background-color: #fff5d9;
+    border-color: #fbe6a2;
+  }
+  
+  .ai-story-new-topic-btn-collapse svg {
+    height: 16px;
+    width: 16px;
+    color: #f6c144; /* yellow bulb icon */
+  }
+  .ai-analysis-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ffc800; /* bright yellow */
+    color: #1a1a1a; /* dark text */
+    border: none;
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 50;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease;
+  }
+  
+  .ai-analysis-close-btn:hover {
+    background-color: #e6b800;
+  }
+  
