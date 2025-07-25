@@ -281,8 +281,14 @@ function getStepButtonProps() {
       };
     } else {
       return {
-        label: 'Complete Practice',
-        icon: '✔',
+        // label: 'Complete Practice',
+        // icon: '✔',
+        label: (
+          <>
+            Complete Practice
+            <span style={{ marginLeft: '8px' }}>✔</span>
+          </>
+        ),
         onClick: () => {
           setStepProgress(100);
           handleNextStep();
@@ -1979,7 +1985,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                   </div>
                 </div>
                 {/* PROGRESS BAR FOR THE QUIZ */}
-                <Progress value={(currentQuestionIndex / learningQuestions.length) * 100} className="mt-4 quiz-progress-bar" />
+                <Progress value={((currentQuestionIndex + 1) / learningQuestions.length) * 100} className="mt-4 quiz-progress-bar" />
               </CardHeader>
               {/* THIS IS THE QUIZ QUESTION CARD*/}
               <CardContent className="space-y-6">
@@ -2363,6 +2369,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
       Start Writing
     </Button>
   ) : (
+    <>
     <div className="professional-story-card">
       {/* ...all the story card content (your existing code here)... */}
       <div className="professional-story-title">Your Professional Story</div>
@@ -2403,8 +2410,30 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
         <span>Words: {userStory.split(' ').filter(word => word.trim()).length}</span>
         <span>Vocabulary used: {dailyWords.filter(word => userStory.toLowerCase().includes(word.word.toLowerCase())).length}/{dailyWords.length}</span>
       </div>
-    </div>
-  )
+    
+      <Button
+  onClick={handleAnalyzeStory}
+  disabled={!userStory.trim() || isAnalyzing || !selectedTopic}
+  className="analyze-story-btn"
+  style={{ width: "100%", marginTop: 16 }}
+>
+  {isAnalyzing ? (
+    <>
+      <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+      Analyzing...
+    </>
+  ) : (
+    <>
+      <div className="w-4 h-4 mr-2 text-aduffy-teal" />
+      Analyze My Story
+    </>
+  )}
+</Button>
+</div>
+      
+    </>
+    )
+  
 ) : (
   // Desktop: always show the card
   <div className="professional-story-card">
@@ -2612,7 +2641,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           </div>
           <div className="space-y-4">
             {!isViewOnly ? (
-                (!isMobile || writingStarted) && (
+                (!isMobile) && (
               <>
                 <Button
                   onClick={handleAnalyzeStory}
@@ -2664,7 +2693,13 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
   <div className="mobile-step-buttons" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '1rem' }}>
     <button
       type="button"
-      onClick={()=>console.log("clicked")}
+      onClick={() => {
+        const currentIndex = STEP_ORDER.indexOf(currentStep);
+        const previousStep = STEP_ORDER[currentIndex - 1];
+        if (previousStep) {
+          setCurrentStep(previousStep);
+        }
+      }}
       className="mobile-back-btn"
     >
       Back
@@ -2863,7 +2898,7 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
 </svg>
                            
                           </button>
-                          <p className="voice-recorder-label">
+                          {/* <p className="voice-recorder-label">
                             {!audioSupported
                               ? 'Audio not supported'
                               : audioLoading
@@ -2871,7 +2906,23 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                               : recording
                               ? 'Listening...'
                               : 'Tap to Speak'}
-                          </p>
+                          </p> */}
+                          <p className="voice-recorder-label">
+  {!audioSupported ? (
+    'Audio not supported'
+  ) : audioLoading ? (
+    'Thinking...'
+  ) : recording ? (
+    <>
+      <span>Listening...</span>
+      <br />
+      <span style={{fontSize:'10px', textAlign:"center"}}>Tap to Stop</span>
+    </>
+  ) : (
+    'Tap to Speak'
+  )}
+</p>
+
                         </div>
                       )}
                     </div>
@@ -2957,7 +3008,7 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
       className="w-full soft-yellow-btn mobile-only-btn"
       disabled={approvedWords.length < 2}
     >
-      Complete &amp; Get Results
+      Complete &amp; Get Results 
       <span className="soft-yellow-arrow">&#8594;</span>
     </button>
   ) : (
@@ -2973,14 +3024,26 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
     >
       <button
         type="button"
-        onClick={() => console.log("clicked")}
+        onClick={() => {
+          const currentIndex = STEP_ORDER.indexOf(currentStep);
+          const previousStep = STEP_ORDER[currentIndex - 1];
+          if (previousStep) {
+            setCurrentStep(previousStep);
+          }
+        }}
         className="mobile-back-btn"
       >
         Back
       </button>
       <button
         type="button"
-        onClick={handleNextStep}
+        onClick={() => {
+          const currentIndex = STEP_ORDER.indexOf(currentStep);
+          const previousStep = STEP_ORDER[currentIndex - 1];
+          if (previousStep) {
+            setCurrentStep(previousStep);
+          }
+        }}
         className="mobile-next-btn"
         disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
       >

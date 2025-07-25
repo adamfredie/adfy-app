@@ -22,9 +22,9 @@ export function Navigation({ currentActivity, onSignOut, onResetOnboarding, user
         </a>
       </div>
       <div className="nav-right">
-        <button type="button"className="nav-icon-btn">
+        {/* <button type="button"className="nav-icon-btn">
           <span role="img" aria-label="settings">⚙️</span>
-        </button>
+        </button> */}
         {/* User menu is now always visible, regardless of the current activity */}
         <div className="user-menu-container">
              <button type="button"className="user-avatar" onClick={() => setIsMenuOpen(!isMenuOpen) } style={{border:"none"}}>

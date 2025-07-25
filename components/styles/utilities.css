@@ -2304,6 +2304,7 @@ ml-auto{
   transition: background 0.15s, border-color 0.15s;
   box-shadow: none;
   cursor: pointer;
+  justify-content:center;
 }
 .return-btn:hover {
   background: #fff8f0; /* very light orange */
@@ -2934,6 +2935,7 @@ ml-auto{
   align-items: center;
 }
 /* ANALYZE MY STORY BUTTON */
+
 .analyze-story-btn {
   background: #ffb32c;           /* solid orange */
   color: #222b3a;                /* black text */
@@ -3627,6 +3629,19 @@ ml-auto{
     }
   }
   .next-btn-learn{
+    width:100%;
+    justify-content:center;
+    border-radius: 12px; 
+    font-size: 13px; 
+    font-weight: 500; 
+    cursor: pointer; 
+    transition: all 0.2s;
+    border: 2px solid #FFC400; 
+    background: #FFC400; 
+    color: black; 
+    height:40px;
+  }
+  .next-btn-learn:disabled{
     width:100%;
     justify-content:center;
     border-radius: 12px; 
