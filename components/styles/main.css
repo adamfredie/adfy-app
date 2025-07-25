@@ -517,11 +517,7 @@ body {
   font-size: var(--font-size-xl);
   color: var(--text-secondary);
 }
-@media(max-width:700px){
-  .nav-icon-btn{
-    display:none;
-  }
-}
+
 
 .nav-level-badge {
   display: flex;
@@ -635,8 +631,11 @@ body {
   background: var(--bg-secondary);
 }
 
-.main-content-column {
+/* .main-content-column {
   padding: var(--space-6);
+} */
+.main-content-column {
+  padding: 5px;
 }
 
 /* Updated Welcome Section */
@@ -1400,7 +1399,14 @@ body {
 .orange-action-btn:hover {
   background: #c17900;
 }
-
+@media(max-width:700px){
+  .orange-action-btn{
+    width: 100%;
+    justify-content: center;
+    padding: 0.438rem 0.656rem 0.438rem 0.656rem;
+    border-radius:0.656rem;
+  }
+}
 .soft-yellow-btn {
   background: #fdd995;
   color: #888;

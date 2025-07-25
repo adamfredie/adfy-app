@@ -606,6 +606,20 @@ ml-auto{
   text-align: right;
 
 }
+/* @media(max-width: 700px){
+  .progress-bar-container{
+    display:none;
+  }
+  .progress-bar-fill{
+    display:none;
+  }
+  .progress-percentage{
+    display:none;
+  }
+  .progress-header-label{
+    display: none;
+  }
+} */
 
 /* 
   STORY CARD STYLING
@@ -3315,7 +3329,8 @@ ml-auto{
   border-radius: 999px;
   padding: 6px 14px;
   background: #fff;
-  font-size: 1rem;
+  font-size: 13px;
+  /* font-size: 1rem; */
   color: #222b3a;
   transition: background 0.2s;
 }
@@ -3474,8 +3489,10 @@ ml-auto{
   
   .voice-recorder-button {
     border:none;
-    width: 5rem;
-    height: 5rem;
+    /* width: 5rem;
+    height: 5rem; */
+    width: 3rem;
+    height: 3rem;
     border-radius: 9999px;
     background-color: #facc15;
     color: #1f2937;
@@ -3495,7 +3512,8 @@ ml-auto{
   }
   
   .voice-recorder-label {
-    margin-top: 1rem;
+    /* margin-top: 1rem; */
+    margin-top: 0.25rem;
     font-weight: 600;
     color: #4b5563;
   }
@@ -3513,4 +3531,171 @@ ml-auto{
       display: none !important;
     }
   }
+  .step-nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    min-height: 48px;
+    background: #fff;
+    width:100%;
+  }
   
+  .step-nav-back {
+    background: none;
+    border: none;
+    padding: 0 8px 0 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .step-nav-steps {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .step-pill-current {
+    display: flex;
+    align-items: center;
+    background: #fff7d6;
+    border: 1.5px solid #ffe59e;
+    border-radius: 18px;
+    padding: 4px 18px 4px 8px;
+    font-weight: 500;
+    color: #222b3a;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    font-size: 1rem;
+  }
+  
+  .step-dot-current {
+    width: 16px;
+    height: 16px;
+    background: #ffd600;
+    border-radius: 50%;
+    margin-right: 8px;
+    border: 2px solid #fff3b0;
+  }
+  
+  .step-label {
+    font-size: 1rem;
+  }
+  
+  .step-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 0;
+    background: #cfd8dc;
+    display: inline-block;
+  }
+  
+  .step-circle.completed {
+    background: #26c6da;
+  }
+  
+  .step-circle.upcoming {
+    background: #cfd8dc;
+  }
+  
+  .step-count-badge {
+    background: #fff7d6;
+    color: #222b3a;
+    border-radius: 16px;
+    padding: 4px 14px;
+    font-size: 1rem;
+    font-weight: 500;
+    border: 1.5px solid #ffe59e;
+    margin-left: 12px;
+  }
+  .mobile-text {
+    display: none;
+  }
+  
+  .desktop-text {
+    display: inline;
+  }
+  
+  @media(max-width: 700px) {
+    .mobile-text {
+      display: inline;
+    }
+    
+    .desktop-text {
+      display: none;
+    }
+  }
+  .next-btn-learn{
+    width:100%;
+    justify-content:center;
+    border-radius: 12px; 
+    font-size: 13px; 
+    font-weight: 500; 
+    cursor: pointer; 
+    transition: all 0.2s;
+    border: 2px solid #FFC400; 
+    background: white; 
+    color: black; 
+    height:40px;
+  }
+  /* .next-btn-learn:hover {
+    background: #c17900;
+  } */
+  .mobile-skip-btn{
+    background: #F9A825;
+    color: black;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    box-shadow: none;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    width:50%;
+    margin-left:12px;
+    justify-content: center;
+    height: 40px;
+  }
+  .mobile-back-btn{
+    width:50%;
+    justify-content:center;
+    border-radius: 12px; 
+    font-size: 16px; 
+    font-weight: 500; 
+    cursor: pointer; 
+    transition: all 0.2s;
+    border: 2px solid #FFC400; 
+    background: white; 
+    color: black; 
+    height:40px;
+
+  }
+  .mobile-next-btn{
+    background: #F9A825;
+    color: black;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    box-shadow: none;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    width:50%;
+    margin-left:12px;
+    justify-content: center;
+    height: 40px;
+  }
+  .mobile-next-btn:disabled {
+    background-color: #f1f1f1;
+    color: #aaa;
+    cursor: not-allowed;
+  }

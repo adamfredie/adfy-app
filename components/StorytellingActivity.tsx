@@ -275,7 +275,7 @@ function getStepButtonProps() {
     if (currentQuestionIndex < learningQuestions.length - 1) {
       return {
         label: 'Next',
-        icon: '→',
+        ...(isMobile ? {} : { icon: '→' }),
         onClick: handleNextQuestion,
         disabled: showQuestionFeedback === false, // Only enable after answering
       };
@@ -522,6 +522,7 @@ function getStepButtonProps() {
       console.log('Parsed analysis:', analysis);
       
       setStoryAnalysis(analysis);
+      setIsAnalyzed(true); 
       if (isMobile) {
         setShowAnalysisModal(true);
       }
@@ -674,7 +675,9 @@ function getStepButtonProps() {
       conversationCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
-  
+  // FOR SEEING IF THE ANALYSIS IS DONE
+  const [isAnalyzed, setIsAnalyzed] = useState(false);
+
 
     // AUTO SCROLL FOR VOICE CONVERSATION TEXT BOX ENDS
   // Step completion tracking - initialize from saved progress
@@ -1863,7 +1866,8 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
         {!isViewOnly ? (
            dailyWords.length > 0 && (
           <Button onClick={handleNextStep} className="orange-action-btn">
-            Continue to Learning Activities
+           <span className="desktop-text">Continue to Learning Activities</span> 
+           <span className="mobile-text">Next</span> 
             <span style={{fontSize: '1.1em', display: 'inline-block', transform: 'translateY(1px)'}}>→</span>
           </Button>
            )
@@ -2061,7 +2065,22 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                   )} */}
                   </div>
                 )}
-              
+              {isMobile && stepButton &&(
+                // <button className="next-btn-learn">Next Question</button>
+                <button
+                    className="next-btn-learn"
+                    onClick={stepButton.onClick}
+                    disabled={stepButton.disabled}
+                    type="button"
+                  >
+                    {stepButton.label}
+                    <span className="start-writing-icon" style={{ marginRight: 8 }}>
+                      {typeof stepButton.icon === 'string'
+                        ? <span style={{ display: 'inline-block', transform: 'translateY(1px)' }}>{stepButton.icon}</span>
+                        : stepButton.icon}
+                    </span>
+                  </button>
+              )}
               </CardContent>
             </Card>
           )}
@@ -2131,59 +2150,74 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           )}
         </TabsContent>
       </Tabs>
-
       <div className="flex justify-between">
         {!isViewOnly ? (
           <>
-            <button
-              type="button"
-              onClick={handleSkipLearning}
-              className="skip-learning-btn"
-            >
-              Skip Learning
-            </button>
-            {/* <button
-              type="button"
-              onClick={handleNextStep}
-              className="start-writing-btn"
-              disabled={stepProgress < 100 && showLearningContent}
-            >
-              <span className="start-writing-icon">
-                <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
-                  <path d="M5 12h14M13 6l6 6-6 6" stroke="#222b3a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </span>
-              Start Writing
-            </button> */}
-            {/* NEW START WRITING COMPLETE PRACTICE BUTTON */}
-             {stepButton && (
-              
-      <button
-        className="start-writing-btn"
-        onClick={stepButton.onClick}
-        disabled={stepButton.disabled}
-        type="button"
-      >
-        {stepButton.label}
-        <span className="start-writing-icon" style={{ marginRight: 8 }}>
-          {typeof stepButton.icon === 'string'
-            ? <span style={{ display: 'inline-block', transform: 'translateY(1px)' }}>{stepButton.icon}</span>
-            : stepButton.icon}
-        </span>
-      </button>
-    )}
+            {isMobile ? (
+              // Mobile Button Layout
+              <div className="mobile-learning-buttons" style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', width: '100%' }}>
+            
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentIndex = STEP_ORDER.indexOf(currentStep);
+                    const previousStep = STEP_ORDER[currentIndex - 1];
+                    if (previousStep) {
+                      setCurrentStep(previousStep);
+                    }
+                  }}
+                  className="mobile-back-btn"
+                  
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSkipLearning}
+                  className="mobile-skip-btn"
+                
+                >
+                  Skip Learning
+                </button>
+              </div>
+            ) : (
+              // Desktop Button Layout
+              <>
+                <button
+                  type="button"
+                  onClick={handleSkipLearning}
+                  className="skip-learning-btn"
+                >
+                  Skip Learning
+                </button>
+                {stepButton && (
+                  <button
+                    className="start-writing-btn"
+                    onClick={stepButton.onClick}
+                    disabled={stepButton.disabled}
+                    type="button"
+                  >
+                    {stepButton.label}
+                    <span className="start-writing-icon" style={{ marginRight: 8 }}>
+                      {typeof stepButton.icon === 'string'
+                        ? <span style={{ display: 'inline-block', transform: 'translateY(1px)' }}>{stepButton.icon}</span>
+                        : stepButton.icon}
+                    </span>
+                  </button>
+                )}
+              </>
+            )}
           </>
         ) : (
           <div className="flex w-full justify-center">
-            {/* Return Button View Only */}
             <Button onClick={handleReturnToFurthest} className="return-btn">
-            {/*Return Button View Only */}
               <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
               Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
             </Button>
           </div>
         )}
       </div>
+      
     </div>
   );
 
@@ -2599,7 +2633,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                 </Button>
 
                 {/* CONTINUE TO VOICE CHAT BUTTON */}
-                {storyAnalysis && (
+                {storyAnalysis && !isMobile &&(
                   <button
                     type="button"
                     onClick={handleNextStep}
@@ -2625,6 +2659,27 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
               </div>
             )}
           </div>
+          {/* MOBILE VERSION */}
+          {isMobile && !isViewOnly && (
+  <div className="mobile-step-buttons" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '1rem' }}>
+    <button
+      type="button"
+      onClick={()=>console.log("clicked")}
+      className="mobile-back-btn"
+    >
+      Back
+    </button>
+    <button
+      type="button"
+      onClick={handleNextStep}
+      className="mobile-next-btn"
+      disabled={!isAnalyzed}
+    >
+      Next
+    </button>
+  </div>
+)}
+
         </div>
       </div>
     </div>
@@ -2820,6 +2875,7 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                         </div>
                       )}
                     </div>
+                    
                   ) : (
                     /* --- DESKTOP UI --- */
                     <div className="flex items-center gap-4 mt-4">
@@ -2892,16 +2948,57 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
           </Card>
         </div>
         {/* COMPLETE AND GET RESULT BUTTON FOR MOBILE VERSION */}
-<button
-     type="button"
-     onClick={handleNextStep}
-     className="w-full soft-yellow-btn mobile-only-btn"
-    //  disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
-    disabled={approvedWords.length < 2}
-   >
-     Complete &amp; Get Results
-     <span className="soft-yellow-arrow">&#8594;</span>
-   </button>
+        {!isViewOnly ? (
+  !isMobile ? (
+    // Case 1: Not mobile & not view-only
+    <button
+      type="button"
+      onClick={handleNextStep}
+      className="w-full soft-yellow-btn mobile-only-btn"
+      disabled={approvedWords.length < 2}
+    >
+      Complete &amp; Get Results
+      <span className="soft-yellow-arrow">&#8594;</span>
+    </button>
+  ) : (
+    // Case 2: Mobile & not view-only
+    <div
+      className="mobile-step-buttons"
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginTop: '1rem',
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => console.log("clicked")}
+        className="mobile-back-btn"
+      >
+        Back
+      </button>
+      <button
+        type="button"
+        onClick={handleNextStep}
+        className="mobile-next-btn"
+        disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
+      >
+        View Results
+      </button>
+    </div>
+  )
+) : (
+  // Case 3: View-only mode
+  <button
+    type="button"
+    onClick={handleReturnToFurthest}
+    className="return-btn"
+  >
+    <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
+    Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
+  </button>
+)}
 
         {/* Right: Word Usage Goal */}
         {/* CHECK LIST FOR VOICE CONVERSATION*/}
@@ -3225,9 +3322,45 @@ const allWordsApproved = dailyWords.every(word =>
       }
     }
   }, []);
+  
 // STORYTELLING RETURN
   return (
-    <div className="step-nav">
+    <>
+    {isMobile? (
+      <div className="step-nav-bar">
+      <button className="step-nav-back" onClick={onBack} aria-label="Back">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+          <path d="M15 19l-7-7 7-7" stroke="#222b3a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      <div className="step-nav-steps">
+        {steps.map((step, idx) => {
+          const isCurrent = step.key === currentStep;
+          const isCompleted = completedSteps.has(step.key);
+          if (isCurrent) {
+            return (
+              <div key={step.key} className="step-pill-current">
+                <span className="step-dot-current" />
+                <span className="step-label">{step.label}</span>
+              </div>
+            );
+          }
+          return (
+            <div
+              key={step.key}
+              className={`step-circle ${isCompleted ? 'completed' : 'upcoming'}`}
+              onClick={() => (isCompleted) && handleStepNavigation(step.key)}
+              style={{ cursor: isCompleted ? 'pointer' : 'default' }}
+            />
+          );
+        })}
+      </div>
+      <div className="step-count-badge">
+        {getStepNumber(currentStep)}/{steps.length}
+      </div>
+    </div> 
+
+    ):( <div className="step-nav">
       {steps.map((step, idx) => {
         const status = getStepStatus(step.key); // 'completed', 'current', 'upcoming'
         return (
@@ -3262,7 +3395,9 @@ const allWordsApproved = dailyWords.every(word =>
           </div>
         );
       })}
-    </div>
+    </div>)}
+    </>
+
   );
 };
  // Add this useEffect to restore story topics
@@ -3332,25 +3467,31 @@ const allWordsApproved = dailyWords.every(word =>
       {/* Progress Header */}
       <div className="space-y-4">
         <div>
+      { !isMobile &&(
           <div className="flex justify-between">
           <div className="progress-header-label ">Overall Progress</div>
           <div className="progress-percentage">{Math.round(calculateProgress())}%</div>
           </div>
+      )}
           {/* OLD BLOCK */}
           {/* <div className="flex justify-end">
             <div className="progress-percentage">{Math.round(calculateProgress())}%</div>
           </div> */}
           {/* <div className="progress-percentage ">{Math.round(calculateProgress())}%</div> */}
           {/* OLD BLOCK END*/}
+          {!isMobile&&(
           <div className="progress-bar-container">
             <div
               className="progress-bar-fill"
               style={{ width: `${calculateProgress()}%` }}
             />
           </div>
+          )}
         </div>
+
         <div className="flex items-center justify-between">
           <div></div>
+      
           <div className="flex items-center gap-2">
             {/* {isViewOnly && (
               <Badge className="view-only-badge">
