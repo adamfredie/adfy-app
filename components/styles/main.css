@@ -557,6 +557,18 @@ body {
   justify-content: center;
   font-weight: 600;
 }
+.reset-btn-nav{
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border: none;
+  padding: 0.2rem 1.3rem;
+  border-radius: 25px;
+}
 
 .user-info {
   display: flex;

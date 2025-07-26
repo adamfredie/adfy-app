@@ -27,11 +27,14 @@ export function Navigation({ currentActivity, onSignOut, onResetOnboarding, user
         </button> */}
         {/* User menu is now always visible, regardless of the current activity */}
         <div className="user-menu-container">
-             <button type="button"className="user-avatar" onClick={() => setIsMenuOpen(!isMenuOpen) } style={{border:"none"}}>
+             <button type="button"className="reset-btn-nav" onClick={onResetOnboarding} style={{border:"none"}}>
+              Reset
+            </button>
+             {/* <button type="button"className="user-avatar" onClick={() => setIsMenuOpen(!isMenuOpen) } style={{border:"none"}}>
   {userProfile?.name
     ? userProfile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : "U"}
-</button>
+            </button> */}
             {/* <div className="user-info">
               <span className="user-name">
           {userProfile?.name ? userProfile.name : "User"}

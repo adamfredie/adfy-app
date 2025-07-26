@@ -249,7 +249,7 @@ export function StorytellingActivity({
   userProfile, 
   savedProgress, 
   onProgressUpdate,
-  onComplete 
+  onComplete,
 }: StorytellingActivityProps) {
   const [storyAnalysis, setStoryAnalysis] = useState<any>(null);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
@@ -357,6 +357,7 @@ function getStepButtonProps() {
             scrollToConversationCard();
           }
         } else {
+          clearTranscript();
           setAudioBlob(blob);
         }
       };
@@ -529,9 +530,10 @@ function getStepButtonProps() {
       
       setStoryAnalysis(analysis);
       setIsAnalyzed(true); 
-      if (isMobile) {
-        setShowAnalysisModal(true);
-      }
+      // if (isMobile) {
+      //   setShowAnalysisModal(true);
+      // }
+      setShowAnalysisModal(true);
     } catch (err) {
       console.error('Story analysis error:', err);
       // Show error to user
@@ -2481,6 +2483,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           {/* AI STORY ANALYSIS FOR DESKTOP */}
           <div className="ai-analysis-desktop">
           {storyAnalysis && (
+          <AnalysisModal open={showAnalysisModal} onClose={() => setShowAnalysisModal(false)}>
             <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent mobile-padding-feedback">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-aduffy-navy">
@@ -2489,10 +2492,6 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                 </CardTitle>
               </CardHeader>
               <CardContent className="ai-analysis-card space-y-6">
-                {/* <div className="ai-analysis-header">
-                  <svg className="ai-analysis-trophy" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4V2h14v2h3v2c0 3.31-2.69 6-6 6h-2v2.09A7.001 7.001 0 0 1 12 22a7.001 7.001 0 0 1-2-13.91V10H8c-3.31 0-6-2.69-6-6V4h3zm2 0v2c0 2.21 1.79 4 4 4s4-1.79 4-4V4H7zm-3 2c0 2.21 1.79 4 4 4h2V4H4v2zm16-2h-6v4h2c2.21 0 4-1.79 4-4V4z"/></svg>
-                  <span>AI Story Analysis</span>
-                </div> */}
                 <div className="ai-analysis-scores-row">
                   <div className="text-center">
                     <div className="ai-analysis-score ai-analysis-score-creativity">{storyAnalysis?.creativity || 0}%</div>
@@ -2528,19 +2527,21 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                       <li className="text-muted-foreground">No specific suggestions available.</li>
                     )}
                   </ul>
+                  <div className="flex justify-end mt-6">
+                 <button
+                 onClick={() => setShowAnalysisModal(false)}
+                 className="orange-action-btn">
+                  close
+                 </button>
+                      </div>
                 </div>
-                {/* Render detailed feedback as markdown */}
-                {/* {storyAnalysis?.detailedFeedback && (
-                  <div className="ai-analysis-detailed-feedback mt-6">
-                    <ReactMarkdown>{storyAnalysis.detailedFeedback}</ReactMarkdown>
-                  </div>
-                )} */}
-                {/* NEW SHORT FEEDBACK */}
-                {/* <p className="text-muted-foreground">{storyAnalysis?.feedback || 'No feedback available.'}</p> */}
               </CardContent>
             </Card>
+            </AnalysisModal>
           )}
         </div>
+        
+        
         </div>
 
           {/* MODAL SHOW BUTTON */}
@@ -3101,6 +3102,7 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                         </svg>
                       )}
                     </div> */}
+                    {/* <div className={`vocab-checklist-indicator ${isApproved ? ' checked' : ''}`}> */}
                     <div className={`word-usage-indicator${isApproved ? ' checked' : ''}`}>
                   {isApproved && (
                     <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
@@ -3117,7 +3119,11 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
             {!isViewOnly ? (
               <button
                 type="button"
-                onClick={handleNextStep}
+                // onClick={handleNextStep}
+                onClick={() => {
+                  stopSpeaking();
+                  handleNextStep();
+                }}
                 className="w-full soft-yellow-btn"
                 disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
               >
@@ -3335,10 +3341,16 @@ const allWordsApproved = dailyWords.every(word =>
             setApprovedWords([]);
             setDailyWords([]);       
             setPreviousWords([]);
+            setWritingStarted(false); // ✅ <--- Add this
+            setTopicCollapsed(false);
+            setIsAnalyzed(false);
             clearTranscript();
+            setTranscript('');
             localStorage.removeItem('aduffy-activity-words');
-
+            sessionStorage.clear();
           }}
+          
+          
           className="try-again-btn"
         >
           <span className="try-again-icon" aria-hidden="true">
@@ -3386,6 +3398,42 @@ const allWordsApproved = dailyWords.every(word =>
       }
     }
   }, []);
+  const handleTryAgain = () => {
+    // Remove all relevant localStorage items
+    const keysToRemove = [
+      'aduffy-activity-progress',
+      'aduffy-activity-words',
+      'aduffy-userStory',
+      'aduffy-storyAnalysis',
+      'aduffy-approvedWords',
+      'voiceConversation',
+      'userStory',
+    ];
+  
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+  
+    // Reset all relevant state
+    setCurrentStep('words');
+    setStepProgress(0);
+    setUserStory('');
+    setStoryAnalysis(null);
+    setVoiceConversation([]);
+    setQuestionResults([]);
+    setCurrentQuestionIndex(0);
+    setSelectedTopic(null);
+    setShowQuestionFeedback(false);
+    setCurrentQuestionResult(null);
+    setCompletedSteps(new Set());
+    setFurthestStep('words');
+    setApprovedWords([]);
+    setDailyWords([]);
+    setPreviousWords([]);
+    setWritingStarted(false);  // ✅ Important for showing "Start Writing" again
+    setTopicCollapsed(false);  // Optional depending on UI flow
+  
+    // Clear transcript if available
+    clearTranscript?.();
+  };
   
 // STORYTELLING RETURN
   return (

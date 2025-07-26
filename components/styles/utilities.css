@@ -1197,10 +1197,14 @@ ml-auto{
   margin-bottom: 0.5rem;
   min-height: 56px;
   box-shadow: 0 1px 2px 0 rgba(60,60,60,0.02);
+  gap:2rem;
 }
 
 .word-usage-info {
   /* left side container, can be empty or used for layout tweaks */
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .word-usage-title {
@@ -1214,16 +1218,22 @@ ml-auto{
   color: #6b7280;
 }
 
+
 .word-usage-indicator {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 9999px;
-  border: 2px solid #e5e7eb; /* gray-200 */
+  /* width: 1.25rem;
+  height: 1.25rem; */
+  width: 20px;
+  height: 20px;
+  /* border-radius: 9999px; */
+  border-radius: var(--radius-full);
+  border: 2px solid #e5e7eb;
   background: #fff;
   transition: background 0.2s, border-color 0.2s;
+  
 }
 
 .word-usage-indicator.checked {
@@ -3252,6 +3262,45 @@ ml-auto{
 /* MODAL STYLING */
 .ai-analysis-desktop { display: block; }
 .ai-analysis-mobile { display: none; }
+.modal-overlay {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  max-width: 95vw;
+  width: 50%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+.modal-close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #222b3a;
+  cursor: pointer;
+}
+.modal-close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #222b3a;
+  cursor: pointer;
+}
 @media (max-width: 767px) {
   .ai-analysis-desktop { display: none; }
   .ai-analysis-mobile { display: block; }
@@ -3285,6 +3334,7 @@ ml-auto{
     cursor: pointer;
   }
 }
+
 .ai-analysis-popup-btn{
   display: flex;
   align-items: center;
