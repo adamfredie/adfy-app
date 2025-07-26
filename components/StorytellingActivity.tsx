@@ -3392,11 +3392,24 @@ const allWordsApproved = dailyWords.every(word =>
     <>
     {isMobile? (
       <div className="step-nav-bar">
-      <button className="step-nav-back" onClick={onBack} aria-label="Back">
+      {/* <button className="step-nav-back" onClick={onBack} aria-label="Back">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+          <path d="M15 19l-7-7 7-7" stroke="#222b3a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button> */}
+       {currentStep !== 'words' && (
+      <button className="step-nav-back"  onClick={() => {
+        const currentIndex = STEP_ORDER.indexOf(currentStep);
+        const previousStep = STEP_ORDER[currentIndex - 1];
+        if (previousStep) {
+          setCurrentStep(previousStep);
+        }
+      }} aria-label="Back">
         <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
           <path d="M15 19l-7-7 7-7" stroke="#222b3a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </button>
+    )}
       <div className="step-nav-steps">
         {steps.map((step, idx) => {
           const isCurrent = step.key === currentStep;

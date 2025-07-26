@@ -53,11 +53,11 @@ export function Navigation({ currentActivity, onSignOut, onResetOnboarding, user
         </a>
       </div>
       <div className="nav-right">
-        <button className="nav-icon-btn">
+        {/* <button className="nav-icon-btn">
           <span role="img" aria-label="settings">⚙️</span>
-        </button>
+        </button> */}
         {/* User menu is now always visible, regardless of the current activity */}
-        <div className="user-menu-container">
+        {/* <div className="user-menu-container">
           <button className="user-menu-trigger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
            
              <div className="user-avatar">
@@ -73,7 +73,7 @@ export function Navigation({ currentActivity, onSignOut, onResetOnboarding, user
             </div>
           </button>
           {isMenuOpen && <UserMenu onSignOut={onSignOut} onResetOnboarding={onResetOnboarding} />}
-        </div>
+        </div> */}
       </div>
     </header>)}
    
