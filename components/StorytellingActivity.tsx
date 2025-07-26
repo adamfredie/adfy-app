@@ -3037,17 +3037,18 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
       </button>
       <button
         type="button"
-        onClick={() => {
-          const currentIndex = STEP_ORDER.indexOf(currentStep);
-          const previousStep = STEP_ORDER[currentIndex - 1];
-          if (previousStep) {
-            setCurrentStep(previousStep);
-          }
-        }}
+        // onClick={() => {
+        //   const currentIndex = STEP_ORDER.indexOf(currentStep);
+        //   const previousStep = STEP_ORDER[currentIndex - 1];
+        //   if (previousStep) {
+        //     setCurrentStep(previousStep);
+        //   }
+        // }}
+        onClick={handleNextStep}
         className="mobile-next-btn"
         disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
       >
-        View Results
+       View Results
       </button>
     </div>
   )
