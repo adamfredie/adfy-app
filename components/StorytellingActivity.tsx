@@ -44,7 +44,13 @@
 // I-1 START
 import React from "react";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
@@ -58,18 +64,21 @@ import { OnboardingData } from "./Onboarding";
 import { useVoiceInteraction } from "../hooks/useVoiceInteraction";
 // I-2 ENDS
 // I-3 STARTS
-import { analyzeStoryWithGemini, generateVoiceResponse, generateVoiceResponseFromAudio } from '../src/api/gemini';
-import { getRandomWordsFromGemini, getGeminiExample } from '../src/api/gemini';
-import { getRandomStoryTopics } from '../src/api/gemini';
+import {
+  analyzeStoryWithGemini,
+  generateVoiceResponse,
+  generateVoiceResponseFromAudio,
+} from "../src/api/gemini";
+import { getRandomWordsFromGemini, getGeminiExample } from "../src/api/gemini";
+import { getRandomStoryTopics } from "../src/api/gemini";
 // I-3 ENDS
 //I-4 STARTS
-import { getElevenLabsAudio } from '../src/api/elevenlabs';
+import { getElevenLabsAudio } from "../src/api/elevenlabs";
 // I-4 ENDS
 // I-5 STARTS
 import { ScrollToTop } from "./ScrollToTop";
 // I-5 ENDS
 // I-1 ENDS
-
 
 // STORY-1 STARTS
 interface StorytellingActivityProps {
@@ -100,7 +109,7 @@ interface DailyWord {
   definition: string;
   partOfSpeech: string;
   example: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  difficulty: "beginner" | "intermediate" | "advanced";
 }
 // WORDS-1 ENDS
 interface LearningQuestion {
@@ -110,7 +119,7 @@ interface LearningQuestion {
   options: string[];
   correctAnswer: number;
   explanation: string;
-  type: 'definition' | 'usage' | 'synonym' | 'context' | 'example';
+  type: "definition" | "usage" | "synonym" | "context" | "example";
 }
 
 interface StoryTopic {
@@ -128,9 +137,15 @@ interface QuestionResult {
   timeSpent: number;
 }
 
-type StepType = 'words' | 'learning' | 'writing' | 'voice' | 'results';
+type StepType = "words" | "learning" | "writing" | "voice" | "results";
 
-const STEP_ORDER: StepType[] = ['words', 'learning', 'writing', 'voice', 'results'];
+const STEP_ORDER: StepType[] = [
+  "words",
+  "learning",
+  "writing",
+  "voice",
+  "results",
+];
 
 // Utility to shuffle an array
 function shuffleArray<T>(array: T[]): T[] {
@@ -150,35 +165,45 @@ function generateLearningQuestions(words: DailyWord[]): LearningQuestion[] {
     // Definition question
     const defOptions = shuffleArray([
       word.definition,
-      ...otherWords.slice(0, 3).map(w => w.definition)
+      ...otherWords.slice(0, 3).map((w) => w.definition),
     ]);
     const defCorrect = defOptions.indexOf(word.definition);
     // Usage question
     const usageOptions = shuffleArray([
       word.example,
-      ...otherWords.slice(0, 3).map(w => w.example)
+      ...otherWords.slice(0, 3).map((w) => w.example),
     ]);
     const usageCorrect = usageOptions.indexOf(word.example);
     // Context question
     const contextOptions = shuffleArray([
-      'Professional/business context',
-      'At a party',
-      'While cooking',
-      'During sports'
+      "Professional/business context",
+      "At a party",
+      "While cooking",
+      "During sports",
     ]);
-    const contextCorrect = contextOptions.indexOf('Professional/business context');
+    const contextCorrect = contextOptions.indexOf(
+      "Professional/business context"
+    );
     // Example fill-in-the-blank
-    const exampleSentence = word.example.replace(new RegExp(word.word, 'gi'), '_____');
+    const exampleSentence = word.example.replace(
+      new RegExp(word.word, "gi"),
+      "_____"
+    );
     const exampleOptions = shuffleArray([
       word.word,
-      ...otherWords.slice(0, 3).map(w => w.word)
+      ...otherWords.slice(0, 3).map((w) => w.word),
     ]);
     const exampleCorrect = exampleOptions.indexOf(word.word);
     // Cycle through types for variety
-    const types: LearningQuestion['type'][] = ['definition', 'usage', 'context', 'example'];
+    const types: LearningQuestion["type"][] = [
+      "definition",
+      "usage",
+      "context",
+      "example",
+    ];
     const type = types[idx % types.length];
     switch (type) {
-      case 'definition':
+      case "definition":
         return {
           id: `q${idx + 1}`,
           wordIndex: idx,
@@ -186,9 +211,9 @@ function generateLearningQuestions(words: DailyWord[]): LearningQuestion[] {
           options: defOptions,
           correctAnswer: defCorrect,
           explanation: `The correct definition of "${word.word}" is: ${word.definition}`,
-          type
+          type,
         };
-      case 'usage':
+      case "usage":
         return {
           id: `q${idx + 1}`,
           wordIndex: idx,
@@ -196,9 +221,9 @@ function generateLearningQuestions(words: DailyWord[]): LearningQuestion[] {
           options: usageOptions,
           correctAnswer: usageCorrect,
           explanation: `Example usage: ${word.example}`,
-          type
+          type,
         };
-      case 'context':
+      case "context":
         return {
           id: `q${idx + 1}`,
           wordIndex: idx,
@@ -206,9 +231,9 @@ function generateLearningQuestions(words: DailyWord[]): LearningQuestion[] {
           options: contextOptions,
           correctAnswer: contextCorrect,
           explanation: `"${word.word}" is typically used in professional contexts.`,
-          type
+          type,
         };
-      case 'example':
+      case "example":
         return {
           id: `q${idx + 1}`,
           wordIndex: idx,
@@ -216,7 +241,7 @@ function generateLearningQuestions(words: DailyWord[]): LearningQuestion[] {
           options: exampleOptions,
           correctAnswer: exampleCorrect,
           explanation: `The correct word is "${word.word}".`,
-          type
+          type,
         };
       default:
         return {
@@ -226,7 +251,7 @@ function generateLearningQuestions(words: DailyWord[]): LearningQuestion[] {
           options: defOptions,
           correctAnswer: defCorrect,
           explanation: `The correct definition of "${word.word}" is: ${word.definition}`,
-          type: 'definition'
+          type: "definition",
         };
     }
   });
@@ -237,17 +262,19 @@ function AnalysisModal({ open, onClose, children }) {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <button className="modal-close-btn" onClick={onClose}>×</button>
+        <button className="modal-close-btn" onClick={onClose}>
+          ×
+        </button>
         {children}
       </div>
     </div>
   );
 }
 
-export function StorytellingActivity({ 
-  onBack, 
-  userProfile, 
-  savedProgress, 
+export function StorytellingActivity({
+  onBack,
+  userProfile,
+  savedProgress,
   onProgressUpdate,
   onComplete,
 }: StorytellingActivityProps) {
@@ -263,72 +290,180 @@ export function StorytellingActivity({
   const audioChunksRef = useRef<Blob[]>([]);
   // AUTO SCROLL FOR VOICE CONVERSATION
   const chatEndRef = useRef<HTMLDivElement | null>(null);
-  const [transcript, setTranscript] = useState('');
-// MODAL USE STATE VARIABLE
-const [showAnalysisModal, setShowAnalysisModal] = useState(false);
-const [writingStarted, setWritingStarted] = useState(false);
-const [topicCollapsed, setTopicCollapsed] = useState(false);
- 
-//  FUNCTION FOR TURNING START WRITING INTO COMPLETE PRACTICE AND NEXT QUESTION
-function getStepButtonProps() {
-  if (currentStep === 'learning') {
-    if (currentQuestionIndex < learningQuestions.length - 1) {
-      return {
-        label: 'Next',
-        ...(isMobile ? {} : { icon: '→' }),
-        onClick: handleNextQuestion,
-        disabled: showQuestionFeedback === false, // Only enable after answering
+  const [transcript, setTranscript] = useState("");
+  // MODAL USE STATE VARIABLE
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [writingStarted, setWritingStarted] = useState(false);
+  const [topicCollapsed, setTopicCollapsed] = useState(false);
+  //  LIVE TRANSCRIPT AI
+  const [aiLiveTranscript, setAiLiveTranscript] = useState<string>("");
+  const [conversationStarted, setConversationStarted] = useState(false);
+
+  //  FUNCTION FOR TURNING START WRITING INTO COMPLETE PRACTICE AND NEXT QUESTION
+  const playBrowserTTSWithLiveTranscript = (
+    text: string,
+    onComplete?: () => void
+  ) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const words = text.split(/\s+/);
+    let currentWordIndex = 0;
+
+    // Live transcript using `onboundary`
+    utterance.onboundary = (event) => {
+      if (event.name === "word" || event.charIndex != null) {
+        currentWordIndex++;
+        setAiLiveTranscript(words.slice(0, currentWordIndex).join(" "));
+      }
+    };
+
+    // When speech ends, clear transcript and run callback
+    utterance.onend = () => {
+      setAiLiveTranscript(""); // hide after end
+      if (onComplete) onComplete();
+    };
+
+    // Handle error gracefully
+    utterance.onerror = (e) => {
+      console.error("Browser TTS error:", e.error);
+      setAiLiveTranscript(""); // hide on error
+      if (onComplete) onComplete();
+    };
+
+    speechSynthesis.cancel(); // stop anything playing
+    speechSynthesis.speak(utterance);
+  };
+
+  const playElevenLabsWithLiveTranscript = useCallback(
+    async (text: string, onComplete?: () => void) => {
+      setAiLiveTranscript(""); // Reset transcript
+      let audioBlob: Blob;
+      try {
+        audioBlob = await getElevenLabsAudio(text);
+      } catch (error) {
+        console.error("Failed to fetch ElevenLabs audio:", error);
+        playBrowserTTSWithLiveTranscript(text, onComplete); // fallback
+        return;
+      }
+
+      const url = URL.createObjectURL(audioBlob);
+      const audio = new Audio(url);
+
+      const words = text.split(/\s+/);
+      let currentWord = 0;
+      let timer: number | null = null;
+
+      audio.onloadedmetadata = () => {
+        const duration = audio.duration || 3; // fallback if unknown
+        const interval = (duration / words.length) * 1000;
+
+        audio.play();
+
+        timer = setInterval(() => {
+          currentWord++;
+          setAiLiveTranscript(words.slice(0, currentWord).join(" "));
+          if (currentWord >= words.length) {
+            clearInterval(timer!);
+          }
+        }, interval);
+
+        audio.onended = () => {
+          setAiLiveTranscript(text); // Show full transcript at end
+          if (timer) clearInterval(timer);
+          setAiLiveTranscript(""); 
+          if (onComplete) onComplete();
+          
+        };
       };
-    } else {
+      setTimeout(() => {
+        if (!audio.duration) {
+          audio.play();
+          const interval = 3000 / words.length;
+          timer = setInterval(() => {
+            currentWord++;
+            setAiLiveTranscript(words.slice(0, currentWord).join(" "));
+            if (currentWord >= words.length) {
+              clearInterval(timer!);
+            }
+          }, interval);
+          audio.onended = () => {
+            setAiLiveTranscript(text);
+            if (timer) clearInterval(timer);
+            setTimeout(() => {
+              setAiLiveTranscript("");
+            }, 2000);
+            if (onComplete) onComplete();
+          };
+        }
+      }, 1000);
+    },
+    []
+  );
+  function getStepButtonProps() {
+    if (currentStep === "learning") {
+      if (currentQuestionIndex < learningQuestions.length - 1) {
+        return {
+          label: "Next",
+          ...(isMobile ? {} : { icon: "→" }),
+          onClick: handleNextQuestion,
+          disabled: showQuestionFeedback === false, // Only enable after answering
+        };
+      } else {
+        return {
+          // label: 'Complete Practice',
+          // icon: '✔',
+          label: (
+            <>
+              Complete Practice
+              <span style={{ marginLeft: "8px" }}>✔</span>
+            </>
+          ),
+          onClick: () => {
+            setStepProgress(100);
+            handleNextStep();
+          },
+          disabled: showQuestionFeedback === false, // Only enable after answering
+        };
+      }
+    }
+    if (currentStep === "writing") {
       return {
-        // label: 'Complete Practice',
-        // icon: '✔',
-        label: (
-          <>
-            Complete Practice
-            <span style={{ marginLeft: '8px' }}>✔</span>
-          </>
+        label: "Start Writing",
+        icon: (
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+            <path
+              d="M5 12h14M13 6l6 6-6 6"
+              stroke="#222b3a"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         ),
-        onClick: () => {
-          setStepProgress(100);
-          handleNextStep();
-        },
-        disabled: showQuestionFeedback === false // Only enable after answering
+        onClick: handleNextStep,
+        disabled: stepProgress < 100 && showLearningContent,
       };
     }
+    return null;
   }
-  if (currentStep === 'writing') {
-    return {
-      label: 'Start Writing',
-      icon: (
-        <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
-          <path d="M5 12h14M13 6l6 6-6 6" stroke="#222b3a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      ),
-      onClick: handleNextStep,
-      disabled: stepProgress < 100 && showLearningContent
-    };
-  }
-  return null;
-}
   // P-1 STARTS
-// THIS PIECE OF CODE IS USED FOR RECORDING THE USER"S VOICE AND SENDING IT TO GEMINI IN AUDIO BLOB FORM AND THEN GETTING REPSONSE FROM GEMINI
+  // THIS PIECE OF CODE IS USED FOR RECORDING THE USER"S VOICE AND SENDING IT TO GEMINI IN AUDIO BLOB FORM AND THEN GETTING REPSONSE FROM GEMINI
   // Check audio recording support on mount
   useEffect(() => {
     setAudioSupported(!!window.MediaRecorder && !!navigator.mediaDevices);
   }, []);
-  
+
   //GEMINI AUDIO FUNCTIONS
   const startRecording = async () => {
     setAudioBlob(null);
+    setAiLiveTranscript("");
     //Speech-to-text (real-time transcript)
     startListening();
     try {
       // Check if MediaRecorder is supported
       if (!window.MediaRecorder) {
-        throw new Error('Audio recording is not supported in this browser');
+        throw new Error("Audio recording is not supported in this browser");
       }
-      
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -340,14 +475,15 @@ function getStepButtonProps() {
         audioChunksRef.current.push(e.data);
       };
 
-      mediaRecorder.onstop = async  () => {
-        const mimeType = mediaRecorder.mimeType || audioChunksRef.current[0]?.type || '';
+      mediaRecorder.onstop = async () => {
+        const mimeType =
+          mediaRecorder.mimeType || audioChunksRef.current[0]?.type || "";
         console.log("MediaRecorder mimeType:", mimeType); // Optional: for debugging
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
         setAudioBlob(blob);
         setRecording(false);
         // Stop all tracks to release microphone
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
         // setTranscript(transcribedText); // <-- Remove this line, transcript is set after AI response
         if (isMobile) {
           if (!audioLoading) {
@@ -362,23 +498,23 @@ function getStepButtonProps() {
         }
       };
     } catch (error) {
-      console.error('Error starting recording:', error);
+      console.error("Error starting recording:", error);
       setRecording(false);
       if (error instanceof Error) {
         alert(`Could not start recording: ${error.message}`);
       } else {
-        alert('Could not access microphone. Please check permissions.');
+        alert("Could not access microphone. Please check permissions.");
       }
     }
   };
-  
+
   const stopRecording = () => {
     stopListening();
     if (mediaRecorderRef.current && recording) {
       mediaRecorderRef.current.stop();
     }
   };
-  
+
   const stopAndSendToGemini = async () => {
     if (mediaRecorderRef.current && recording) {
       mediaRecorderRef.current.stop();
@@ -387,28 +523,28 @@ function getStepButtonProps() {
     }
   };
   //GEMINI AUDIO FUNCTIONS END
-  
+
   // Function to send audio to Gemini and get response
   const sendAudioToGemini = async (audioBlob: Blob) => {
     if (isViewOnly) return;
-    
+
     setAudioLoading(true);
     try {
       // Add a placeholder message to show recording was received
       const newConversation = [...voiceConversation];
       newConversation.push({
-        type: 'user',
+        type: "user",
         content: "",
         timestamp: new Date(),
-        isAudio: true
+        isAudio: true,
       });
       setVoiceConversation(newConversation);
-      
+
       // Send audio to Gemini
       const aiResponse = await generateVoiceResponseFromAudio({
         audioBlob,
         conversationHistory: voiceConversation,
-        vocabulary: dailyWords.map(w => w.word),
+        vocabulary: dailyWords.map((w) => w.word),
         topic: selectedTopic?.title,
         approvedWords,
       });
@@ -417,82 +553,100 @@ function getStepButtonProps() {
       // APPROVED WORDS FUNCTION
       // const approvedWordsMatch = aiResponse.match(/APPROVED_WORDS:\s*(\[.*?\])/s);
       console.log(aiResponse);
-      const approvedWordsMatch = aiResponse.match(/APPROVED_WORDS:\s*(\[[\s\S]*?\])/);
+      const approvedWordsMatch = aiResponse.match(
+        /APPROVED_WORDS:\s*(\[[\s\S]*?\])/
+      );
       if (approvedWordsMatch) {
         try {
           // setApprovedWords(JSON.parse(approvedWordsMatch[1]));
           const jsonString = approvedWordsMatch[1].replace(/'/g, '"');
           setApprovedWords(JSON.parse(jsonString));
-        } catch (e) { /* handle error */ }
+        } catch (e) {
+          /* handle error */
+        }
       }
       if (!approvedWordsMatch) {
-        console.warn('Could not find APPROVED_WORDS in AI response:', aiResponse);
+        console.warn(
+          "Could not find APPROVED_WORDS in AI response:",
+          aiResponse
+        );
       }
 
       // Parse the response to extract transcription and AI response
-      const transcriptionMatch = aiResponse.match(/TRANSCRIPTION:\s*(.+?)(?=\nRESPONSE:|$)/s);
+      const transcriptionMatch = aiResponse.match(
+        /TRANSCRIPTION:\s*(.+?)(?=\nRESPONSE:|$)/s
+      );
       const responseMatch = aiResponse.match(/RESPONSE:\s*(.+?)(?=\n|$)/s);
-      
-      const transcription = transcriptionMatch ? transcriptionMatch[1].trim() : '[Audio message]';
+
+      const transcription = transcriptionMatch
+        ? transcriptionMatch[1].trim()
+        : "[Audio message]";
       setTranscript(transcription);
-      const aiResponseText = responseMatch ? responseMatch[1].trim() : aiResponse;
-      
+      const aiResponseText = responseMatch
+        ? responseMatch[1].trim()
+        : aiResponse;
+
       // Create a NEW conversation array with the updated user message
       const updatedConversation = [...newConversation];
       const lastMessageIndex = updatedConversation.length - 1;
-      
+
       // Replace the last message with a new object (don't mutate)
       updatedConversation[lastMessageIndex] = {
         ...updatedConversation[lastMessageIndex],
         content: transcription,
-        wordsUsed: dailyWords.filter(word => 
+        wordsUsed: dailyWords.filter((word) =>
           transcription.toLowerCase().includes(word.word.toLowerCase())
-        )
+        ),
       };
-      
+
       // Update the conversation state - this will trigger the auto-scroll
       setVoiceConversation(updatedConversation);
-      
+
       // Wait a moment before speaking the response
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // USED ELEVENLABS AUDIO FOR THE AI RESPONSE
-      try {
-        const audioBlob = await getElevenLabsAudio(aiResponseText);
-        const url = URL.createObjectURL(audioBlob);
-        const audio = new Audio(url);
-        await audio.play();
-      } catch (ttsError) {
-        // Fallback to browser TTS if ElevenLabs fails
-        await safeSpeak(aiResponseText);
-      }
-      
+      // try {
+      //   const audioBlob = await getElevenLabsAudio(aiResponseText);
+      //   const url = URL.createObjectURL(audioBlob);
+      //   const audio = new Audio(url);
+      //   await audio.play();
+      // } catch (ttsError) {
+      //   await safeSpeak(aiResponseText);
+      // }
+
       // Add AI response
-      const finalConversation = [...updatedConversation];
-      finalConversation.push({
-        type: 'ai',
-        content: aiResponseText,
-        timestamp: new Date()
+
+      await new Promise<void>((resolve) => {
+        playElevenLabsWithLiveTranscript(aiResponseText, () => {
+          // After audio and transcript finish, add AI message to conversation
+          const finalConversation = [...updatedConversation];
+          finalConversation.push({
+            type: "ai",
+            content: aiResponseText,
+            timestamp: new Date(),
+          });
+          setVoiceConversation(finalConversation);
+          resolve();
+        });
       });
-      
-      setVoiceConversation(finalConversation);
-      
     } catch (error) {
-      console.warn('Audio response error:', error);
+      console.warn("Audio response error:", error);
       // Fallback response if Gemini fails
-      const fallbackResponse = "I couldn't process your audio. Please try speaking again.";
-      
+      const fallbackResponse =
+        "I couldn't process your audio. Please try speaking again.";
+
       try {
         await safeSpeak(fallbackResponse);
       } catch (speechError) {
-        console.warn('Speech error:', speechError);
+        console.warn("Speech error:", speechError);
       }
-      
+
       const newConversation = [...voiceConversation];
       newConversation.push({
-        type: 'ai',
+        type: "ai",
         content: fallbackResponse,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       setVoiceConversation(newConversation);
     } finally {
@@ -500,7 +654,7 @@ function getStepButtonProps() {
       setAudioBlob(null);
     }
   };
-  
+
   // Effect to automatically send audio when it's ready
   // useEffect(() => {
   //   if (audioBlob && !audioLoading) {
@@ -511,38 +665,43 @@ function getStepButtonProps() {
   async function handleAnalyzeStory() {
     setIsAnalyzing(true);
     try {
-      console.log('Starting story analysis...');
-      console.log('Story:', userStory);
-      console.log('Topic:', selectedTopic?.title);
-      console.log('Vocabulary:', dailyWords.map(w => w.word));
-      
+      console.log("Starting story analysis...");
+      console.log("Story:", userStory);
+      console.log("Topic:", selectedTopic?.title);
+      console.log(
+        "Vocabulary:",
+        dailyWords.map((w) => w.word)
+      );
+
       const analysisText = await analyzeStoryWithGemini({
         story: userStory,
-        topic: selectedTopic?.title || '',
-        vocabulary: dailyWords.map(w => w.word)
+        topic: selectedTopic?.title || "",
+        vocabulary: dailyWords.map((w) => w.word),
       });
-      
-      console.log('Analysis text received:', analysisText);
-      
+
+      console.log("Analysis text received:", analysisText);
+
       // Parse the text response into structured data
       const analysis = parseAnalysisResponse(analysisText);
-      console.log('Parsed analysis:', analysis);
-      
+      console.log("Parsed analysis:", analysis);
+
       setStoryAnalysis(analysis);
-      setIsAnalyzed(true); 
+      setIsAnalyzed(true);
       // if (isMobile) {
       //   setShowAnalysisModal(true);
       // }
       setShowAnalysisModal(true);
     } catch (err) {
-      console.error('Story analysis error:', err);
+      console.error("Story analysis error:", err);
       // Show error to user
-      alert(`Failed to analyze story: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      alert(
+        `Failed to analyze story: ${err instanceof Error ? err.message : "Unknown error"}`
+      );
     } finally {
       setIsAnalyzing(false);
     }
   }
-  
+
   // Helper function to parse the Gemini API text response
   const parseAnalysisResponse = (text: string) => {
     try {
@@ -560,52 +719,64 @@ function getStepButtonProps() {
       const coherenceMatch = text.match(/Coherence:\s*\[(\d+)%\]/);
       const topicMatch = text.match(/Topic Match:\s*\[(\d+)%\]/);
       //NEW BLOCK
-//       const creativityLevel = text.match(/Creativity:\s*(High|Moderate|Low)/i)?.[1] || "Moderate";
-//       const grammarLevel = text.match(/Grammar:\s*(High|Moderate|Low)/i)?.[1] || "Moderate";
-// const coherenceLevel = text.match(/Coherence:\s*(High|Moderate|Low)/i)?.[1] || "Moderate";
-// const topicLevel = text.match(/Topic Match:\s*(High|Moderate|Low)/i)?.[1] || "Moderate";
+      //       const creativityLevel = text.match(/Creativity:\s*(High|Moderate|Low)/i)?.[1] || "Moderate";
+      //       const grammarLevel = text.match(/Grammar:\s*(High|Moderate|Low)/i)?.[1] || "Moderate";
+      // const coherenceLevel = text.match(/Coherence:\s*(High|Moderate|Low)/i)?.[1] || "Moderate";
+      // const topicLevel = text.match(/Topic Match:\s*(High|Moderate|Low)/i)?.[1] || "Moderate";
 
-      
       // Extract feedback (everything between "Overall Impression:" and the next section)
-      const feedbackMatch = text.match(/\*\*Overall Impression:\*\*\s*([^*\n]+)/);
-      
+      const feedbackMatch = text.match(
+        /\*\*Overall Impression:\*\*\s*([^*\n]+)/
+      );
+
       // Extract suggestions (look for bullet points or numbered lists)
-      const suggestionsMatch = text.match(/Suggestions for Improvement:[\s\S]*?([•\-\*]\s*[^\n]+(?:\n[•\-\*]\s*[^\n]+)*)/);
-      
+      const suggestionsMatch = text.match(
+        /Suggestions for Improvement:[\s\S]*?([•\-\*]\s*[^\n]+(?:\n[•\-\*]\s*[^\n]+)*)/
+      );
+
       // Extract the detailed feedback section (from #### 1. Creativity onward)
       const detailedFeedbackMatch = text.match(/(#+\s*1\. Creativity[\s\S]*)/);
-      const detailedFeedback = detailedFeedbackMatch ? detailedFeedbackMatch[1].trim() : '';
+      const detailedFeedback = detailedFeedbackMatch
+        ? detailedFeedbackMatch[1].trim()
+        : "";
       //OLD BLOCK
       const creativity = creativityMatch ? parseInt(creativityMatch[1]) : 75;
       const grammar = grammarMatch ? parseInt(grammarMatch[1]) : 80;
       const coherence = coherenceMatch ? parseInt(coherenceMatch[1]) : 75;
       const topicAdherence = topicMatch ? parseInt(topicMatch[1]) : 70;
-      const feedback = feedbackMatch ? feedbackMatch[1].trim() : 'Good work on your story!';
+      const feedback = feedbackMatch
+        ? feedbackMatch[1].trim()
+        : "Good work on your story!";
       //NEW BLOCK
-//       const creativity = mapLevelToScore(creativityLevel);
-// const grammar = mapLevelToScore(grammarLevel);
-// const coherence = mapLevelToScore(coherenceLevel);
-// const topicAdherence = mapLevelToScore(topicLevel);
-// const feedback = feedbackMatch ? feedbackMatch[1].trim() : 'Good work on your story!';
+      //       const creativity = mapLevelToScore(creativityLevel);
+      // const grammar = mapLevelToScore(grammarLevel);
+      // const coherence = mapLevelToScore(coherenceLevel);
+      // const topicAdherence = mapLevelToScore(topicLevel);
+      // const feedback = feedbackMatch ? feedbackMatch[1].trim() : 'Good work on your story!';
       // Parse suggestions
       let suggestions: string[] = [];
       if (suggestionsMatch) {
         suggestions = suggestionsMatch[1]
-          .split('\n')
+          .split("\n")
           // .map(line => line.replace(/^[•\-\*]\s*/, '').trim())
-          .map(line => line.replace(/^[•\-\*]\s*/, '').replace(/^\*/, '').trim())
-          .filter(line => line.length > 0);
+          .map((line) =>
+            line
+              .replace(/^[•\-\*]\s*/, "")
+              .replace(/^\*/, "")
+              .trim()
+          )
+          .filter((line) => line.length > 0);
       }
-      
+
       // If no suggestions found, provide default ones
       if (suggestions.length === 0) {
         suggestions = [
           "Try to use all vocabulary words in your story for maximum learning benefit",
           "Consider adding more specific details about the challenges presented in the scenario",
-          "Practice using the words in different sentence structures to enhance versatility"
+          "Practice using the words in different sentence structures to enhance versatility",
         ];
       }
-      
+
       return {
         creativity,
         grammar,
@@ -613,66 +784,82 @@ function getStepButtonProps() {
         topicAdherence,
         feedback,
         suggestions,
-        detailedFeedback
+        detailedFeedback,
       };
     } catch (error) {
-      console.error('Error parsing analysis response:', error);
+      console.error("Error parsing analysis response:", error);
       // Return default structure if parsing fails
       return {
         creativity: 75,
         grammar: 80,
         coherence: 75,
         topicAdherence: 70,
-        feedback: 'Good work on your story! Keep practicing to improve your vocabulary usage.',
+        feedback:
+          "Good work on your story! Keep practicing to improve your vocabulary usage.",
         suggestions: [
           "Try to use all vocabulary words in your story for maximum learning benefit",
           "Consider adding more specific details about the challenges presented in the scenario",
-          "Practice using the words in different sentence structures to enhance versatility"
+          "Practice using the words in different sentence structures to enhance versatility",
         ],
-        detailedFeedback: ''
+        detailedFeedback: "",
       };
     }
   };
-  
+
   // Initialize state from saved progress or defaults
   const [currentStep, setCurrentStep] = useState<StepType>(
-    savedProgress ? (STEP_ORDER[savedProgress.currentStep - 1] as StepType) : 'words'
+    savedProgress
+      ? (STEP_ORDER[savedProgress.currentStep - 1] as StepType)
+      : "words"
   );
   const [stepProgress, setStepProgress] = useState(0);
   const [selectedField, setSelectedField] = useState<string>(
-    savedProgress?.selectedField || userProfile?.field || 'marketing'
+    savedProgress?.selectedField || userProfile?.field || "marketing"
   );
-  const [dailyWords, setDailyWords] = useState<DailyWord[]>(savedProgress?.vocabularyWords || []);
-  const [learningQuestions, setLearningQuestions] = useState<LearningQuestion[]>([]);
+  const [dailyWords, setDailyWords] = useState<DailyWord[]>(
+    savedProgress?.vocabularyWords || []
+  );
+  const [learningQuestions, setLearningQuestions] = useState<
+    LearningQuestion[]
+  >([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [questionResults, setQuestionResults] = useState<QuestionResult[]>(savedProgress?.quizAnswers || []);
+  const [questionResults, setQuestionResults] = useState<QuestionResult[]>(
+    savedProgress?.quizAnswers || []
+  );
   const [showQuestionFeedback, setShowQuestionFeedback] = useState(false);
-  const [currentQuestionResult, setCurrentQuestionResult] = useState<{ isCorrect: boolean; explanation: string } | null>(null);
-  const [userStory, setUserStory] = useState(savedProgress?.userStory || '');
+  const [currentQuestionResult, setCurrentQuestionResult] = useState<{
+    isCorrect: boolean;
+    explanation: string;
+  } | null>(null);
+  const [userStory, setUserStory] = useState(savedProgress?.userStory || "");
   const [voiceConversation, setVoiceConversation] = useState<any[]>([]);
   const [currentWordFocus, setCurrentWordFocus] = useState(0);
   const [finalScore, setFinalScore] = useState(0);
   const [showLearningContent, setShowLearningContent] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [voiceResponse, setVoiceResponse] = useState('');
+  const [voiceResponse, setVoiceResponse] = useState("");
   const [storyTopics, setStoryTopics] = useState<StoryTopic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<StoryTopic | null>(null);
   const [isGeneratingTopic, setIsGeneratingTopic] = useState(false);
 
   // Story listening state
   const [isListeningToStory, setIsListeningToStory] = useState(false);
-  const [storyHighlightedWords, setStoryHighlightedWords] = useState<string[]>([]);
+  const [storyHighlightedWords, setStoryHighlightedWords] = useState<string[]>(
+    []
+  );
   const [currentStoryWordIndex, setCurrentStoryWordIndex] = useState(-1);
 
   // Word pronunciation state
-  const [currentlyPlayingWord, setCurrentlyPlayingWord] = useState<number | null>(null);
+  const [currentlyPlayingWord, setCurrentlyPlayingWord] = useState<
+    number | null
+  >(null);
   const [isPlayingSequence, setIsPlayingSequence] = useState(false);
   // AUTO SCROLL
   const chatContainerRef = useRef<HTMLDivElement>(null);
   // AUTO_SCROLL VOICE CONVERSATION PAGE
   const conversationCardRef = useRef<HTMLDivElement | null>(null);
   // FOR STORING WORDS GENERATED RANDOMLY BY GEMINI
-  const [previousWords,setPreviousWords]=useState<string[]>([])
+  const [previousWords, setPreviousWords] = useState<string[]>([]);
   // APPROVED WORDS
   const [approvedWords, setApprovedWords] = useState<string[]>([]);
   // VOICE CONVERSATION AUTO SCROLL FUNCTION
@@ -680,14 +867,16 @@ function getStepButtonProps() {
     if (conversationCardRef.current) {
       // conversationCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
       // conversationCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      conversationCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      conversationCardRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
   };
   // FOR SEEING IF THE ANALYSIS IS DONE
   const [isAnalyzed, setIsAnalyzed] = useState(false);
 
-
-    // AUTO SCROLL FOR VOICE CONVERSATION TEXT BOX ENDS
+  // AUTO SCROLL FOR VOICE CONVERSATION TEXT BOX ENDS
   // Step completion tracking - initialize from saved progress
   const [completedSteps, setCompletedSteps] = useState<Set<StepType>>(() => {
     if (savedProgress) {
@@ -705,47 +894,50 @@ function getStepButtonProps() {
   const [furthestStep, setFurthestStep] = useState<StepType>(() => {
     if (savedProgress) {
       // The furthest step is the current step from saved progress
-      return STEP_ORDER[savedProgress.currentStep - 1] || 'words';
+      return STEP_ORDER[savedProgress.currentStep - 1] || "words";
     }
-    return 'words';
+    return "words";
   });
 
   // Use ref to track the last progress update to prevent duplicates
-  const lastProgressUpdateRef = useRef<string>('');
+  const lastProgressUpdateRef = useRef<string>("");
 
-  const { 
-    isListening, 
-    transcript: voiceTranscript, 
+  const {
+    isListening,
+    transcript: voiceTranscript,
     error: voiceError,
     isSupported: isVoiceSupported,
-    startListening, 
-    stopListening, 
+    startListening,
+    stopListening,
     speak,
     isSpeaking,
     clearTranscript,
     permissionStatus,
     requestPermission,
-    stopSpeaking
+    stopSpeaking,
   } = useVoiceInteraction();
   // AUTO SCROLL FOR VOICE CONVERSATION TEXT BOX
   useEffect(() => {
     if (chatContainerRef.current) {
       // Scroll immediately when conversation updates
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, [voiceConversation]);
 
   useEffect(() => {
-    if (chatContainerRef.current && voiceTranscript) {
+    if (chatContainerRef.current && (voiceTranscript || aiLiveTranscript)) {
       // Scroll immediately when transcript updates
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
-  }, [voiceTranscript]);
+  }, [voiceTranscript, aiLiveTranscript]);
 
   // Add a more robust auto-scroll function
   const scrollToBottom = useCallback(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, []);
 
@@ -755,8 +947,7 @@ function getStepButtonProps() {
     requestAnimationFrame(() => {
       scrollToBottom();
     });
-  }, [voiceConversation, scrollToBottom]); 
-
+  }, [voiceConversation, scrollToBottom]);
 
   // Generate words based on selected field and user level
   // const generateVocabularyWords = (field: string) => {
@@ -997,28 +1188,27 @@ function getStepButtonProps() {
       vocabularyWords: dailyWords,
       quizAnswers: questionResults,
       userStory: userStory,
-      isCompleted: currentStep === 'results'
+      isCompleted: currentStep === "results",
     };
   }, [currentStep, selectedField, dailyWords, questionResults, userStory]);
 
   // Stable progress update function that only updates when there are meaningful changes
   const updateProgress = useCallback(() => {
     if (!onProgressUpdate || dailyWords.length === 0) return;
-    
+
     const progressKey = JSON.stringify(currentProgress);
     if (progressKey === lastProgressUpdateRef.current) return;
-    
+
     lastProgressUpdateRef.current = progressKey;
     onProgressUpdate(currentProgress);
   }, [onProgressUpdate, currentProgress, dailyWords.length]);
 
- 
- //This is the old block for safeSpeak 
- const safeSpeak = useCallback((text: string, wordIndex?: number) => {
-    console.log('SafeSpeak called with:', text, 'wordIndex:', wordIndex);
-    
-    if (!text || text.trim() === '') {
-      console.warn('Empty text provided to safeSpeak');
+  //This is the old block for safeSpeak
+  const safeSpeak = useCallback((text: string, wordIndex?: number) => {
+    console.log("SafeSpeak called with:", text, "wordIndex:", wordIndex);
+
+    if (!text || text.trim() === "") {
+      console.warn("Empty text provided to safeSpeak");
       return Promise.resolve();
     }
 
@@ -1030,7 +1220,7 @@ function getStepButtonProps() {
         }
 
         // Set currently playing word if index provided
-        if (typeof wordIndex === 'number') {
+        if (typeof wordIndex === "number") {
           setCurrentlyPlayingWord(wordIndex);
         }
 
@@ -1038,61 +1228,58 @@ function getStepButtonProps() {
         utterance.rate = 0.9;
         utterance.pitch = 1.05;
         utterance.volume = 0.95;
-              // Get available voices
-      // const voices = window.speechSynthesis.getVoices();
-       // Try to find a high-quality English voice
-      //  utterance.voice =
-      //  voices.find(v => v.name.includes("Google") && v.lang === "en-US") ||
-      //  voices.find(v => v.name.includes("Microsoft") && v.lang === "en-US") ||
-      //  voices.find(v => v.lang === "en-US") ||
-      //  voices[0];
-
+        // Get available voices
+        // const voices = window.speechSynthesis.getVoices();
+        // Try to find a high-quality English voice
+        //  utterance.voice =
+        //  voices.find(v => v.name.includes("Google") && v.lang === "en-US") ||
+        //  voices.find(v => v.name.includes("Microsoft") && v.lang === "en-US") ||
+        //  voices.find(v => v.lang === "en-US") ||
+        //  voices[0];
 
         utterance.onstart = () => {
-          console.log('Speech started for:', text);
+          console.log("Speech started for:", text);
         };
 
         utterance.onend = () => {
-          console.log('Speech ended for:', text);
+          console.log("Speech ended for:", text);
           setCurrentlyPlayingWord(null);
           resolve();
         };
 
         utterance.onerror = (event) => {
-          console.error('Speech error:', event.error);
+          console.error("Speech error:", event.error);
           setCurrentlyPlayingWord(null);
           reject(new Error(`Speech synthesis error: ${event.error}`));
         };
-           // Sometimes voices are not loaded immediately, so ensure they're loaded
-      // if (voices.length === 0) {
-      //   window.speechSynthesis.onvoiceschanged = () => {
-      //     const loadedVoices = window.speechSynthesis.getVoices();
-      //     utterance.voice =
-      //       loadedVoices.find(v => v.name.includes("Google") && v.lang === "en-US") ||
-      //       loadedVoices.find(v => v.name.includes("Microsoft") && v.lang === "en-US") ||
-      //       loadedVoices.find(v => v.lang === "en-US") ||
-      //       loadedVoices[0];
-      //     window.speechSynthesis.speak(utterance);
-      //   };
-      // } else {
-      //   setTimeout(() => {
-      //     window.speechSynthesis.speak(utterance);
-      //   }, 100);
-      // }
+        // Sometimes voices are not loaded immediately, so ensure they're loaded
+        // if (voices.length === 0) {
+        //   window.speechSynthesis.onvoiceschanged = () => {
+        //     const loadedVoices = window.speechSynthesis.getVoices();
+        //     utterance.voice =
+        //       loadedVoices.find(v => v.name.includes("Google") && v.lang === "en-US") ||
+        //       loadedVoices.find(v => v.name.includes("Microsoft") && v.lang === "en-US") ||
+        //       loadedVoices.find(v => v.lang === "en-US") ||
+        //       loadedVoices[0];
+        //     window.speechSynthesis.speak(utterance);
+        //   };
+        // } else {
+        //   setTimeout(() => {
+        //     window.speechSynthesis.speak(utterance);
+        //   }, 100);
+        // }
 
         // Small delay to ensure cleanup is complete
         setTimeout(() => {
           window.speechSynthesis.speak(utterance);
         }, 100);
-
       } catch (error) {
-        console.error('SafeSpeak error:', error);
+        console.error("SafeSpeak error:", error);
         setCurrentlyPlayingWord(null);
         reject(error);
       }
     });
   }, []);
-
 
   // const playWordPronunciation = useCallback(async (wordIndex: number) => {
   //   if (wordIndex < 0 || wordIndex >= dailyWords.length) {
@@ -1120,25 +1307,26 @@ function getStepButtonProps() {
   //   }
   // }, [dailyWords, safeSpeak, currentlyPlayingWord]);
 
-
-// ELEVEN LABS AUDIO FOR RANDOM WORDS
-// E-11 STARTS
-const playWordWithElevenLabs = async (wordIndex: number) => {
-  const word = dailyWords[wordIndex];
-  if (!word) return;
-  try {
-    // You can use just the word, or word + definition for richer audio
-    const audioBlob = await getElevenLabsAudio(`${word.word}. ${word.definition}`);
-    const url = URL.createObjectURL(audioBlob);
-    const audio = new Audio(url);
-    await audio.play();
-  } catch (error) {
-    console.error('Error playing ElevenLabs audio:', error);
-    // Optionally fallback to browser TTS
-    await safeSpeak(`${word.word}. ${word.definition}`, wordIndex);
-  }
-};
-// E-11 ENDS
+  // ELEVEN LABS AUDIO FOR RANDOM WORDS
+  // E-11 STARTS
+  const playWordWithElevenLabs = async (wordIndex: number) => {
+    const word = dailyWords[wordIndex];
+    if (!word) return;
+    try {
+      // You can use just the word, or word + definition for richer audio
+      const audioBlob = await getElevenLabsAudio(
+        `${word.word}. ${word.definition}`
+      );
+      const url = URL.createObjectURL(audioBlob);
+      const audio = new Audio(url);
+      await audio.play();
+    } catch (error) {
+      console.error("Error playing ElevenLabs audio:", error);
+      // Optionally fallback to browser TTS
+      await safeSpeak(`${word.word}. ${word.definition}`, wordIndex);
+    }
+  };
+  // E-11 ENDS
   // const playAllWords = useCallback(async () => {
   //   if (isPlayingSequence) {
   //     console.log('Already playing sequence, stopping...');
@@ -1153,10 +1341,10 @@ const playWordWithElevenLabs = async (wordIndex: number) => {
   //   try {
   //     for (let i = 0; i < dailyWords.length; i++) {
   //       if (!isPlayingSequence) break; // Check if cancelled
-        
+
   //       const word = dailyWords[i];
   //       await safeSpeak(`Word ${i + 1}: ${word.word}. ${word.definition}`, i);
-        
+
   //       // Add small pause between words
   //       await new Promise(resolve => setTimeout(resolve, 500));
   //     }
@@ -1204,12 +1392,13 @@ const playWordWithElevenLabs = async (wordIndex: number) => {
   const isViewOnly = useMemo(() => {
     const currentIndex = STEP_ORDER.indexOf(currentStep);
     const furthestIndex = STEP_ORDER.indexOf(furthestStep);
-    
+
     // View only if: current step is before furthest reached AND current step is completed
     return currentIndex < furthestIndex && completedSteps.has(currentStep);
   }, [currentStep, furthestStep, completedSteps]);
 
-  const exampleStory = "In today's fast-paced business environment, Maria knew she had to be more articulate during presentations. She decided to collaborate with her colleague James to prepare for the quarterly review. James helped facilitate the brainstorming session, creating an environment where ideas could flow freely. Together, they worked to synthesize all the feedback from different departments into a comprehensive strategy. Maria realized she could leverage her communication skills and the collaborative approach to not only improve her presentation but also strengthen team relationships. The preparation paid off when she delivered a clear, well-structured presentation that impressed the leadership team.";
+  const exampleStory =
+    "In today's fast-paced business environment, Maria knew she had to be more articulate during presentations. She decided to collaborate with her colleague James to prepare for the quarterly review. James helped facilitate the brainstorming session, creating an environment where ideas could flow freely. Together, they worked to synthesize all the feedback from different departments into a comprehensive strategy. Maria realized she could leverage her communication skills and the collaborative approach to not only improve her presentation but also strengthen team relationships. The preparation paid off when she delivered a clear, well-structured presentation that impressed the leadership team.";
 
   const getStepNumber = (step: StepType): number => {
     return STEP_ORDER.indexOf(step) + 1;
@@ -1217,41 +1406,42 @@ const playWordWithElevenLabs = async (wordIndex: number) => {
 
   const calculateProgress = (): number => {
     const currentStepNum = getStepNumber(currentStep);
-    const baseProgress = ((currentStepNum ) / 5) * 100;
-    
-    if (currentStep === 'learning' && learningQuestions.length > 0) {
-      const questionProgress = (currentQuestionIndex / learningQuestions.length) * 20;
+    const baseProgress = (currentStepNum / 5) * 100;
+
+    if (currentStep === "learning" && learningQuestions.length > 0) {
+      const questionProgress =
+        (currentQuestionIndex / learningQuestions.length) * 20;
       return baseProgress + questionProgress;
     }
-    
+
     return baseProgress + (stepProgress / 5) * 20;
   };
 
   const getStepStatus = (step: StepType) => {
-    if (completedSteps.has(step)) return 'completed';
-    if (step === currentStep) return 'current';
-    return 'upcoming';
+    if (completedSteps.has(step)) return "completed";
+    if (step === currentStep) return "current";
+    return "upcoming";
   };
-//Event Handler
+  //Event Handler
   const handleStepNavigation = (step: StepType) => {
     const status = getStepStatus(step);
-    
+
     // Only allow navigation to completed steps or current step
-    if (status === 'completed' || status === 'current') {
+    if (status === "completed" || status === "current") {
       setCurrentStep(step);
     }
   };
-//Event Handler
+  //Event Handler
   // const handleFieldChange = (newField: string) => {
   //   // Don't allow field changes in view-only mode
   //   if (isViewOnly) return;
-    
+
   //   if (newField !== selectedField) {
   //     setSelectedField(newField);
   //     // Generate new words for the selected field
   //     const newWords = generateVocabularyWords(newField);
   //     setDailyWords(newWords);
-      
+
   //     // Reset progress if changing field mid-activity
   //     if (currentStep !== 'words') {
   //       setCurrentStep('words');
@@ -1262,81 +1452,82 @@ const playWordWithElevenLabs = async (wordIndex: number) => {
   //     }
   //   }
   // };
-//Event Handler
+  //Event Handler
   const handleNextStep = () => {
     // Don't allow navigation in view-only mode
     if (isViewOnly) return;
-    
+
     const currentIndex = STEP_ORDER.indexOf(currentStep);
     const nextStep = STEP_ORDER[currentIndex + 1];
-    
+
     if (nextStep) {
       // Mark current step as completed
-      setCompletedSteps(prev => new Set([...prev, currentStep]));
-      
+      setCompletedSteps((prev) => new Set([...prev, currentStep]));
+
       // Update furthest step to the next step (since we're progressing forward)
       const nextIndex = STEP_ORDER.indexOf(nextStep);
       const furthestIndex = STEP_ORDER.indexOf(furthestStep);
-      
+
       if (nextIndex > furthestIndex) {
         setFurthestStep(nextStep);
       }
-      
+
       // Move to next step
       setCurrentStep(nextStep);
       setStepProgress(0);
-      
+
       // Special actions for specific steps
-      if (nextStep === 'writing') {
+      if (nextStep === "writing") {
         generateStoryTopic();
-      } else if (nextStep === 'results') {
+      } else if (nextStep === "results") {
         calculateFinalScore();
       }
     }
   };
-//Event Handler
+  //Event Handler
   const handleSkipLearning = () => {
     // Don't allow skipping in view-only mode
     if (isViewOnly) return;
-    
+
     // Mark current step as completed
-    setCompletedSteps(prev => new Set([...prev, currentStep]));
-    
+    setCompletedSteps((prev) => new Set([...prev, currentStep]));
+
     // Update furthest step to writing
-    const writingIndex = STEP_ORDER.indexOf('writing');
+    const writingIndex = STEP_ORDER.indexOf("writing");
     const furthestIndex = STEP_ORDER.indexOf(furthestStep);
-    
+
     if (writingIndex > furthestIndex) {
-      setFurthestStep('writing');
+      setFurthestStep("writing");
     }
-    
-    setCurrentStep('writing');
+
+    setCurrentStep("writing");
     generateStoryTopic();
     setStepProgress(0);
   };
-//Event Handler
+  //Event Handler
   const handleReturnToFurthest = () => {
     setCurrentStep(furthestStep);
   };
 
   const generateStoryTopic = () => {
     setIsGeneratingTopic(true);
-    
+
     // Simulate AI topic generation - in real app, this would call AI service
     setTimeout(() => {
-      const randomTopic = storyTopics[Math.floor(Math.random() * storyTopics.length)];
+      const randomTopic =
+        storyTopics[Math.floor(Math.random() * storyTopics.length)];
       setSelectedTopic(randomTopic);
       setIsGeneratingTopic(false);
     }, 1500);
   };
-// OLD GENERATING RANDOM TOPIC 
+  // OLD GENERATING RANDOM TOPIC
   // const regenerateTopic = () => {
   //   // Don't allow regeneration in view-only mode
   //   if (isViewOnly) return;
-    
+
   //   setIsGeneratingTopic(true);
   //   setSelectedTopic(null);
-    
+
   //   setTimeout(() => {
   //     // Filter out the currently selected topic to ensure we get a different one
   //     const availableTopics = storyTopics.filter(topic => topic.id !== selectedTopic?.id);
@@ -1350,7 +1541,7 @@ const playWordWithElevenLabs = async (wordIndex: number) => {
     if (isViewOnly) return;
     setIsGeneratingTopic(true);
     setSelectedTopic(null);
-  
+
     try {
       // Fetch 1 random topic from Gemini
       const topics = await getRandomStoryTopics(1);
@@ -1358,43 +1549,43 @@ const playWordWithElevenLabs = async (wordIndex: number) => {
         setSelectedTopic(topics[0]);
       }
     } catch (error) {
-      alert('Could not fetch a new topic from Gemini.');
+      alert("Could not fetch a new topic from Gemini.");
     }
     setIsGeneratingTopic(false);
   };
 
-//Event Handler
+  //Event Handler
   const handleAnswerQuestion = (answerIndex: number) => {
     // Don't allow answering in view-only mode
     if (isViewOnly) return;
-    
+
     const currentQuestion = learningQuestions[currentQuestionIndex];
     const isCorrect = answerIndex === currentQuestion.correctAnswer;
     const startTime = Date.now() - 5000; // Mock timing
-    
+
     // Record the result
     const result: QuestionResult = {
       questionId: currentQuestion.id,
       userAnswer: answerIndex,
       isCorrect,
-      timeSpent: Date.now() - startTime
+      timeSpent: Date.now() - startTime,
     };
-    
+
     setQuestionResults([...questionResults, result]);
     setCurrentQuestionResult({
       isCorrect,
-      explanation: currentQuestion.explanation
+      explanation: currentQuestion.explanation,
     });
     setShowQuestionFeedback(true);
   };
-//Event Handler
+  //Event Handler
   const handleNextQuestion = () => {
     // Don't allow navigation in view-only mode
     if (isViewOnly) return;
-    
+
     setShowQuestionFeedback(false);
     setCurrentQuestionResult(null);
-    
+
     if (currentQuestionIndex < learningQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
@@ -1415,40 +1606,42 @@ const playWordWithElevenLabs = async (wordIndex: number) => {
     try {
       setIsListeningToStory(true);
       setCurrentStoryWordIndex(-1);
-      
+
       // Split story into sentences and highlight vocabulary words as they're spoken
-      const sentences = exampleStory.split(/[.!?]+/).filter(s => s.trim());
-      
-      for (let sentenceIndex = 0; sentenceIndex < sentences.length; sentenceIndex++) {
+      const sentences = exampleStory.split(/[.!?]+/).filter((s) => s.trim());
+
+      for (
+        let sentenceIndex = 0;
+        sentenceIndex < sentences.length;
+        sentenceIndex++
+      ) {
         // Check if story listening was stopped
         if (!isListeningToStory) break;
-        
+
         const sentence = sentences[sentenceIndex].trim();
-        
+
         // Check if this sentence contains any vocabulary words
         dailyWords.forEach((word, index) => {
           if (sentence.toLowerCase().includes(word.word.toLowerCase())) {
             setCurrentStoryWordIndex(index);
           }
         });
-        
+
         try {
           await safeSpeak(sentence);
-          
+
           // Wait for sentence to complete
-          const words = sentence.split(' ').length;
+          const words = sentence.split(" ").length;
           const readingTime = Math.max(words * 400, 1000); // Minimum 1 second
-          
-          await new Promise(resolve => setTimeout(resolve, readingTime));
-          
+
+          await new Promise((resolve) => setTimeout(resolve, readingTime));
         } catch (error) {
           console.warn(`Error speaking sentence ${sentenceIndex + 1}:`, error);
           // Continue with next sentence
         }
       }
-      
     } catch (error) {
-      console.warn('Story listening error:', error);
+      console.warn("Story listening error:", error);
     } finally {
       setIsListeningToStory(false);
       setCurrentStoryWordIndex(-1);
@@ -1457,36 +1650,39 @@ const playWordWithElevenLabs = async (wordIndex: number) => {
 
   const highlightVocabularyWords = (text: string) => {
     let highlightedText = text;
-    
+
     dailyWords.forEach((word, index) => {
-      const regex = new RegExp(`\\b${word.word}\\b`, 'gi');
+      const regex = new RegExp(`\\b${word.word}\\b`, "gi");
       const isCurrentWord = currentStoryWordIndex === index;
-      const className = isCurrentWord 
-        ? 'bg-aduffy-yellow text-aduffy-navy font-bold px-1 rounded animate-pulse'
-        : 'bg-aduffy-yellow/30 text-aduffy-navy font-semibold px-1 rounded';
-      
-      highlightedText = highlightedText.replace(regex, `<span class="${className}">$&</span>`);
+      const className = isCurrentWord
+        ? "bg-aduffy-yellow text-aduffy-navy font-bold px-1 rounded animate-pulse"
+        : "bg-aduffy-yellow/30 text-aduffy-navy font-semibold px-1 rounded";
+
+      highlightedText = highlightedText.replace(
+        regex,
+        `<span class="${className}">$&</span>`
+      );
     });
-    
+
     return highlightedText;
   };
 
   const analyzeStory = async () => {
     // Don't allow analysis in view-only mode
     if (isViewOnly) return;
-    
+
     setIsAnalyzing(true);
-    
+
     // Mock analysis - in real app, this would call AI service
     setTimeout(() => {
-      const wordsUsed = dailyWords.filter(word => 
+      const wordsUsed = dailyWords.filter((word) =>
         userStory.toLowerCase().includes(word.word.toLowerCase())
       );
-      
+
       const analysis = {
         wordsUsed: wordsUsed.length,
         totalWords: dailyWords.length,
-        storyLength: userStory.split(' ').length,
+        storyLength: userStory.split(" ").length,
         creativity: Math.floor(Math.random() * 30) + 70, // Mock score 70-100
         grammar: Math.floor(Math.random() * 20) + 80, // Mock score 80-100
         coherence: Math.floor(Math.random() * 25) + 75, // Mock score 75-100
@@ -1495,10 +1691,10 @@ const playWordWithElevenLabs = async (wordIndex: number) => {
         suggestions: [
           "Try to use all vocabulary words in your story for maximum learning benefit",
           "Consider adding more specific details about the challenges presented in the scenario",
-          "Practice using the words in different sentence structures to enhance versatility"
-        ]
+          "Practice using the words in different sentence structures to enhance versatility",
+        ],
       };
-      
+
       setStoryAnalysis(analysis);
       setIsAnalyzing(false);
       setStepProgress(100);
@@ -1508,143 +1704,124 @@ const playWordWithElevenLabs = async (wordIndex: number) => {
   const startVoiceConversation = async () => {
     // Don't allow starting conversation in view-only mode
     if (isViewOnly) return;
-    
-    console.log('Starting voice conversation...');
-    console.log('Selected topic:', selectedTopic?.title);
-    console.log('Voice supported:', isVoiceSupported);
-    console.log('Permission status:', permissionStatus);
-    
+
+    console.log("Starting voice conversation...");
+    console.log("Selected topic:", selectedTopic?.title);
+    console.log("Voice supported:", isVoiceSupported);
+    console.log("Permission status:", permissionStatus);
+
     try {
-      // const initialPrompt = selectedTopic 
-      //   ? `Hello ${userProfile?.name} Let's have a conversation about your approach to this scenario I'll ask you questions and you should try to use each of our vocabulary words in your responses Here is the first question:How did you decide on your approach to handling this professional challenge?`
-      //   : `Hello ${userProfile?.name} Let's have a conversation about your approach to this scenario I'll ask you questions and you should try to use each of our vocabulary words in your responses Here is the first question:How did you decide on your approach to handling this professional challenge?`;
-      const intro = `Hello ${userProfile?.name|| "user"}! Let's have a conversation about your approach to this scenario. I'll ask you questions and you should try to use each of our vocabulary words in your responses.`;
-const firstQuestion = `Here is the first question: How did you decide on your approach to handling this professional challenge?`;
-      // console.log('Speaking initial prompt:', initialPrompt);
-      console.log('Speaking initial prompt:', intro,firstQuestion);
-      
-      // First set the conversation state
+      const intro = `Hello ${userProfile?.name || "user"}! Let's have a conversation about your approach to this scenario. I'll ask you questions and you should try to use each of our vocabulary words in your responses.`;
+      const firstQuestion = `Here is the first question: How did you decide on your approach to handling this professional challenge?`;
+      console.log("Speaking initial prompt:", intro, firstQuestion);
+
       // setVoiceConversation([
-      //   { type: 'ai', content: initialPrompt, timestamp: new Date() }
+      //   { type: "ai", content: intro, timestamp: new Date() },
       // ]);
-      setVoiceConversation([
-        { type: 'ai', content: intro, timestamp: new Date() },
-        // { type: 'ai', content: firstQuestion, timestamp: new Date() }
-      ]);
-      
+
       // Then speak the prompt with error handling
       // await safeSpeak(initialPrompt);
       // USED ELEVENLABS FOR INITIAL PROMPT
       try {
-        // const audioBlob = await getElevenLabsAudio(initialPrompt);
+        // setVoiceConversation([
+        //   { type: "ai", content: intro, timestamp: new Date() },
+        // ]);
+        // First part: play intro with ElevenLabs or fallback
+        // setConversationStarted(true);
+        setConversationStarted(true);
+        await playElevenLabsWithLiveTranscript(intro, async () => {
+          // When intro audio finishes:
+          setVoiceConversation((prev) => [
+            ...prev,
+            { type: "ai", content: intro, timestamp: new Date() },
+          ]);
 
-        // const url = URL.createObjectURL(audioBlob);
-        // const audio = new Audio(url);
-        // await audio.play();
-        // NEW BLOCK
-         // Play intro
-  const audioBlob1 = await getElevenLabsAudio(intro);
-  const url1 = URL.createObjectURL(audioBlob1);
-  const audio1 = new Audio(url1);
-  await audio1.play();
-// OLD BLOCK
-  // 3. After intro is spoken, add the first question to the conversation
-  // setVoiceConversation(prev => [
-  //   ...prev,
-  //   { type: 'ai', content: firstQuestion, timestamp: new Date() }
-  // ]);
-
-  // Play first question after intro finishes
-  // const audioBlob2 = await getElevenLabsAudio(firstQuestion);
-  // const url2 = URL.createObjectURL(audioBlob2);
-  // const audio2 = new Audio(url2);
-  // await audio2.play();
-  // OLD BLOCK ENDED
-  audio1.onended = async () => {
-    // 3. After intro finishes, add first question to chat
-    setVoiceConversation(prev => [
-      ...prev,
-      { type: "ai", content: firstQuestion, timestamp: new Date() }
-      
-    ]);
-   const audioBlob2 = await getElevenLabsAudio(firstQuestion);
-  const url2 = URL.createObjectURL(audioBlob2);
-  const audio2 = new Audio(url2);
-  await audio2.play();
-}
+          // Second part: play question with ElevenLabs or fallback
+          await playElevenLabsWithLiveTranscript(firstQuestion, () => {
+            // ✅ After first question finishes, store it in conversation
+            setVoiceConversation((prev) => [
+              ...prev,
+              { type: "ai", content: firstQuestion, timestamp: new Date() },
+            ]);
+          });
+        });
       } catch (ttsError) {
-        // Fallback to browser TTS if ElevenLabs fails
-        // await safeSpeak(initialPrompt);
-        await safeSpeak(intro);
-        // await safeSpeak(firstQuestion);
-        setVoiceConversation(prev => [
-          ...prev,
-          { type: 'ai', content: firstQuestion, timestamp: new Date() }
+        console.warn("ElevenLabs error, falling back to browser TTS", ttsError);
+        setConversationStarted(true);
+        await playBrowserTTSWithLiveTranscript(intro);
+        // Show intro text and speak it with browser TTS
+        setVoiceConversation([
+          { type: "ai", content: intro, timestamp: new Date() },
         ]);
-        await safeSpeak(firstQuestion);
+
+        await playBrowserTTSWithLiveTranscript(firstQuestion);
+        // Now show first question and speak it
+        setVoiceConversation((prev) => [
+          ...prev,
+          { type: "ai", content: firstQuestion, timestamp: new Date() },
+        ]);
       }
-      
     } catch (error) {
-      console.warn('Voice conversation start error:', error);
+      console.warn("Voice conversation start error:", error);
       // Continue even if speech fails - user can still see the text
     }
   };
-//Event Handler
+  //Event Handler
   const handleVoiceResponse = async () => {
     // Don't allow voice responses in view-only mode
     if (isViewOnly) return;
-    
+
     if (transcript) {
       // you never modify state directly instad you create a new arrayor object
       const newConversation = [...voiceConversation];
       newConversation.push({
-        type: 'user',
+        type: "user",
         content: transcript,
         timestamp: new Date(),
-        wordsUsed: dailyWords.filter(word => 
+        wordsUsed: dailyWords.filter((word) =>
           transcript.toLowerCase().includes(word.word.toLowerCase())
-        )
+        ),
       });
-      
+
       setVoiceConversation(newConversation);
       clearTranscript();
-      
+
       try {
         // Generate AI response using Gemini
         const aiResponse = await generateVoiceResponse({
           userMessage: transcript,
           conversationHistory: voiceConversation,
-          vocabulary: dailyWords.map(w => w.word),
-          topic: selectedTopic?.title
+          vocabulary: dailyWords.map((w) => w.word),
+          topic: selectedTopic?.title,
         });
- 
+
         // Wait a moment before speaking the response
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         await safeSpeak(aiResponse);
         //safeSpeak takes a text and convets it to speech
         newConversation.push({
-          type: 'ai',
+          type: "ai",
           content: aiResponse,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
         setVoiceConversation([...newConversation]);
-        
       } catch (error) {
-        console.warn('Voice response error:', error);
+        console.warn("Voice response error:", error);
         // Fallback response if Gemini fails
-        const fallbackResponse = "That's interesting! Can you tell me more about how you would apply these concepts in your work?";
-        
+        const fallbackResponse =
+          "That's interesting! Can you tell me more about how you would apply these concepts in your work?";
+
         try {
           await safeSpeak(fallbackResponse);
         } catch (speechError) {
-          console.warn('Speech error:', speechError);
+          console.warn("Speech error:", speechError);
         }
-        
+
         newConversation.push({
-          type: 'ai',
+          type: "ai",
           content: fallbackResponse,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
         setVoiceConversation([...newConversation]);
       }
@@ -1652,20 +1829,29 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
   };
 
   const calculateFinalScore = () => {
-    const correctAnswers = questionResults.filter(result => result.isCorrect).length;
+    const correctAnswers = questionResults.filter(
+      (result) => result.isCorrect
+    ).length;
     //This is for calculating the learning score upto 25 points
     const learningScore = (correctAnswers / learningQuestions.length) * 25;
     //The is for calculating the story score upto 35 points
-    const storyScore = storyAnalysis ? 
-      ((storyAnalysis?.creativity || 0) + (storyAnalysis?.grammar || 0) + (storyAnalysis?.coherence || 0) + (storyAnalysis?.topicAdherence || 0)) / 4 * 0.35 : 0;
+    const storyScore = storyAnalysis
+      ? (((storyAnalysis?.creativity || 0) +
+          (storyAnalysis?.grammar || 0) +
+          (storyAnalysis?.coherence || 0) +
+          (storyAnalysis?.topicAdherence || 0)) /
+          4) *
+        0.35
+      : 0;
     // This is for calculating the voice score upto 40
-    const voiceScore = voiceConversation.filter(msg => 
-      msg.type === 'user' && msg.wordsUsed?.length > 0
-    ).length * 10;
-    
+    const voiceScore =
+      voiceConversation.filter(
+        (msg) => msg.type === "user" && msg.wordsUsed?.length > 0
+      ).length * 10;
+
     const total = Math.min(100, learningScore + storyScore + voiceScore);
     setFinalScore(Math.round(total));
-    
+
     // Mark activity as completed
     if (onComplete) {
       onComplete();
@@ -1677,7 +1863,8 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
       return (
         <Alert className="mb-6">
           <div className="text-muted-foreground text-sm mt-2">
-            Audio recording is not supported in this browser. Please use Chrome, Safari, or Edge for the best experience with voice conversations.
+            Audio recording is not supported in this browser. Please use Chrome,
+            Safari, or Edge for the best experience with voice conversations.
           </div>
         </Alert>
       );
@@ -1689,7 +1876,9 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           <div className="flex items-center justify-between text-muted-foreground text-sm mt-2">
             <span>{voiceError}</span>
             <Button
-              onClick={() => window.open('chrome://settings/content/microphone', '_blank')}
+              onClick={() =>
+                window.open("chrome://settings/content/microphone", "_blank")
+              }
               className="aduffy-button-outline ml-4"
             >
               Settings
@@ -1699,13 +1888,16 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
       );
     }
 
-    if (permissionStatus === 'prompt' || permissionStatus === 'unknown') {
+    if (permissionStatus === "prompt" || permissionStatus === "unknown") {
       return (
         <Alert className="mb-6">
           {/* <div className="flex items-center justify-between text-muted-foreground text-sm mt-2 allow-access-div"> */}
           <div className="flex items-center justify-between allow-access-div">
-          {/* <div className="allow-access-div"> */}
-            <span>Microphone access is required for audio recording and voice conversations.</span>
+            {/* <div className="allow-access-div"> */}
+            <span>
+              Microphone access is required for audio recording and voice
+              conversations.
+            </span>
             <Button
               onClick={requestPermission}
               // className="aduffy-button-outline ml-4"
@@ -1729,22 +1921,47 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
         <div className="alert-content">
           <span className="alert-lock-icon" aria-hidden="true">
             <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
-              <rect x="5" y="11" width="14" height="8" rx="3" stroke="#1793b6" strokeWidth="1.5" fill="none"/>
-              <path d="M8 11V8a4 4 0 1 1 8 0v3" stroke="#1793b6" strokeWidth="1.5" fill="none"/>
+              <rect
+                x="5"
+                y="11"
+                width="14"
+                height="8"
+                rx="3"
+                stroke="#1793b6"
+                strokeWidth="1.5"
+                fill="none"
+              />
+              <path
+                d="M8 11V8a4 4 0 1 1 8 0v3"
+                stroke="#1793b6"
+                strokeWidth="1.5"
+                fill="none"
+              />
             </svg>
           </span>
           <span>
-            You're viewing a completed step. Changes are not allowed in view mode.
+            You're viewing a completed step. Changes are not allowed in view
+            mode.
           </span>
         </div>
-        <button
-          className="alert-action-btn"
-          onClick={handleReturnToFurthest}
-        >
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" style={{marginRight: '0.3em'}}>
-            <path d="M5 12h14M13 6l6 6-6 6" stroke="#1793b6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <button className="alert-action-btn" onClick={handleReturnToFurthest}>
+          <svg
+            width="20"
+            height="20"
+            fill="none"
+            viewBox="0 0 24 24"
+            style={{ marginRight: "0.3em" }}
+          >
+            <path
+              d="M5 12h14M13 6l6 6-6 6"
+              stroke="#1793b6"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
-          Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
+          Return to{" "}
+          {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
         </button>
       </Alert>
     );
@@ -1753,15 +1970,17 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
   const renderWordsStep = () => (
     <div className="space-y-8">
       {renderViewOnlyAlert()}
-      
+
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-3 mb-4">
           <div className="w-16 h-16 bg-aduffy-yellow/10 rounded-full flex items-center justify-center border-2 border-aduffy-yellow/20">
             <div className="w-8 h-8 text-aduffy-yellow" />
           </div>
           <div className="text-left">
-            <h2 className="text-3xl font-bold text-aduffy-navy text-center">Today's Vocabulary Words</h2>
-            
+            <h2 className="text-3xl font-bold text-aduffy-navy text-center">
+              Today's Vocabulary Words
+            </h2>
+
             <div className="flex items-center gap-2 mt-1 justify-center">
               <Badge className="vocab-badge-professional">
                 <svg
@@ -1770,14 +1989,41 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                   height="18"
                   viewBox="0 0 20 20"
                   fill="none"
-                  style={{ marginRight: '0.5em', flexShrink: 0, display: 'inline' }}
+                  style={{
+                    marginRight: "0.5em",
+                    flexShrink: 0,
+                    display: "inline",
+                  }}
                   aria-hidden="true"
                   focusable="false"
                 >
-                  <rect x="3" y="5" width="14" height="12" rx="3" fill="none" stroke="#222b3a" strokeWidth="1.5"/>
-                  <path d="M3 8.5h14" stroke="#222b3a" strokeWidth="1.2"/>
-                  <rect x="6.5" y="2.5" width="1.5" height="3" rx="0.75" fill="#222b3a"/>
-                  <rect x="12" y="2.5" width="1.5" height="3" rx="0.75" fill="#222b3a"/>
+                  <rect
+                    x="3"
+                    y="5"
+                    width="14"
+                    height="12"
+                    rx="3"
+                    fill="none"
+                    stroke="#222b3a"
+                    strokeWidth="1.5"
+                  />
+                  <path d="M3 8.5h14" stroke="#222b3a" strokeWidth="1.2" />
+                  <rect
+                    x="6.5"
+                    y="2.5"
+                    width="1.5"
+                    height="3"
+                    rx="0.75"
+                    fill="#222b3a"
+                  />
+                  <rect
+                    x="12"
+                    y="2.5"
+                    width="1.5"
+                    height="3"
+                    rx="0.75"
+                    fill="#222b3a"
+                  />
                 </svg>
                 5 Professional Words
               </Badge>
@@ -1793,57 +2039,67 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
         </div>
         {/* <p className="text-lg text-muted-foreground max-w-2xl mx-auto"> */}
         <p>
-          Master these 5 carefully selected vocabulary words to enhance your professional communication skills.
+          Master these 5 carefully selected vocabulary words to enhance your
+          professional communication skills.
         </p>
       </div>
-       <div className="generate-random-words-container">
-          <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-            <button
-             
+      <div className="generate-random-words-container">
+        <div
+          style={{ display: "flex", justifyContent: "center", width: "100%" }}
+        >
+          <button
             // Event handler for generating random words
             onClick={async () => {
               if (isViewOnly) return;
               setLoadingRandomWords(true);
               try {
                 // Get random words from Gemini
-                const geminiWords = await getRandomWordsFromGemini(5,previousWords);
-                console.log('Gemini words:', geminiWords);
-                
+                const geminiWords = await getRandomWordsFromGemini(
+                  5,
+                  previousWords
+                );
+                console.log("Gemini words:", geminiWords);
+
                 // Optionally, get example sentences for each word
                 const wordsWithExamples = await Promise.all(
                   geminiWords.map(async (w: any) => ({
                     ...w,
                     example: await getGeminiExample(w.word, w.definition),
-                    difficulty: 'beginner' // or set based on your logic
+                    difficulty: "beginner", // or set based on your logic
                   }))
                 );
                 // NEW BLOCK
-                const newWordStrings = wordsWithExamples.map(w => w.word.toLowerCase());
-                setPreviousWords(prev => [...prev, ...newWordStrings]);
-// NEW BLOCK ENDED
+                const newWordStrings = wordsWithExamples.map((w) =>
+                  w.word.toLowerCase()
+                );
+                setPreviousWords((prev) => [...prev, ...newWordStrings]);
+                // NEW BLOCK ENDED
                 setDailyWords(wordsWithExamples);
-                localStorage.setItem('aduffy-activity-words', JSON.stringify(wordsWithExamples));
+                localStorage.setItem(
+                  "aduffy-activity-words",
+                  JSON.stringify(wordsWithExamples)
+                );
               } catch (err) {
-                console.error('Error fetching random words from Gemini:', err);
-                alert('Could not fetch random words from Gemini.');
+                console.error("Error fetching random words from Gemini:", err);
+                alert("Could not fetch random words from Gemini.");
               }
               setLoadingRandomWords(false);
             }}
-              
-              disabled={isViewOnly || loadingRandomWords}
-              className={`btn-outline-teal${isViewOnly ? ' opacity-60' : ''}`}
-              
-            >
-              {loadingRandomWords ? 'Loading...' : 'Generate Random Words'}
-            </button>
-          </div>
-          </div>
+            disabled={isViewOnly || loadingRandomWords}
+            className={`btn-outline-teal${isViewOnly ? " opacity-60" : ""}`}
+          >
+            {loadingRandomWords ? "Loading..." : "Generate Random Words"}
+          </button>
+        </div>
+      </div>
       <div className="vocabulary-grid">
         {dailyWords.map((word, index) => (
           <div key={index} className="vocabulary-card">
             <div className="vocabulary-card-header">
               <div className="word-number">{index + 1}</div>
-              <div className={`word-level ${word.difficulty}`}>{word.difficulty}</div>
+              <div className={`word-level ${word.difficulty}`}>
+                {word.difficulty}
+              </div>
             </div>
             <div className="vocabulary-word">
               {word.word}
@@ -1872,49 +2128,74 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
 
       <div className="flex justify-center">
         {!isViewOnly ? (
-           dailyWords.length > 0 && (
-          <Button onClick={handleNextStep} className="orange-action-btn">
-           <span className="desktop-text">Continue to Learning Activities</span> 
-           <span className="mobile-text">Next</span> 
-            <span style={{fontSize: '1.1em', display: 'inline-block', transform: 'translateY(1px)'}}>→</span>
-          </Button>
-           )
+          dailyWords.length > 0 && (
+            <Button onClick={handleNextStep} className="orange-action-btn">
+              <span className="desktop-text">
+                Continue to Learning Activities
+              </span>
+              <span className="mobile-text">Next</span>
+              <span
+                style={{
+                  fontSize: "1.1em",
+                  display: "inline-block",
+                  transform: "translateY(1px)",
+                }}
+              >
+                →
+              </span>
+            </Button>
+          )
         ) : (
           // Return Button View Only
           <Button onClick={handleReturnToFurthest} className="return-btn">
             <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-            Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
+            Return to{" "}
+            {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
           </Button>
         )}
       </div>
     </div>
   );
-// Learning Page starts here
+  // Learning Page starts here
   const renderLearningStep = () => (
     <div className="space-y-8">
       {renderViewOnlyAlert()}
-      
+
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-3 mb-4">
           <div className="w-16 h-16 bg-aduffy-teal/10 rounded-full flex items-center justify-center border-2 border-aduffy-teal/20">
             <div className="w-8 h-8 text-aduffy-teal" />
           </div>
           <div className="text-left">
-            <h2 className="text-3xl font-bold text-aduffy-navy text-center">Learn &amp; Practice</h2>
+            <h2 className="text-3xl font-bold text-aduffy-navy text-center">
+              Learn &amp; Practice
+            </h2>
             <div className="learning-header-center">
               <Badge className="aduffy-badge-info">
                 {/*INTERACTIVE BADGE IN THE LEARNING PAGE */}
-              <span className="info-badge">
-                <span className="info-badge-icon" aria-hidden="true">
-                  {/* SVG icon for target/interactive */}
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="9" stroke="#14b8a6" strokeWidth="2"/>
-                    <circle cx="12" cy="12" r="5" stroke="#14b8a6" strokeWidth="2"/>
-                    <circle cx="12" cy="12" r="1.5" fill="#14b8a6"/>
-                  </svg>
+                <span className="info-badge">
+                  <span className="info-badge-icon" aria-hidden="true">
+                    {/* SVG icon for target/interactive */}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="9"
+                        stroke="#14b8a6"
+                        strokeWidth="2"
+                      />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="5"
+                        stroke="#14b8a6"
+                        strokeWidth="2"
+                      />
+                      <circle cx="12" cy="12" r="1.5" fill="#14b8a6" />
+                    </svg>
+                  </span>
+                  Interactive Learning
                 </span>
-                Interactive Learning
-              </span>
               </Badge>
               {isViewOnly && (
                 // <Badge className="aduffy-badge-info ml-2">
@@ -1927,11 +2208,10 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           </div>
         </div>
         <p className="text-muted-foreground max-w-2xl mx-auto font-size-quiz">
-        {/* <p className="text-lg text-muted-foreground max-w-2xl mx-auto"> */}
-          {isViewOnly 
+          {/* <p className="text-lg text-muted-foreground max-w-2xl mx-auto"> */}
+          {isViewOnly
             ? "Review your completed learning session. All answers and content are shown in view-only mode."
-            : "Strengthen your understanding through comprehensive questions and contextual examples. You can skip this step if you're confident."
-          }
+            : "Strengthen your understanding through comprehensive questions and contextual examples. You can skip this step if you're confident."}
         </p>
       </div>
 
@@ -1946,7 +2226,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
             Example Story
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent tabValue="questions" className="space-y-6 mt-8">
           {showLearningContent && learningQuestions.length > 0 && (
             <Card className="aduffy-card quiz-question-card">
@@ -1954,28 +2234,40 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-aduffy-navy quiz-question-card-title">
-                      Question {currentQuestionIndex + 1} of {learningQuestions.length}
-                      {isViewOnly && <div className="w-4 h-4 ml-2 inline text-muted-foreground" />}
+                      Question {currentQuestionIndex + 1} of{" "}
+                      {learningQuestions.length}
+                      {isViewOnly && (
+                        <div className="w-4 h-4 ml-2 inline text-muted-foreground" />
+                      )}
                     </CardTitle>
                     <CardDescription className="mt-1">
-                      {dailyWords[learningQuestions[currentQuestionIndex]?.wordIndex]?.word} - {learningQuestions[currentQuestionIndex]?.type}
+                      {
+                        dailyWords[
+                          learningQuestions[currentQuestionIndex]?.wordIndex
+                        ]?.word
+                      }{" "}
+                      - {learningQuestions[currentQuestionIndex]?.type}
                     </CardDescription>
                   </div>
                   {/* PRACTICE BADGE IN LEARNING PAGE */}
                   <div className="badges-column">
-                  {/* NO>OF CORRECT QUESTIONS BADGE */}
-                  <div className="badges-row">
-                  {questionResults.length>0 &&(
-                  <Badge className="correct-answers-badge-soft">
-                  {/* <span>Correct Answers: </span> */}
-                  <span>Scores: &nbsp;</span>
-                  <span>
-                  {/* <span className="font-medium text-success"> */}
-                    {questionResults.filter(r => r.isCorrect).length} / {questionResults.length}
-                  </span>
-                  </Badge>)} 
-                  {/* ACCURACY BADGE */}
-                  {/* {questionResults.length>0 &&(
+                    {/* NO>OF CORRECT QUESTIONS BADGE */}
+                    <div className="badges-row">
+                      {questionResults.length > 0 && (
+                        <Badge className="correct-answers-badge-soft">
+                          {/* <span>Correct Answers: </span> */}
+                          <span>Scores: &nbsp;</span>
+                          <span>
+                            {/* <span className="font-medium text-success"> */}
+                            {
+                              questionResults.filter((r) => r.isCorrect).length
+                            }{" "}
+                            / {questionResults.length}
+                          </span>
+                        </Badge>
+                      )}
+                      {/* ACCURACY BADGE */}
+                      {/* {questionResults.length>0 &&(
                   <Badge className="accuracy-badge-soft">
                   <span>Accuracy: </span>
                   <span>
@@ -1983,11 +2275,17 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                   </span>
                   </Badge>
                   )} */}
-                  </div>
+                    </div>
                   </div>
                 </div>
                 {/* PROGRESS BAR FOR THE QUIZ */}
-                <Progress value={((currentQuestionIndex + 1) / learningQuestions.length) * 100} className="mt-4 quiz-progress-bar" />
+                <Progress
+                  value={
+                    ((currentQuestionIndex + 1) / learningQuestions.length) *
+                    100
+                  }
+                  className="mt-4 quiz-progress-bar"
+                />
               </CardHeader>
               {/* THIS IS THE QUIZ QUESTION CARD*/}
               <CardContent className="space-y-6">
@@ -1995,64 +2293,130 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                   {/* This line displays the text of the current learning question in your quiz */}
                   {learningQuestions[currentQuestionIndex]?.question}
                 </div>
-                
+
                 <div className="grid ">
-                {/* <div className="grid grid-cols-1 gap-3"> */}
-                  {learningQuestions[currentQuestionIndex]?.options.map((option, index) => {
-                    // HIGHLIGHTING THE OPTION THAT IS BEING SELECTED
-                    const lastResult = questionResults[questionResults.length - 1];
-                    const isCurrentQuestionAnswered = lastResult && lastResult.questionId === learningQuestions[currentQuestionIndex]?.id;
-                    const isSelected = isCurrentQuestionAnswered && lastResult.userAnswer === index;
-                    
-                    const isCorrect = index === learningQuestions[currentQuestionIndex].correctAnswer;
-                    return (
-                      <div
-                        key={index}
-                        // FOR STYLING TEH CORRECT AND INCORRECT OPTION
-                        className={`quiz-option
-                          ${isSelected ? ' selected' : ''}
-                          ${isCorrect && (showQuestionFeedback || isViewOnly) ? ' correct' : ''}
-                          ${isSelected && !isCorrect && showQuestionFeedback ? ' incorrect' : ''}
-                          ${isViewOnly ? ' cursor-default' : ''}
+                  {/* <div className="grid grid-cols-1 gap-3"> */}
+                  {learningQuestions[currentQuestionIndex]?.options.map(
+                    (option, index) => {
+                      // HIGHLIGHTING THE OPTION THAT IS BEING SELECTED
+                      const lastResult =
+                        questionResults[questionResults.length - 1];
+                      const isCurrentQuestionAnswered =
+                        lastResult &&
+                        lastResult.questionId ===
+                          learningQuestions[currentQuestionIndex]?.id;
+                      const isSelected =
+                        isCurrentQuestionAnswered &&
+                        lastResult.userAnswer === index;
+
+                      const isCorrect =
+                        index ===
+                        learningQuestions[currentQuestionIndex].correctAnswer;
+                      return (
+                        <div
+                          key={index}
+                          // FOR STYLING TEH CORRECT AND INCORRECT OPTION
+                          className={`quiz-option
+                          ${isSelected ? " selected" : ""}
+                          ${isCorrect && (showQuestionFeedback || isViewOnly) ? " correct" : ""}
+                          ${isSelected && !isCorrect && showQuestionFeedback ? " incorrect" : ""}
+                          ${isViewOnly ? " cursor-default" : ""}
                         `}
-                        onClick={() => !showQuestionFeedback && !isViewOnly && handleAnswerQuestion(index)}
-                        style={{ pointerEvents: showQuestionFeedback || isViewOnly ? 'none' : 'auto' }}
-                      >
-                        <span className="option-letter">{String.fromCharCode(65 + index)}</span>
-                        {option}
-                        {(showQuestionFeedback || isViewOnly) && isCorrect && (
-                          <span className="option-check">
-                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
-                              <path d="M5 13l4 4L19 7" stroke="#22b573" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
+                          onClick={() =>
+                            !showQuestionFeedback &&
+                            !isViewOnly &&
+                            handleAnswerQuestion(index)
+                          }
+                          style={{
+                            pointerEvents:
+                              showQuestionFeedback || isViewOnly
+                                ? "none"
+                                : "auto",
+                          }}
+                        >
+                          <span className="option-letter">
+                            {String.fromCharCode(65 + index)}
                           </span>
+                          {option}
+                          {(showQuestionFeedback || isViewOnly) &&
+                            isCorrect && (
+                              <span className="option-check">
+                                <svg
+                                  width="22"
+                                  height="22"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    d="M5 13l4 4L19 7"
+                                    stroke="#22b573"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              </span>
+                            )}
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+
+                {(showQuestionFeedback || isViewOnly) &&
+                  currentQuestionResult && (
+                    <div
+                      className={`quiz-feedback ${currentQuestionResult.isCorrect ? "correct" : "quiz-feedback-incorrect"}`}
+                    >
+                      <div className="quiz-feedback-header">
+                        {currentQuestionResult.isCorrect ? (
+                          <>
+                            <svg
+                              width="22"
+                              height="22"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                d="M5 13l4 4L19 7"
+                                stroke="#22b573"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            Correct!
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              width="22"
+                              height="22"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                d="M6 18L18 6M6 6l12 12"
+                                stroke="#b91c1c"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            <span
+                              className="text-error"
+                              style={{ marginLeft: 6 }}
+                            >
+                              Incorrect
+                            </span>
+                          </>
                         )}
                       </div>
-                    );
-                  })}
-                </div>
-                
-
-                {(showQuestionFeedback || isViewOnly) && currentQuestionResult && (
-                  <div className={`quiz-feedback ${currentQuestionResult.isCorrect ? 'correct' : 'quiz-feedback-incorrect'}`}>
-                    <div className="quiz-feedback-header">
-                      {currentQuestionResult.isCorrect ? (
-                        <>
-                          <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#22b573" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          Correct!
-                        </>
-                      ) : (
-                        <>
-                          <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke="#b91c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          <span className="text-error" style={{marginLeft: 6}}>Incorrect</span>
-                        </>
-                      )}
-                    </div>
-                    <div className="quiz-feedback-explanation">
-                      {currentQuestionResult.explanation}
-                    </div>
-                    {/* CURRENT INDEX LESS THAN 4 NEXT QUESTION BUTTON IS DISPLAY WHEN IT REACHES 5 COMPLETE PRACTICE IS SHOWN WHICH TAKES THE USER TO THE NEXT STEP */}
-                    {/* {!isViewOnly && (
+                      <div className="quiz-feedback-explanation">
+                        {currentQuestionResult.explanation}
+                      </div>
+                      {/* CURRENT INDEX LESS THAN 4 NEXT QUESTION BUTTON IS DISPLAY WHEN IT REACHES 5 COMPLETE PRACTICE IS SHOWN WHICH TAKES THE USER TO THE NEXT STEP */}
+                      {/* {!isViewOnly && (
                     currentQuestionIndex < learningQuestions.length - 1 ? (
                       <button className="quiz-feedback-btn" onClick={handleNextQuestion}>
                         Next Question
@@ -2071,24 +2435,36 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                       </button>
                     )
                   )} */}
-                  </div>
-                )}
-              {isMobile && stepButton &&(
-                // <button className="next-btn-learn">Next Question</button>
-                <button
+                    </div>
+                  )}
+                {isMobile && stepButton && (
+                  // <button className="next-btn-learn">Next Question</button>
+                  <button
                     className="next-btn-learn"
                     onClick={stepButton.onClick}
                     disabled={stepButton.disabled}
                     type="button"
                   >
                     {stepButton.label}
-                    <span className="start-writing-icon" style={{ marginRight: 8 }}>
-                      {typeof stepButton.icon === 'string'
-                        ? <span style={{ display: 'inline-block', transform: 'translateY(1px)' }}>{stepButton.icon}</span>
-                        : stepButton.icon}
+                    <span
+                      className="start-writing-icon"
+                      style={{ marginRight: 8 }}
+                    >
+                      {typeof stepButton.icon === "string" ? (
+                        <span
+                          style={{
+                            display: "inline-block",
+                            transform: "translateY(1px)",
+                          }}
+                        >
+                          {stepButton.icon}
+                        </span>
+                      ) : (
+                        stepButton.icon
+                      )}
                     </span>
                   </button>
-              )}
+                )}
               </CardContent>
             </Card>
           )}
@@ -2115,7 +2491,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
             </Card>
           )} */}
         </TabsContent>
-{/* This is the example story tab */}
+        {/* This is the example story tab */}
         <TabsContent tabValue="story" className="space-y-6 mt-8">
           {showLearningContent && (
             <Card className="example-story-card progress-summary-card">
@@ -2123,11 +2499,14 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                 <div className="flex items-start justify-between w-full">
                   <div>
                     <div className="flex items-center gap-2 text-aduffy-orange font-bold text-lg mb-1">
-                      <span role="img" aria-label="lightbulb">💡</span>
+                      <span role="img" aria-label="lightbulb">
+                        💡
+                      </span>
                       Example Professional Story
                     </div>
                     <div className="text-muted-foreground text-base">
-                      See how all 5 vocabulary words are used naturally in a workplace context
+                      See how all 5 vocabulary words are used naturally in a
+                      workplace context
                     </div>
                   </div>
                   {/* <Button className="listen-story-btn" >
@@ -2143,11 +2522,27 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                   </div>
                 </div>
                 <div className="mt-6">
-                  <div className="font-semibold mb-2">Vocabulary Words Used:</div>
+                  <div className="font-semibold mb-2">
+                    Vocabulary Words Used:
+                  </div>
                   <div className="flex flex-wrap-example gap-2">
                     {dailyWords.map((word, index) => (
                       <span key={index} className="vocab-badge-success">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" style={{marginRight: 4, verticalAlign: 'middle'}}><path d="M5 13l4 4L19 7" stroke="#22b573" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <svg
+                          width="18"
+                          height="18"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          style={{ marginRight: 4, verticalAlign: "middle" }}
+                        >
+                          <path
+                            d="M5 13l4 4L19 7"
+                            stroke="#22b573"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
                         {word.word}
                       </span>
                     ))}
@@ -2163,8 +2558,15 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           <>
             {isMobile ? (
               // Mobile Button Layout
-              <div className="mobile-learning-buttons" style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', width: '100%' }}>
-            
+              <div
+                className="mobile-learning-buttons"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: "12px",
+                  width: "100%",
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => {
@@ -2175,7 +2577,6 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                     }
                   }}
                   className="mobile-back-btn"
-                  
                 >
                   Back
                 </button>
@@ -2183,7 +2584,6 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                   type="button"
                   onClick={handleSkipLearning}
                   className="mobile-skip-btn"
-                
                 >
                   Skip Learning
                 </button>
@@ -2206,10 +2606,22 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                     type="button"
                   >
                     {stepButton.label}
-                    <span className="start-writing-icon" style={{ marginRight: 8 }}>
-                      {typeof stepButton.icon === 'string'
-                        ? <span style={{ display: 'inline-block', transform: 'translateY(1px)' }}>{stepButton.icon}</span>
-                        : stepButton.icon}
+                    <span
+                      className="start-writing-icon"
+                      style={{ marginRight: 8 }}
+                    >
+                      {typeof stepButton.icon === "string" ? (
+                        <span
+                          style={{
+                            display: "inline-block",
+                            transform: "translateY(1px)",
+                          }}
+                        >
+                          {stepButton.icon}
+                        </span>
+                      ) : (
+                        stepButton.icon
+                      )}
                     </span>
                   </button>
                 )}
@@ -2220,12 +2632,12 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           <div className="flex w-full justify-center">
             <Button onClick={handleReturnToFurthest} className="return-btn">
               <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-              Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
+              Return to{" "}
+              {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
             </Button>
           </div>
         )}
       </div>
-      
     </div>
   );
 
@@ -2246,14 +2658,19 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           <div className="text-left">
             {/* <h2 className="storytelling-welcome-title">Write Your Story</h2> */}
             <h2 className="ai-guided-title">
-            <span className="ai-guided-icon" aria-hidden="true">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                <path d="M12 17.25L7.09 20l.93-5.43L4 10.97l5.46-.79L12 5.5l2.54 4.68 5.46.79-3.97 3.6.93 5.43z"
-                  stroke="#222b3a" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
-              </svg>
-            </span>
-            AI-Guided Writing
-          </h2>
+              <span className="ai-guided-icon" aria-hidden="true">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                  <path
+                    d="M12 17.25L7.09 20l.93-5.43L4 10.97l5.46-.79L12 5.5l2.54 4.68 5.46.79-3.97 3.6.93 5.43z"
+                    stroke="#222b3a"
+                    strokeWidth="1.5"
+                    fill="none"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+              AI-Guided Writing
+            </h2>
             <div className="flex justify-center mt-1">
               {/* AI-GUIDED BADGE  */}
               {/* <span className="ai-guided-badge">
@@ -2294,9 +2711,10 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           <Card className="aduffy-card ai-story-card-content">
             <CardHeader>
               <div className="ai-story-card-title ">
-                <span role="img" aria-label="lightbulb">💡</span>
+                <span role="img" aria-label="lightbulb">
+                  💡
+                </span>
                 Your Story Topic
-             
                 {selectedTopic && !isViewOnly && (
                   // <button onClick={regenerateTopic} disabled={isGeneratingTopic} className="ai-story-new-topic-btn ml-auto">
                   //   {isGeneratingTopic ? 'Generating...' : 'New Topic'}
@@ -2307,252 +2725,379 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                     disabled={isGeneratingTopic}
                     className="ai-story-new-topic-btn "
                   >
-                    {isGeneratingTopic ? 'Generating...' : 'Change Topic'}
+                    {isGeneratingTopic ? "Generating..." : "Change Topic"}
                   </button>
                 )}
-                   {isMobile && writingStarted && (
-      <button
-        onClick={() => setTopicCollapsed(c => !c)}
-        className="ai-story-new-topic-btn-collapse"
-        style={{ marginLeft: 8 }}
-        aria-label={topicCollapsed ? "Expand Topic" : "Collapse Topic"}
-      >
-        {topicCollapsed ? "▼" : "▲"}
-      </button>
-    )}
+                {isMobile && writingStarted && (
+                  <button
+                    onClick={() => setTopicCollapsed((c) => !c)}
+                    className="ai-story-new-topic-btn-collapse"
+                    style={{ marginLeft: 8 }}
+                    aria-label={
+                      topicCollapsed ? "Expand Topic" : "Collapse Topic"
+                    }
+                  >
+                    {topicCollapsed ? "▼" : "▲"}
+                  </button>
+                )}
               </div>
               {/* <div className="ai-story-card-desc">
                 Use this professional scenario as the foundation for your story
               </div> */}
             </CardHeader>
             {!topicCollapsed && (
-            <CardContent>
-              {/* CONTEXT AND TEH CHALLENGE GENERATED BY THE NEW TOPIC */}
-              <div className="story-context-box">
-              <div className="story-context-title">{selectedTopic?.title}</div>
-              <div className="story-context-scenario">{selectedTopic?.scenario}</div>
-              <div>
-                <span className="story-context-label">Context:</span>
-                <span className="story-context-value"> {selectedTopic?.context}</span>
-              </div>
-              <div>
-                <span className="story-context-label">Your Challenge:</span>
-                <span className="story-context-value"> {selectedTopic?.challenge}</span>
-              </div>
-            </div>
-
-             
-              {/* WRITING INSTRUCTION BLOCK*/}
-              <div className="writing-instructions-box">
-                <span className="writing-instructions-icon" aria-hidden="true">✨</span>
-                <div className="writing-instructions-content">
-                  <span className="writing-instructions-title">Writing Instructions:</span>
-                  <span className="writing-instructions-desc">
-                    {isViewOnly
-                      ? `You successfully incorporated all 5 vocabulary words into this scenario: ${dailyWords.map(w => w.word).join(', ')}`
-                      : `Create a compelling narrative that addresses this scenario while naturally incorporating all 5 vocabulary words: ${dailyWords.map(w => w.word).join(', ')}`}
-                  </span>
+              <CardContent>
+                {/* CONTEXT AND TEH CHALLENGE GENERATED BY THE NEW TOPIC */}
+                <div className="story-context-box">
+                  <div className="story-context-title">
+                    {selectedTopic?.title}
+                  </div>
+                  <div className="story-context-scenario">
+                    {selectedTopic?.scenario}
+                  </div>
+                  <div>
+                    <span className="story-context-label">Context:</span>
+                    <span className="story-context-value">
+                      {" "}
+                      {selectedTopic?.context}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="story-context-label">Your Challenge:</span>
+                    <span className="story-context-value">
+                      {" "}
+                      {selectedTopic?.challenge}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
+
+                {/* WRITING INSTRUCTION BLOCK*/}
+                <div className="writing-instructions-box">
+                  <span
+                    className="writing-instructions-icon"
+                    aria-hidden="true"
+                  >
+                    ✨
+                  </span>
+                  <div className="writing-instructions-content">
+                    <span className="writing-instructions-title">
+                      Writing Instructions:
+                    </span>
+                    <span className="writing-instructions-desc">
+                      {isViewOnly
+                        ? `You successfully incorporated all 5 vocabulary words into this scenario: ${dailyWords.map((w) => w.word).join(", ")}`
+                        : `Create a compelling narrative that addresses this scenario while naturally incorporating all 5 vocabulary words: ${dailyWords.map((w) => w.word).join(", ")}`}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
             )}
           </Card>
           {/* Story Writing Area */}
           {isMobile ? (
-  !writingStarted ? (
-    <Button
-      className="start-writing-btn"
-      onClick={() => {setWritingStarted(true);
-        setTopicCollapsed(true);
-      }}
-      type="button"
-      style={{ width: "100%", marginBottom: 16 }}
-    >
-      Start Writing
-    </Button>
-  ) : (
-    <>
-    <div className="professional-story-card">
-      {/* ...all the story card content (your existing code here)... */}
-      <div className="professional-story-title">Your Professional Story</div>
-      <div className="professional-story-desc">
-        <p>Write a story and include all the vocabulary words</p>
-      </div>
-      <Textarea
-        placeholder={selectedTopic
-          ? (isViewOnly ? "Your story is displayed above..." : `Start your story about \"${selectedTopic.title}\" here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.`)
-          : 'Start your story here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.'}
-        value={userStory}
-        onChange={(e) => !isViewOnly && setUserStory(e.target.value)}
-        className="professional-story-textarea"
-        readOnly={isViewOnly}
-        onPaste={e => e.preventDefault()} 
-      />
-      {/* ...rest of your mobile vocab row and footer... */}
-      <div className="mobile-vocab-row">
-        {dailyWords && dailyWords.length > 0 ? dailyWords.map((word, index) => {
-          const isUsed = userStory.toLowerCase().includes(word.word.toLowerCase());
-          return (
-            <div key={index} className={`mobile-vocab-pill${isUsed ? ' used' : ''}`}>
-              <span className="mobile-vocab-word">{word.word}</span>
-              {isUsed && (
-                <span className="mobile-vocab-check">
-                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-                    <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+            !writingStarted ? (
+              <Button
+                className="start-writing-btn"
+                onClick={() => {
+                  setWritingStarted(true);
+                  setTopicCollapsed(true);
+                }}
+                type="button"
+                style={{ width: "100%", marginBottom: 16 }}
+              >
+                Start Writing
+              </Button>
+            ) : (
+              <>
+                <div className="professional-story-card">
+                  {/* ...all the story card content (your existing code here)... */}
+                  <div className="professional-story-title">
+                    Your Professional Story
+                  </div>
+                  <div className="professional-story-desc">
+                    <p>Write a story and include all the vocabulary words</p>
+                  </div>
+                  <Textarea
+                    placeholder={
+                      selectedTopic
+                        ? isViewOnly
+                          ? "Your story is displayed above..."
+                          : `Start your story about \"${selectedTopic.title}\" here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.`
+                        : "Start your story here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented."
+                    }
+                    value={userStory}
+                    onChange={(e) =>
+                      !isViewOnly && setUserStory(e.target.value)
+                    }
+                    className="professional-story-textarea"
+                    readOnly={isViewOnly}
+                    onPaste={(e) => e.preventDefault()}
+                  />
+                  {/* ...rest of your mobile vocab row and footer... */}
+                  <div className="mobile-vocab-row">
+                    {dailyWords && dailyWords.length > 0 ? (
+                      dailyWords.map((word, index) => {
+                        const isUsed = userStory
+                          .toLowerCase()
+                          .includes(word.word.toLowerCase());
+                        return (
+                          <div
+                            key={index}
+                            className={`mobile-vocab-pill${isUsed ? " used" : ""}`}
+                          >
+                            <span className="mobile-vocab-word">
+                              {word.word}
+                            </span>
+                            {isUsed && (
+                              <span className="mobile-vocab-check">
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 20 20"
+                                  fill="none"
+                                >
+                                  <path
+                                    d="M5 10.5L9 14.5L15 7.5"
+                                    stroke="#fff"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <span>Loading...</span>
+                    )}
+                  </div>
+                  <div className="professional-story-footer">
+                    <span>
+                      Words:{" "}
+                      {
+                        userStory.split(" ").filter((word) => word.trim())
+                          .length
+                      }
+                    </span>
+                    <span>
+                      Vocabulary used:{" "}
+                      {
+                        dailyWords.filter((word) =>
+                          userStory
+                            .toLowerCase()
+                            .includes(word.word.toLowerCase())
+                        ).length
+                      }
+                      /{dailyWords.length}
+                    </span>
+                  </div>
+
+                  <Button
+                    onClick={handleAnalyzeStory}
+                    disabled={
+                      !userStory.trim() || isAnalyzing || !selectedTopic
+                    }
+                    className="analyze-story-btn"
+                    style={{ width: "100%", marginTop: 16 }}
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-4 h-4 mr-2 text-aduffy-teal" />
+                        Analyze My Story
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            )
+          ) : (
+            // Desktop: always show the card
+            <div className="professional-story-card">
+              {/* ...all the story card content (your existing code here)... */}
+              <div className="professional-story-title">
+                Your Professional Story
+              </div>
+              <div className="professional-story-desc">
+                <p>Write a story and include all the vocabulary words</p>
+              </div>
+              <Textarea
+                placeholder={
+                  selectedTopic
+                    ? isViewOnly
+                      ? "Your story is displayed above..."
+                      : `Start your story about \"${selectedTopic.title}\" here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.`
+                    : "Start your story here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented."
+                }
+                value={userStory}
+                onChange={(e) => !isViewOnly && setUserStory(e.target.value)}
+                className="professional-story-textarea"
+                readOnly={isViewOnly}
+                onPaste={(e) => e.preventDefault()}
+              />
+              {/* ...rest of your mobile vocab row and footer... */}
+              <div className="mobile-vocab-row">
+                {dailyWords && dailyWords.length > 0 ? (
+                  dailyWords.map((word, index) => {
+                    const isUsed = userStory
+                      .toLowerCase()
+                      .includes(word.word.toLowerCase());
+                    return (
+                      <div
+                        key={index}
+                        className={`mobile-vocab-pill${isUsed ? " used" : ""}`}
+                      >
+                        <span className="mobile-vocab-word">{word.word}</span>
+                        {isUsed && (
+                          <span className="mobile-vocab-check">
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 20 20"
+                              fill="none"
+                            >
+                              <path
+                                d="M5 10.5L9 14.5L15 7.5"
+                                stroke="#fff"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <span>Loading...</span>
+                )}
+              </div>
+              <div className="professional-story-footer">
+                <span>
+                  Words:{" "}
+                  {userStory.split(" ").filter((word) => word.trim()).length}
                 </span>
-              )}
+                <span>
+                  Vocabulary used:{" "}
+                  {
+                    dailyWords.filter((word) =>
+                      userStory.toLowerCase().includes(word.word.toLowerCase())
+                    ).length
+                  }
+                  /{dailyWords.length}
+                </span>
+              </div>
             </div>
-          );
-        }) : (
-          <span>Loading...</span>
-        )}
-      </div>
-      <div className="professional-story-footer">
-        <span>Words: {userStory.split(' ').filter(word => word.trim()).length}</span>
-        <span>Vocabulary used: {dailyWords.filter(word => userStory.toLowerCase().includes(word.word.toLowerCase())).length}/{dailyWords.length}</span>
-      </div>
-    
-      <Button
-  onClick={handleAnalyzeStory}
-  disabled={!userStory.trim() || isAnalyzing || !selectedTopic}
-  className="analyze-story-btn"
-  style={{ width: "100%", marginTop: 16 }}
->
-  {isAnalyzing ? (
-    <>
-      <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-      Analyzing...
-    </>
-  ) : (
-    <>
-      <div className="w-4 h-4 mr-2 text-aduffy-teal" />
-      Analyze My Story
-    </>
-  )}
-</Button>
-</div>
-      
-    </>
-    )
-  
-) : (
-  // Desktop: always show the card
-  <div className="professional-story-card">
-    {/* ...all the story card content (your existing code here)... */}
-    <div className="professional-story-title">Your Professional Story</div>
-    <div className="professional-story-desc">
-      <p>Write a story and include all the vocabulary words</p>
-    </div>
-    <Textarea
-      placeholder={selectedTopic
-        ? (isViewOnly ? "Your story is displayed above..." : `Start your story about \"${selectedTopic.title}\" here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.`)
-        : 'Start your story here... Remember to incorporate all vocabulary words naturally into your narrative while addressing the challenge presented.'}
-      value={userStory}
-      onChange={(e) => !isViewOnly && setUserStory(e.target.value)}
-      className="professional-story-textarea"
-      readOnly={isViewOnly}
-      onPaste={e => e.preventDefault()} 
-    />
-    {/* ...rest of your mobile vocab row and footer... */}
-    <div className="mobile-vocab-row">
-      {dailyWords && dailyWords.length > 0 ? dailyWords.map((word, index) => {
-        const isUsed = userStory.toLowerCase().includes(word.word.toLowerCase());
-        return (
-          <div key={index} className={`mobile-vocab-pill${isUsed ? ' used' : ''}`}>
-            <span className="mobile-vocab-word">{word.word}</span>
-            {isUsed && (
-              <span className="mobile-vocab-check">
-                <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-                  <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </span>
-            )}
-          </div>
-        );
-      }) : (
-        <span>Loading...</span>
-      )}
-    </div>
-    <div className="professional-story-footer">
-      <span>Words: {userStory.split(' ').filter(word => word.trim()).length}</span>
-      <span>Vocabulary used: {dailyWords.filter(word => userStory.toLowerCase().includes(word.word.toLowerCase())).length}/{dailyWords.length}</span>
-    </div>
-  </div>
-)}
+          )}
           {/* AI STORY ANALYSIS FOR DESKTOP */}
           <div className="ai-analysis-desktop">
-          {storyAnalysis && (
-          <AnalysisModal open={showAnalysisModal} onClose={() => setShowAnalysisModal(false)}>
-            <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent mobile-padding-feedback">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-aduffy-navy">
-                  <div className="w-6 h-6 text-aduffy-yellow" />
-                  AI Story Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="ai-analysis-card space-y-6">
-                <div className="ai-analysis-scores-row">
-                  <div className="text-center">
-                    <div className="ai-analysis-score ai-analysis-score-creativity">{storyAnalysis?.creativity || 0}%</div>
-                    <div className="ai-analysis-label">Creativity</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="ai-analysis-score ai-analysis-score-grammar">{storyAnalysis?.grammar || 0}%</div>
-                    <div className="ai-analysis-label">Grammar</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="ai-analysis-score ai-analysis-score-coherence">{storyAnalysis?.coherence || 0}%</div>
-                    <div className="ai-analysis-label">Coherence</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="ai-analysis-score ai-analysis-score-topic">{storyAnalysis?.topicAdherence || 0}%</div>
-                    <div className="ai-analysis-label">Topic Match</div>
-                  </div>
-                </div>
-                <hr className="ai-analysis-divider" />
-                <div>
-                  <h4 className="font-medium text-aduffy-navy mb-2">Feedback</h4>
-                  <p className="text-muted-foreground">{storyAnalysis?.feedback || 'No feedback available.'}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-aduffy-navy mb-2 ">Suggestions for Improvement</h4>
-                  <ul className="space-y-1 text-muted-foreground">
-                    {storyAnalysis?.suggestions && storyAnalysis.suggestions.length > 0 ? storyAnalysis.suggestions.map((suggestion: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <div className="w-2 h-2 bg-aduffy-yellow rounded-full mt-2 flex-shrink-0"></div>
-                        {suggestion}
-                      </li>
-                    )) : (
-                      <li className="text-muted-foreground">No specific suggestions available.</li>
-                    )}
-                  </ul>
-                  <div className="flex justify-end mt-6">
-                 <button
-                 onClick={() => setShowAnalysisModal(false)}
-                 className="orange-action-btn">
-                  close
-                 </button>
+            {storyAnalysis && (
+              <AnalysisModal
+                open={showAnalysisModal}
+                onClose={() => setShowAnalysisModal(false)}
+              >
+                <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent mobile-padding-feedback">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3 text-aduffy-navy">
+                      <div className="w-6 h-6 text-aduffy-yellow" />
+                      AI Story Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="ai-analysis-card space-y-6">
+                    <div className="ai-analysis-scores-row">
+                      <div className="text-center">
+                        <div className="ai-analysis-score ai-analysis-score-creativity">
+                          {storyAnalysis?.creativity || 0}%
+                        </div>
+                        <div className="ai-analysis-label">Creativity</div>
                       </div>
-                </div>
-              </CardContent>
-            </Card>
-            </AnalysisModal>
-          )}
-        </div>
-        
-        
+                      <div className="text-center">
+                        <div className="ai-analysis-score ai-analysis-score-grammar">
+                          {storyAnalysis?.grammar || 0}%
+                        </div>
+                        <div className="ai-analysis-label">Grammar</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="ai-analysis-score ai-analysis-score-coherence">
+                          {storyAnalysis?.coherence || 0}%
+                        </div>
+                        <div className="ai-analysis-label">Coherence</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="ai-analysis-score ai-analysis-score-topic">
+                          {storyAnalysis?.topicAdherence || 0}%
+                        </div>
+                        <div className="ai-analysis-label">Topic Match</div>
+                      </div>
+                    </div>
+                    <hr className="ai-analysis-divider" />
+                    <div>
+                      <h4 className="font-medium text-aduffy-navy mb-2">
+                        Feedback
+                      </h4>
+                      <p className="text-muted-foreground">
+                        {storyAnalysis?.feedback || "No feedback available."}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-aduffy-navy mb-2 ">
+                        Suggestions for Improvement
+                      </h4>
+                      <ul className="space-y-1 text-muted-foreground">
+                        {storyAnalysis?.suggestions &&
+                        storyAnalysis.suggestions.length > 0 ? (
+                          storyAnalysis.suggestions.map(
+                            (suggestion: string, index: number) => (
+                              <li
+                                key={index}
+                                className="flex items-start gap-2"
+                              >
+                                <div className="w-2 h-2 bg-aduffy-yellow rounded-full mt-2 flex-shrink-0"></div>
+                                {suggestion}
+                              </li>
+                            )
+                          )
+                        ) : (
+                          <li className="text-muted-foreground">
+                            No specific suggestions available.
+                          </li>
+                        )}
+                      </ul>
+                      <div className="flex justify-end mt-6">
+                        <button
+                          onClick={() => setShowAnalysisModal(false)}
+                          className="orange-action-btn"
+                        >
+                          close
+                        </button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </AnalysisModal>
+            )}
+          </div>
         </div>
 
-          {/* MODAL SHOW BUTTON */}
-          {storyAnalysis && (
-  <div className="ai-analysis-mobile">
-    {/* <button className="ai-analysis-popup-btn" onClick={() => setShowAnalysisModal(true)}>
+        {/* MODAL SHOW BUTTON */}
+        {storyAnalysis && (
+          <div className="ai-analysis-mobile">
+            {/* <button className="ai-analysis-popup-btn" onClick={() => setShowAnalysisModal(true)}>
       View AI Feedback
     </button> */}
-                <AnalysisModal open={showAnalysisModal} onClose={() => setShowAnalysisModal(false)}>
-        <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent no-box-shadow">
-        <div className="w-6 h-6 text-aduffy-yellow" />
+            <AnalysisModal
+              open={showAnalysisModal}
+              onClose={() => setShowAnalysisModal(false)}
+            >
+              <Card className="aduffy-card bg-gradient-to-br from-aduffy-yellow/5 to-transparent no-box-shadow">
+                <div className="w-6 h-6 text-aduffy-yellow" />
                 <div className="ai-analysis-header">
                   {/* <svg className="ai-analysis-trophy" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4V2h14v2h3v2c0 3.31-2.69 6-6 6h-2v2.09A7.001 7.001 0 0 1 12 22a7.001 7.001 0 0 1-2-13.91V10H8c-3.31 0-6-2.69-6-6V4h3zm2 0v2c0 2.21 1.79 4 4 4s4-1.79 4-4V4H7zm-3 2c0 2.21 1.79 4 4 4h2V4H4v2zm16-2h-6v4h2c2.21 0 4-1.79 4-4V4z"/></svg> */}
                   <span className="ai-analysis-trophy">🎖</span>
@@ -2560,79 +3105,121 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                 </div>
                 <div className="ai-analysis-scores-row">
                   <div className="text-center">
-                    <div className="ai-analysis-score ai-analysis-score-creativity">{storyAnalysis?.creativity || 0}%</div>
+                    <div className="ai-analysis-score ai-analysis-score-creativity">
+                      {storyAnalysis?.creativity || 0}%
+                    </div>
                     <div className="ai-analysis-label">Creativity</div>
                   </div>
                   <div className="text-center">
-                    <div className="ai-analysis-score ai-analysis-score-grammar">{storyAnalysis?.grammar || 0}%</div>
+                    <div className="ai-analysis-score ai-analysis-score-grammar">
+                      {storyAnalysis?.grammar || 0}%
+                    </div>
                     <div className="ai-analysis-label">Grammar</div>
                   </div>
                   <div className="text-center">
-                    <div className="ai-analysis-score ai-analysis-score-coherence">{storyAnalysis?.coherence || 0}%</div>
+                    <div className="ai-analysis-score ai-analysis-score-coherence">
+                      {storyAnalysis?.coherence || 0}%
+                    </div>
                     <div className="ai-analysis-label">Coherence</div>
                   </div>
                   <div className="text-center">
-                    <div className="ai-analysis-score ai-analysis-score-topic">{storyAnalysis?.topicAdherence || 0}%</div>
+                    <div className="ai-analysis-score ai-analysis-score-topic">
+                      {storyAnalysis?.topicAdherence || 0}%
+                    </div>
                     <div className="ai-analysis-label">Topic Match</div>
                   </div>
                 </div>
                 <hr className="ai-analysis-divider" />
                 <div>
-                  <h4 className="font-medium text-aduffy-navy mb-2">Feedback</h4>
-                  <p className="text-muted-foreground">{storyAnalysis?.feedback || 'No feedback available.'}</p>
+                  <h4 className="font-medium text-aduffy-navy mb-2">
+                    Feedback
+                  </h4>
+                  <p className="text-muted-foreground">
+                    {storyAnalysis?.feedback || "No feedback available."}
+                  </p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-aduffy-navy mb-2 m-t">Suggestions for Improvement</h4>
+                  <h4 className="font-medium text-aduffy-navy mb-2 m-t">
+                    Suggestions for Improvement
+                  </h4>
                   <ul className="space-y-1 text-muted-foreground">
-                    {storyAnalysis?.suggestions && storyAnalysis.suggestions.length > 0 ? storyAnalysis.suggestions.map((suggestion: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <div className="w-2 h-2 bg-aduffy-yellow rounded-full mt-2 flex-shrink-0"></div>
-                        {suggestion}
+                    {storyAnalysis?.suggestions &&
+                    storyAnalysis.suggestions.length > 0 ? (
+                      storyAnalysis.suggestions.map(
+                        (suggestion: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <div className="w-2 h-2 bg-aduffy-yellow rounded-full mt-2 flex-shrink-0"></div>
+                            {suggestion}
+                          </li>
+                        )
+                      )
+                    ) : (
+                      <li className="text-muted-foreground">
+                        No specific suggestions available.
                       </li>
-                    )) : (
-                      <li className="text-muted-foreground">No specific suggestions available.</li>
                     )}
                   </ul>
-                    <div className="flex justify-end mt-6">
-                 <button
-                 onClick={() => setShowAnalysisModal(false)}
-                 className="orange-action-btn">
-                  close
-                 </button>
-                      </div>
+                  <div className="flex justify-end mt-6">
+                    <button
+                      onClick={() => setShowAnalysisModal(false)}
+                      className="orange-action-btn"
+                    >
+                      close
+                    </button>
+                  </div>
                 </div>
-                </Card>
-              </AnalysisModal>
-              </div>
-          )}
-              {/* AI ANALYSIS VOCABULARY WORD CHECKLIST STARTS */}
+              </Card>
+            </AnalysisModal>
+          </div>
+        )}
+        {/* AI ANALYSIS VOCABULARY WORD CHECKLIST STARTS */}
         <div className="space-y-6">
           <div className="vocab-checklist-card">
             <div className="vocab-checklist-title">Vocabulary Checklist</div>
             <div className="vocab-checklist-desc">
-              {isViewOnly ? 'Words you used in your story' : "Track which words you've used in your story"}
+              {isViewOnly
+                ? "Words you used in your story"
+                : "Track which words you've used in your story"}
             </div>
             <div className="vocab-checklist-list">
-              {dailyWords && dailyWords.length > 0 ? dailyWords.map((word, index) => {
+              {dailyWords && dailyWords.length > 0 ? (
+                dailyWords.map((word, index) => {
+                  const isUsed = userStory
+                    .toLowerCase()
+                    .includes(word.word.toLowerCase());
 
-                const isUsed = userStory.toLowerCase().includes(word.word.toLowerCase());
-                
-                return (
-                  <div key={index} className="vocab-checklist-item">
-                    <div>
-                      <div className="vocab-checklist-word">{word.word}</div>
-                      <div className="vocab-checklist-pos">{word.partOfSpeech}</div>
+                  return (
+                    <div key={index} className="vocab-checklist-item">
+                      <div>
+                        <div className="vocab-checklist-word">{word.word}</div>
+                        <div className="vocab-checklist-pos">
+                          {word.partOfSpeech}
+                        </div>
+                      </div>
+                      <div
+                        className={`vocab-checklist-indicator${isUsed ? " checked" : ""}`}
+                      >
+                        {isUsed && (
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                          >
+                            <path
+                              d="M5 10.5L9 14.5L15 7.5"
+                              stroke="#fff"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </div>
                     </div>
-                    <div className={`vocab-checklist-indicator${isUsed ? ' checked' : ''}`}>
-                      {isUsed && (
-                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-                          <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      )}
-                    </div>
-                  </div>
-                );
-              }) : (
+                  );
+                })
+              ) : (
                 <div className="text-center text-muted-foreground py-4">
                   <div className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
                   <p className="text-sm">Loading vocabulary words...</p>
@@ -2642,107 +3229,135 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           </div>
           <div className="space-y-4">
             {!isViewOnly ? (
-                (!isMobile) && (
-              <>
-                <Button
-                  onClick={handleAnalyzeStory}
-                  disabled={!userStory.trim() || isAnalyzing || !selectedTopic}
-                  className="analyze-story-btn"
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-4 h-4 mr-2 text-aduffy-teal" />
-                      Analyze My Story
-                    </>
-                  )}
-                </Button>
-
-                {/* CONTINUE TO VOICE CHAT BUTTON */}
-                {storyAnalysis && !isMobile &&(
-                  <button
-                    type="button"
-                    onClick={handleNextStep}
-                    className="continue-voice-btn"
+              !isMobile && (
+                <>
+                  <Button
+                    onClick={handleAnalyzeStory}
+                    disabled={
+                      !userStory.trim() || isAnalyzing || !selectedTopic
+                    }
+                    className="analyze-story-btn"
                   >
-                    Continue to Voice Chat
-                    <span className="continue-voice-icon">
-                      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
-                        <path d="M5 12h14M13 6l6 6-6 6" stroke="#222b3a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </span>
-                  </button>
-                )}
-              </>
-                )
+                    {isAnalyzing ? (
+                      <>
+                        <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-4 h-4 mr-2 text-aduffy-teal" />
+                        Analyze My Story
+                      </>
+                    )}
+                  </Button>
+
+                  {/* CONTINUE TO VOICE CHAT BUTTON */}
+                  {storyAnalysis && !isMobile && (
+                    <button
+                      type="button"
+                      onClick={handleNextStep}
+                      className="continue-voice-btn"
+                    >
+                      Continue to Voice Chat
+                      <span className="continue-voice-icon">
+                        <svg
+                          width="22"
+                          height="22"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M5 12h14M13 6l6 6-6 6"
+                            stroke="#222b3a"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                    </button>
+                  )}
+                </>
+              )
             ) : (
               // Return Button View Only
               <div className="flex w-full justify-center">
-              <Button onClick={handleReturnToFurthest} className="return-btn">
-                <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-                Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
-              </Button>
+                <Button onClick={handleReturnToFurthest} className="return-btn">
+                  <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
+                  Return to{" "}
+                  {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
+                </Button>
               </div>
             )}
           </div>
           {/* MOBILE VERSION */}
           {isMobile && !isViewOnly && (
-  <div className="mobile-step-buttons" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '1rem' }}>
-    <button
-      type="button"
-      onClick={() => {
-        const currentIndex = STEP_ORDER.indexOf(currentStep);
-        const previousStep = STEP_ORDER[currentIndex - 1];
-        if (previousStep) {
-          setCurrentStep(previousStep);
-        }
-      }}
-      className="mobile-back-btn"
-    >
-      Back
-    </button>
-    <button
-      type="button"
-      onClick={handleNextStep}
-      className="mobile-next-btn"
-      disabled={!isAnalyzed}
-    >
-      Next
-    </button>
-  </div>
-)}
-
+            <div
+              className="mobile-step-buttons"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+                marginTop: "1rem",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  const currentIndex = STEP_ORDER.indexOf(currentStep);
+                  const previousStep = STEP_ORDER[currentIndex - 1];
+                  if (previousStep) {
+                    setCurrentStep(previousStep);
+                  }
+                }}
+                className="mobile-back-btn"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={handleNextStep}
+                className="mobile-next-btn"
+                disabled={!isAnalyzed}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-  {/* VOICE VOCABULARY WORD CHECKLIST ENDS */}
-// Voice conversation page starts from here
+  {
+    /* VOICE VOCABULARY WORD CHECKLIST ENDS */
+  }
+  // [VC-STARTS]
   const renderVoiceStep = () => (
     <div className="space-y-8">
       {renderViewOnlyAlert()}
-      
+
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-3 mb-4">
           <div className="w-16 h-16 bg-info/10 rounded-full flex items-center justify-center border-2 border-info/20">
             <div className="w-8 h-8 text-info" />
           </div>
           <div className="text-left">
-            <h2 className="text-3xl font-bold text-aduffy-navy text-center">Voice Conversation</h2>
+            <h2 className="text-3xl font-bold text-aduffy-navy text-center">
+              Voice Conversation
+            </h2>
             <div className="speaking-badge-center">
               <span className="speaking-badge">
                 <span className="speaking-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 17c2.761 0 5-2.239 5-5V7a5 5 0 0 0-10 0v5c0 2.761 2.239 5 5 5zm7-5v-1a1 1 0 1 0-2 0v1a7 7 0 0 1-14 0v-1a1 1 0 1 0-2 0v1c0 4.418 3.582 8 8 8s8-3.582 8-8z" fill="#0097a7"/>
+                    <path
+                      d="M12 17c2.761 0 5-2.239 5-5V7a5 5 0 0 0-10 0v5c0 2.761 2.239 5 5 5zm7-5v-1a1 1 0 1 0-2 0v1a7 7 0 0 1-14 0v-1a1 1 0 1 0-2 0v1c0 4.418 3.582 8 8 8s8-3.582 8-8z"
+                      fill="#0097a7"
+                    />
                   </svg>
                 </span>
                 Interactive Speaking
               </span>
-            {isViewOnly && (
+              {isViewOnly && (
                 // <Badge className="aduffy-badge-info ml-2">
                 <Badge className="view-only-badge">
                   <div className="w-3 h-3 mr-1 text-muted-foreground" />
@@ -2753,10 +3368,9 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
           </div>
         </div>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          {isViewOnly 
+          {isViewOnly
             ? "Review your completed voice conversation with AI. All interactions are shown in view-only mode."
-            : "Have a natural conversation with AI about your story using audio. Record your voice and try to use each vocabulary word in your responses."
-          }
+            : "Have a natural conversation with AI about your story using audio. Record your voice and try to use each vocabulary word in your responses."}
         </p>
       </div>
 
@@ -2771,39 +3385,39 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
             </CardHeader>
             {/* .CONVERSATION AREA */}
             <CardContent className="space-y-4">
-              <div className="scrollable-fixed"  ref={chatContainerRef}>
-                {voiceConversation.length === 0 ?
-                 (
+              <div className="scrollable-fixed" ref={chatContainerRef}>
+                {voiceConversation.length === 0 ? (
                   <div className="text-center text-muted-foreground py-8">
                     <div className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-                    <p>
-                      {isViewOnly 
-                        ? "No conversation data available to display"
-                        : 'Click "Start Conversation" to begin the voice interaction'
-                      }
-                    </p>
-                   
+                    {!conversationStarted && (
+                      <p>
+                        {isViewOnly
+                          ? "No conversation data available to display"
+                          : 'Click "Start Conversation" to begin the voice interaction'}
+                      </p>
+                    )}
                   </div>
-                ) :
-                 (
-                  voiceConversation.map((message, index) => ( 
-                    <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-              {/* ADDED INDENTATION */}
-                      <div className={`chat-bubble ${message.type === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`}>
-
+                ) : (
+                  voiceConversation.map((message, index) => (
+                    <div
+                      key={index}
+                      className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
+                    >
+                      {/* ADDED INDENTATION */}
+                      <div
+                        className={`chat-bubble ${message.type === "user" ? "chat-bubble-user" : "chat-bubble-ai"}`}
+                      >
                         <p>
                           {/* OLD BLOCK */}
                           {message.isAudio ? (
                             <span className="flex items-center gap-2">
-  
                               {message.content}
                             </span>
                           ) : (
                             message.content
                           )}
-                
                         </p>
-                        
+
                         {/* {message.wordsUsed && message.wordsUsed.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-1">
                             {message.wordsUsed.map((word: any, wordIndex: number) => (
@@ -2823,47 +3437,72 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
                 )}
                 {/* NEW BLOCK */}
                 {!isViewOnly && voiceTranscript && (
-                <div className="flex justify-end">
-                  <div className="chat-bubble chat-bubble-user">
-                    {/* <div className="p-2 bg-muted/50 rounded-lg"> */}
+                  <div className="flex justify-end">
+                    <div className="chat-bubble chat-bubble-user">
+                      {/* <div className="p-2 bg-muted/50 rounded-lg"> */}
                       {/* <div className="text-xs text-muted-foreground mb-1">Your speech (live):</div> */}
                       <p className="text-sm">{voiceTranscript}</p>
                     </div>
-                  {/* </div> */}
-                </div>
-                  )}
-                  {/* new blcok neds */}
+                    {/* </div> */}
                   </div>
-                  {/* CONVERSATION AREA ENDS */}
-                  {/* MOBILE VERSION VOCABULARY CHECKLIST */}
-                  {/* Mobile-only word usage checklist */}
-                  <div className="mobile-word-usage-row">
-                    {dailyWords.map((word, index) => {
-                      // const isUsedInConversation = voiceConversation.some(msg => 
-                      //   msg.type === 'user' && 
-                      //   (msg.content.toLowerCase().includes(word.word.toLowerCase()) || 
-                      //     (msg.wordsUsed && msg.wordsUsed.some((w) => w.word.toLowerCase() === word.word.toLowerCase())))
-                      // );
-    // const isApproved = approvedWords.includes(word.word);
-    // const isApproved = approvedWords.map(w => w.toLowerCase()).includes(word.word.toLowerCase());
-    const capitalize = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word));
-    
-    return (
-      <div key={index} className={`mobile-word-pill${isApproved ? ' used' : ''}`}>
-        <span className="mobile-word-text">{word.word}</span>
-        {isApproved && (
-          <span className="mobile-word-check">
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-              <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </span>
-        )}
-      </div>
-     
-    );
-  })}
-</div>
+                )}
+                {!isViewOnly && aiLiveTranscript && (
+                  <div className="flex justify-start">
+                    <div className="chat-bubble chat-bubble-ai live-transcript-bubble">
+                      <p className="text-sm live-transcript-text">
+                        {aiLiveTranscript}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {/* new blcok neds */}
+              </div>
+              {/* CONVERSATION AREA ENDS */}
+              {/* MOBILE VERSION VOCABULARY CHECKLIST */}
+              {/* Mobile-only word usage checklist */}
+              <div className="mobile-word-usage-row">
+                {dailyWords.map((word, index) => {
+                  // const isUsedInConversation = voiceConversation.some(msg =>
+                  //   msg.type === 'user' &&
+                  //   (msg.content.toLowerCase().includes(word.word.toLowerCase()) ||
+                  //     (msg.wordsUsed && msg.wordsUsed.some((w) => w.word.toLowerCase() === word.word.toLowerCase())))
+                  // );
+                  // const isApproved = approvedWords.includes(word.word);
+                  // const isApproved = approvedWords.map(w => w.toLowerCase()).includes(word.word.toLowerCase());
+                  const capitalize = (w) =>
+                    w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+                  const isApproved = approvedWords
+                    .map(capitalize)
+                    .includes(capitalize(word.word));
+
+                  return (
+                    <div
+                      key={index}
+                      className={`mobile-word-pill${isApproved ? " used" : ""}`}
+                    >
+                      <span className="mobile-word-text">{word.word}</span>
+                      {isApproved && (
+                        <span className="mobile-word-check">
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                          >
+                            <path
+                              d="M5 10.5L9 14.5L15 7.5"
+                              stroke="#fff"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
               {/* Audio recording controls */}
               {!isViewOnly && (
                 <>
@@ -2871,21 +3510,35 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                   {isMobile ? (
                     <div className="flex flex-col items-center justify-center w-full mt-4">
                       {voiceConversation.length === 0 ? (
-                    <button
-                      type="button"
-                      className="orange-action-btn"
-                      onClick={startVoiceConversation}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}><path d="M8 5v14l11-7z" fill="#222"/></svg>
-                      Start Conversation
-                    </button>
-                  ) :  (
+                        <button
+                          type="button"
+                          className="orange-action-btn"
+                          onClick={startVoiceConversation}
+                        >
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            style={{
+                              marginRight: 8,
+                              display: "inline-block",
+                              verticalAlign: "middle",
+                            }}
+                          >
+                            <path d="M8 5v14l11-7z" fill="#222" />
+                          </svg>
+                          Start Conversation
+                        </button>
+                      ) : (
                         <div className="voice-recorder-container">
                           <button
                             onClick={recording ? stopRecording : startRecording}
                             disabled={audioLoading || !audioSupported}
-                            className={`voice-recorder-button ${recording ? 'is-recording' : ''}`}
-                            aria-label={recording ? 'Stop Recording' : 'Start Recording'}
+                            className={`voice-recorder-button ${recording ? "is-recording" : ""}`}
+                            aria-label={
+                              recording ? "Stop Recording" : "Start Recording"
+                            }
                           >
                             {/* {audioLoading ? (
                               <div className="w-8 h-8 border-4 border-gray-800 border-t-white rounded-full animate-spin"></div>
@@ -2894,10 +3547,14 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                                 <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z" />
                               </svg>
                             )} */}
-                           <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z" />
-</svg>
-                           
+                            <svg
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z" />
+                            </svg>
                           </button>
                           {/* <p className="voice-recorder-label">
                             {!audioSupported
@@ -2909,25 +3566,30 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                               : 'Tap to Speak'}
                           </p> */}
                           <p className="voice-recorder-label">
-  {!audioSupported ? (
-    'Audio not supported'
-  ) : audioLoading ? (
-    'Thinking...'
-  ) : recording ? (
-    <>
-      <span>Listening...</span>
-      <br />
-      <span style={{fontSize:'10px', textAlign:"center"}}>Tap to Stop</span>
-    </>
-  ) : (
-    'Tap to Speak'
-  )}
-</p>
-
+                            {!audioSupported ? (
+                              "Audio not supported"
+                            ) : audioLoading ? (
+                              "Thinking..."
+                            ) : recording ? (
+                              <>
+                                <span>Listening...</span>
+                                <br />
+                                <span
+                                  style={{
+                                    fontSize: "10px",
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  Tap to Stop
+                                </span>
+                              </>
+                            ) : (
+                              "Tap to Speak"
+                            )}
+                          </p>
                         </div>
                       )}
                     </div>
-                    
                   ) : (
                     /* --- DESKTOP UI --- */
                     <div className="flex items-center gap-4 mt-4">
@@ -2937,7 +3599,19 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                           className="orange-action-btn"
                           onClick={startVoiceConversation}
                         >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}><path d="M8 5v14l11-7z" fill="#222"/></svg>
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            style={{
+                              marginRight: 8,
+                              display: "inline-block",
+                              verticalAlign: "middle",
+                            }}
+                          >
+                            <path d="M8 5v14l11-7z" fill="#222" />
+                          </svg>
                           Start Conversation
                         </button>
                       ) : (
@@ -2945,23 +3619,52 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                           {audioSupported ? (
                             <button
                               type="button"
-                              onClick={recording ? stopRecording : startRecording}
+                              onClick={
+                                recording ? stopRecording : startRecording
+                              }
                               className="orange-action-btn"
                               disabled={audioLoading}
                             >
                               {recording ? (
                                 <>
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
-                                    <rect x="6" y="6" width="12" height="12" rx="2" fill="#222" />
+                                  <svg
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    style={{
+                                      marginRight: 8,
+                                      display: "inline-block",
+                                      verticalAlign: "middle",
+                                    }}
+                                  >
+                                    <rect
+                                      x="6"
+                                      y="6"
+                                      width="12"
+                                      height="12"
+                                      rx="2"
+                                      fill="#222"
+                                    />
                                   </svg>
-                                  {audioLoading ? 'Thinking' : 'Listening'}
+                                  {audioLoading ? "Thinking" : "Listening"}
                                 </>
                               ) : (
                                 <>
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 8, display: 'inline-block', verticalAlign: 'middle'}}>
-                                    <path d="M8 5v14l11-7z" fill="#222"/>
+                                  <svg
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    style={{
+                                      marginRight: 8,
+                                      display: "inline-block",
+                                      verticalAlign: "middle",
+                                    }}
+                                  >
+                                    <path d="M8 5v14l11-7z" fill="#222" />
                                   </svg>
-                                  {audioLoading ? 'Thinking...' : 'Talk'}
+                                  {audioLoading ? "Thinking..." : "Talk"}
                                 </>
                               )}
                             </button>
@@ -2970,7 +3673,7 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                               Audio recording not supported in this browser
                             </div>
                           )}
-                          
+
                           {audioBlob && !audioLoading && (
                             <button
                               type="button"
@@ -2987,10 +3690,9 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                 </>
               )}
 
-
-               {/* NEW BLOCKS VOICE TRANSCRIPT*/}
-               {/* OLD BLOCK OF VOICE TRANSCRIPT */}
-               {/* {!isViewOnly &&  voiceTranscript && (
+              {/* NEW BLOCKS VOICE TRANSCRIPT*/}
+              {/* OLD BLOCK OF VOICE TRANSCRIPT */}
+              {/* {!isViewOnly &&  voiceTranscript && (
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <div className="text-xs text-muted-foreground mb-1">Your speech:</div>
                   <p className="text-sm">{voiceTranscript}</p>
@@ -3001,76 +3703,82 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
         </div>
         {/* COMPLETE AND GET RESULT BUTTON FOR MOBILE VERSION */}
         {!isViewOnly ? (
-  !isMobile ? (
-    // Case 1: Not mobile & not view-only
-    <button
-      type="button"
-      onClick={handleNextStep}
-      className="w-full soft-yellow-btn mobile-only-btn"
-      disabled={approvedWords.length < 2}
-    >
-      Complete &amp; Get Results 
-      <span className="soft-yellow-arrow">&#8594;</span>
-    </button>
-  ) : (
-    // Case 2: Mobile & not view-only
-    <div
-      className="mobile-step-buttons"
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        width: '100%',
-        marginTop: '1rem',
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => {
-          const currentIndex = STEP_ORDER.indexOf(currentStep);
-          const previousStep = STEP_ORDER[currentIndex - 1];
-          if (previousStep) {
-            setCurrentStep(previousStep);
-          }
-        }}
-        className="mobile-back-btn"
-      >
-        Back
-      </button>
-      <button
-        type="button"
-        // onClick={() => {
-        //   const currentIndex = STEP_ORDER.indexOf(currentStep);
-        //   const previousStep = STEP_ORDER[currentIndex - 1];
-        //   if (previousStep) {
-        //     setCurrentStep(previousStep);
-        //   }
-        // }}
-        onClick={handleNextStep}
-        className="mobile-next-btn"
-        disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
-      >
-       View Results
-      </button>
-    </div>
-  )
-) : (
-  // Case 3: View-only mode
-  <button
-    type="button"
-    onClick={handleReturnToFurthest}
-    className="return-btn"
-  >
-    <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-    Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
-  </button>
-)}
+          !isMobile ? (
+            // Case 1: Not mobile & not view-only
+            <button
+              type="button"
+              onClick={handleNextStep}
+              className="w-full soft-yellow-btn mobile-only-btn"
+              disabled={approvedWords.length < 2}
+            >
+              Complete &amp; Get Results
+              <span className="soft-yellow-arrow">&#8594;</span>
+            </button>
+          ) : (
+            // Case 2: Mobile & not view-only
+            <div
+              className="mobile-step-buttons"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+                marginTop: "1rem",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  const currentIndex = STEP_ORDER.indexOf(currentStep);
+                  const previousStep = STEP_ORDER[currentIndex - 1];
+                  if (previousStep) {
+                    setCurrentStep(previousStep);
+                  }
+                }}
+                className="mobile-back-btn"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                // onClick={() => {
+                //   const currentIndex = STEP_ORDER.indexOf(currentStep);
+                //   const previousStep = STEP_ORDER[currentIndex - 1];
+                //   if (previousStep) {
+                //     setCurrentStep(previousStep);
+                //   }
+                // }}
+                onClick={handleNextStep}
+                className="mobile-next-btn"
+                disabled={
+                  voiceConversation.filter((msg) => msg.type === "user")
+                    .length < 2
+                }
+              >
+                View Results
+              </button>
+            </div>
+          )
+        ) : (
+          // Case 3: View-only mode
+          <button
+            type="button"
+            onClick={handleReturnToFurthest}
+            className="return-btn"
+          >
+            <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
+            Return to{" "}
+            {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
+          </button>
+        )}
 
         {/* Right: Word Usage Goal */}
         {/* CHECK LIST FOR VOICE CONVERSATION*/}
         <div className="word-usage-panel">
           <Card className="aduffy-card">
             <CardHeader>
-              <CardTitle className="text-aduffy-navy">Word Usage Goal</CardTitle>
+              <CardTitle className="text-aduffy-navy">
+                Word Usage Goal
+              </CardTitle>
               <CardDescription>
                 Try to use each word in the conversation
               </CardDescription>
@@ -3078,15 +3786,18 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
             <CardContent>
               {dailyWords.map((word, index) => {
                 // Checks if the word is used
-                // const isUsedInConversation = voiceConversation.some(msg => 
-                //   msg.type === 'user' && 
-                //   (msg.content.toLowerCase().includes(word.word.toLowerCase()) || 
+                // const isUsedInConversation = voiceConversation.some(msg =>
+                //   msg.type === 'user' &&
+                //   (msg.content.toLowerCase().includes(word.word.toLowerCase()) ||
                 //    (msg.wordsUsed && msg.wordsUsed.some((w: any) => w.word.toLowerCase() === word.word.toLowerCase())))
                 // );
                 // const isApproved = approvedWords.includes(word.word);
                 // const isApproved = approvedWords.map(w => w.toLowerCase()).includes(word.word.toLowerCase());
-                const capitalize = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word));
+                const capitalize = (w) =>
+                  w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+                const isApproved = approvedWords
+                  .map(capitalize)
+                  .includes(capitalize(word.word));
                 return (
                   <div key={index} className="word-usage-card">
                     {/* Displays the word and definition */}
@@ -3103,13 +3814,26 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                       )}
                     </div> */}
                     {/* <div className={`vocab-checklist-indicator ${isApproved ? ' checked' : ''}`}> */}
-                    <div className={`word-usage-indicator${isApproved ? ' checked' : ''}`}>
-                  {isApproved && (
-                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-                      <path d="M5 10.5L9 14.5L15 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  )}
-                </div>
+                    <div
+                      className={`word-usage-indicator${isApproved ? " checked" : ""}`}
+                    >
+                      {isApproved && (
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                        >
+                          <path
+                            d="M5 10.5L9 14.5L15 7.5"
+                            stroke="#fff"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -3125,7 +3849,10 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                   handleNextStep();
                 }}
                 className="w-full soft-yellow-btn"
-                disabled={voiceConversation.filter(msg => msg.type === 'user').length < 2}
+                disabled={
+                  voiceConversation.filter((msg) => msg.type === "user")
+                    .length < 2
+                }
               >
                 Complete &amp; Get Results
                 <span className="soft-yellow-arrow">&#8594;</span>
@@ -3138,7 +3865,8 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
                 className="return-btn"
               >
                 <div className="w-4 h-4 mr-2 text-aduffy-yellow" />
-                Return to {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
+                Return to{" "}
+                {furthestStep.charAt(0).toUpperCase() + furthestStep.slice(1)}
               </button>
             )}
           </div>
@@ -3146,19 +3874,22 @@ const isApproved = approvedWords.map(capitalize).includes(capitalize(word.word))
       </div>
     </div>
   );
-  // WRITING SCORE 
+  // [VC-ENDS]
+  // WRITING SCORE
   const writingScore = storyAnalysis
-  ? Math.round(
-      ((storyAnalysis?.creativity || 0) +
-        (storyAnalysis?.grammar || 0) +
-        (storyAnalysis?.coherence || 0) +
-        (storyAnalysis?.topicAdherence || 0)) / 4
-    )
-  : 0;
-  const capitalize = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-const allWordsApproved = dailyWords.every(word =>
-  approvedWords.map(capitalize).includes(capitalize(word.word))
-);
+    ? Math.round(
+        ((storyAnalysis?.creativity || 0) +
+          (storyAnalysis?.grammar || 0) +
+          (storyAnalysis?.coherence || 0) +
+          (storyAnalysis?.topicAdherence || 0)) /
+          4
+      )
+    : 0;
+  const capitalize = (w) =>
+    w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+  const allWordsApproved = dailyWords.every((word) =>
+    approvedWords.map(capitalize).includes(capitalize(word.word))
+  );
   const renderResultsStep = () => (
     <div className="space-y-8">
       <div className="text-center space-y-4">
@@ -3167,23 +3898,31 @@ const allWordsApproved = dailyWords.every(word =>
             <div className="w-8 h-8 text-aduffy-yellow" />
           </div>
           <div className="text-left">
-            <h2 className="text-3xl font-bold text-aduffy-navy text-center">Learning Complete!</h2>
-         
-            {/* FINAL SCORE BADGE END */}
+            <h2 className="text-3xl font-bold text-aduffy-navy text-center">
+              Learning Complete!
+            </h2>
 
+            {/* FINAL SCORE BADGE END */}
           </div>
         </div>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Congratulations! You've completed today's vocabulary learning journey. Here's your comprehensive performance analysis.
+          Congratulations! You've completed today's vocabulary learning journey.
+          Here's your comprehensive performance analysis.
         </p>
       </div>
       {/* NEW BLOCK OF ACHEIVEMENT */}
       <Card className="daily-achievement-card">
-        <div className={`achievement-title ${finalScore<50?"text-red":finalScore<80?"text-orange":"text-green"}`}>
-          {finalScore<50?"Try Again":finalScore<80?"You can do better":"🎉 Good Job"}
-          </div>
+        <div
+          className={`achievement-title ${finalScore < 50 ? "text-red" : finalScore < 80 ? "text-orange" : "text-green"}`}
+        >
+          {finalScore < 50
+            ? "Try Again"
+            : finalScore < 80
+              ? "You can do better"
+              : "🎉 Good Job"}
+        </div>
         {/* <div className="achievement-title">{finalScore<50?"Try Again":finalScore<80?"You can do better":"🎉 Good Job"}</div> */}
-        
+
         <div className="score-section">
           <div className="score-number">{finalScore}/100</div>
           <div className="score-label">Overall Score</div>
@@ -3196,49 +3935,72 @@ const allWordsApproved = dailyWords.every(word =>
         </div>
         <div className="achievement-grid">
           <div>
-            <h4 className="font-medium text-aduffy-navy mb-3">Today's Achievements</h4>
+            <h4 className="font-medium text-aduffy-navy mb-3">
+              Today's Achievements
+            </h4>
             <ul className="achievement-list">
-              <li><span className="checkmark">✔</span><span>Learned 5 new vocabulary words</span></li>
+              <li>
+                <span className="checkmark">✔</span>
+                <span>Learned 5 new vocabulary words</span>
+              </li>
               {/* <li><span className="checkmark">✔</span><span>Completed {learningQuestions.length} practice questions</span></li>
                */}
-               <li >
-                  {/* <span className="checkmark"> */}
-                  <span className={questionResults.length === learningQuestions.length ? "" : "text-error"}>
-                    {questionResults.length === learningQuestions.length ? '✔' : '✖'}
-                  </span>
-                  <span>
-                    Completed {learningQuestions.length} practice questions
-                  </span>
-                </li>
+              <li>
+                {/* <span className="checkmark"> */}
+                <span
+                  className={
+                    questionResults.length === learningQuestions.length
+                      ? ""
+                      : "text-error"
+                  }
+                >
+                  {questionResults.length === learningQuestions.length
+                    ? "✔"
+                    : "✖"}
+                </span>
+                <span>
+                  Completed {learningQuestions.length} practice questions
+                </span>
+              </li>
               {/* <li><span className="checkmark">✔</span><span>Created AI-guided story</span></li> */}
               <li>
-              <span className={storyAnalysis && writingScore >= 50 ? "checkmark" : "crossmark"}>
-                {storyAnalysis && writingScore >= 50 ? '✔' : '✖'}
-              </span>
-              <span>Created AI-guided story</span>
-            </li>
+                <span
+                  className={
+                    storyAnalysis && writingScore >= 50
+                      ? "checkmark"
+                      : "crossmark"
+                  }
+                >
+                  {storyAnalysis && writingScore >= 50 ? "✔" : "✖"}
+                </span>
+                <span>Created AI-guided story</span>
+              </li>
               {/* <li><span className="checkmark">✔</span><span>Practiced speaking skills</span></li> */}
-              <li >
-  <span className={allWordsApproved ? "checkmark" : "text-error"}>{allWordsApproved ? '✔' : '✖'}</span>
-  <span>Practiced speaking skills</span>
-</li>
+              <li>
+                <span className={allWordsApproved ? "checkmark" : "text-error"}>
+                  {allWordsApproved ? "✔" : "✖"}
+                </span>
+                <span>Practiced speaking skills</span>
+              </li>
             </ul>
           </div>
           <div>
-          <h4 className="font-medium text-aduffy-navy mb-3">Words You Learned</h4>
-          {/* <div className="flex flex-wrap gap-2"> */}
-          <div className="topic-mastered">
-            {dailyWords.map((word, idx) => (
-              <span key={idx} className="result-words-learned">
-                <span className="checkmark">✔&nbsp;&nbsp;&nbsp;</span>
-                {word.word}
-              </span>
-            ))}
+            <h4 className="font-medium text-aduffy-navy mb-3">
+              Words You Learned
+            </h4>
+            {/* <div className="flex flex-wrap gap-2"> */}
+            <div className="topic-mastered">
+              {dailyWords.map((word, idx) => (
+                <span key={idx} className="result-words-learned">
+                  <span className="checkmark">✔&nbsp;&nbsp;&nbsp;</span>
+                  {word.word}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-        </div>
       </Card>
-{/* NEW BLOCK OF ACHEIVEMENT ENDS */}
+      {/* NEW BLOCK OF ACHEIVEMENT ENDS */}
       {/* LEARNING< WRITING SPEAKING SCORE CARD */}
       <div className="w-full max-w-4xl mx-auto">
         <div className="grid grid-cols-3 gap-6">
@@ -3247,10 +4009,26 @@ const allWordsApproved = dailyWords.every(word =>
             <CardContent className="pt-6">
               <div className="card-icon-circle card-icon-learning">
                 {/* brain icon */}
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M8.5 8.5a2 2 0 1 1 4 0m-4 0V10a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v1.5m-5-7A5.5 5.5 0 0 0 2 12v0a5.5 5.5 0 0 0 5.5 5.5h.5m7-11A5.5 5.5 0 0 1 22 12v0a5.5 5.5 0 0 1-5.5 5.5h-.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M8.5 8.5a2 2 0 1 1 4 0m-4 0V10a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v1.5m-5-7A5.5 5.5 0 0 0 2 12v0a5.5 5.5 0 0 0 5.5 5.5h.5m7-11A5.5 5.5 0 0 1 22 12v0a5.5 5.5 0 0 1-5.5 5.5h-.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </div>
               <div className="card-title-learning">Learning</div>
-              <div className="card-subtitle">{Math.round((questionResults.filter(r => r.isCorrect).length / learningQuestions.length) * 100)}% correct ({questionResults.filter(r => r.isCorrect).length}/{learningQuestions.length})</div>
+              <div className="card-subtitle">
+                {Math.round(
+                  (questionResults.filter((r) => r.isCorrect).length /
+                    learningQuestions.length) *
+                    100
+                )}
+                % correct ({questionResults.filter((r) => r.isCorrect).length}/
+                {learningQuestions.length})
+              </div>
             </CardContent>
           </Card>
           {/* writing */}
@@ -3258,10 +4036,48 @@ const allWordsApproved = dailyWords.every(word =>
             <CardContent className="pt-6 pb-6">
               <div className="card-icon-circle card-icon-writing">
                 {/* book icon */}
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M3 8.5h18" stroke="currentColor" strokeWidth="1.2"/><rect x="7.5" y="2.5" width="2" height="3" rx="1" fill="currentColor"/><rect x="14.5" y="2.5" width="2" height="3" rx="1" fill="currentColor"/></svg>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+                  <rect
+                    x="3"
+                    y="5"
+                    width="18"
+                    height="14"
+                    rx="2"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <path d="M3 8.5h18" stroke="currentColor" strokeWidth="1.2" />
+                  <rect
+                    x="7.5"
+                    y="2.5"
+                    width="2"
+                    height="3"
+                    rx="1"
+                    fill="currentColor"
+                  />
+                  <rect
+                    x="14.5"
+                    y="2.5"
+                    width="2"
+                    height="3"
+                    rx="1"
+                    fill="currentColor"
+                  />
+                </svg>
               </div>
               <div className="card-title-writing ">Writing</div>
-              <div className="card-subtitle">{storyAnalysis ? Math.round(((storyAnalysis?.creativity || 0) + (storyAnalysis?.grammar || 0) + (storyAnalysis?.coherence || 0) + (storyAnalysis?.topicAdherence || 0)) / 4) : 0}% quality</div>
+              <div className="card-subtitle">
+                {storyAnalysis
+                  ? Math.round(
+                      ((storyAnalysis?.creativity || 0) +
+                        (storyAnalysis?.grammar || 0) +
+                        (storyAnalysis?.coherence || 0) +
+                        (storyAnalysis?.topicAdherence || 0)) /
+                        4
+                    )
+                  : 0}
+                % quality
+              </div>
             </CardContent>
           </Card>
           {/* speaking */}
@@ -3269,15 +4085,28 @@ const allWordsApproved = dailyWords.every(word =>
             <CardContent className="pt-6">
               <div className="card-icon-circle card-icon-speaking">
                 {/* speaker icon */}
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M3 10v4h4l5 5V5l-5 5H3z" fill="currentColor"/><path d="M16.5 12c0-1.77-1-3.29-2.5-4.03v8.06A4.978 4.978 0 0 0 16.5 12z" fill="currentColor"/><path d="M19.5 12c0-3.04-1.64-5.64-4.5-6.32v2.06c1.77.77 3 2.53 3 4.26s-1.23 3.49-3 4.26v2.06c2.86-.68 4.5-3.28 4.5-6.32z" fill="currentColor"/></svg>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 10v4h4l5 5V5l-5 5H3z" fill="currentColor" />
+                  <path
+                    d="M16.5 12c0-1.77-1-3.29-2.5-4.03v8.06A4.978 4.978 0 0 0 16.5 12z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M19.5 12c0-3.04-1.64-5.64-4.5-6.32v2.06c1.77.77 3 2.53 3 4.26s-1.23 3.49-3 4.26v2.06c2.86-.68 4.5-3.28 4.5-6.32z"
+                    fill="currentColor"
+                  />
+                </svg>
               </div>
               <div className="card-title-speaking">Speaking</div>
-              <div className="card-subtitle">{voiceConversation.filter(msg => msg.type === 'user').length} interactions</div>
+              <div className="card-subtitle">
+                {voiceConversation.filter((msg) => msg.type === "user").length}{" "}
+                interactions
+              </div>
             </CardContent>
           </Card>
         </div>
       </div>
-              {/* DAILY ACEIVEMENT CARD IN THE RESULT PAGE */}
+      {/* DAILY ACEIVEMENT CARD IN THE RESULT PAGE */}
       {/* <Card className="daily-achievement-card">
         <div className="confetti-icon" aria-hidden="true">🎉</div>
         <div className="achievement-title">Daily Learning Achievement Unlocked!</div>
@@ -3326,9 +4155,9 @@ const allWordsApproved = dailyWords.every(word =>
         <button
           onClick={() => {
             localStorage.removeItem("aduffy-activity-progress");
-            setCurrentStep('words');
+            setCurrentStep("words");
             setStepProgress(0);
-            setUserStory('');
+            setUserStory("");
             setStoryAnalysis(null);
             setVoiceConversation([]);
             setQuestionResults([]);
@@ -3337,24 +4166,30 @@ const allWordsApproved = dailyWords.every(word =>
             setShowQuestionFeedback(false);
             setCurrentQuestionResult(null);
             setCompletedSteps(new Set());
-            setFurthestStep('words');
+            setFurthestStep("words");
             setApprovedWords([]);
-            setDailyWords([]);       
+            setDailyWords([]);
             setPreviousWords([]);
             setWritingStarted(false); // ✅ <--- Add this
             setTopicCollapsed(false);
             setIsAnalyzed(false);
             clearTranscript();
-            setTranscript('');
-            localStorage.removeItem('aduffy-activity-words');
+            setTranscript("");
+            localStorage.removeItem("aduffy-activity-words");
             sessionStorage.clear();
           }}
-          
-          
           className="try-again-btn"
         >
           <span className="try-again-icon" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5V3m0 0C6.477 3 2 7.477 2 13s4.477 10 10 10 10-4.477 10-10c0-2.21-.896-4.21-2.343-5.657M12 3l-3 3m3-3l3 3" stroke="#222b3a" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 5V3m0 0C6.477 3 2 7.477 2 13s4.477 10 10 10 10-4.477 10-10c0-2.21-.896-4.21-2.343-5.657M12 3l-3 3m3-3l3 3"
+                stroke="#222b3a"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </span>
           Try Again
         </button>
@@ -3364,198 +4199,260 @@ const allWordsApproved = dailyWords.every(word =>
 
   const renderStepContent = () => {
     switch (currentStep) {
-      case 'words':
+      case "words":
         return renderWordsStep();
-      case 'learning':
+      case "learning":
         return renderLearningStep();
-      case 'writing':
+      case "writing":
         return renderWritingStep();
-      case 'voice':
+      case "voice":
         return renderVoiceStep();
-      case 'results':
+      case "results":
         return renderResultsStep();
       default:
         return renderWordsStep();
     }
   };
 
-  
-
-//  FUNCTION FOR RENDERING STEP NAVIGATION
- const renderStepNavigation = () => {
-  const steps: { key: StepType; label: string }[]=[
-    { key: 'words', label: 'Words' },
-    { key: 'learning', label: 'Quiz' },
-    { key: 'writing', label: 'Write' },
-    { key: 'voice', label: 'Speak' },
-    { key: 'results', label: 'Results' }
-  ];
-  useEffect(() => {
-    if (dailyWords.length === 0) {
-      const savedWords = localStorage.getItem('aduffy-activity-words');
-      if (savedWords) {
-        setDailyWords(JSON.parse(savedWords));
-      }
-    }
-  }, []);
-  const handleTryAgain = () => {
-    // Remove all relevant localStorage items
-    const keysToRemove = [
-      'aduffy-activity-progress',
-      'aduffy-activity-words',
-      'aduffy-userStory',
-      'aduffy-storyAnalysis',
-      'aduffy-approvedWords',
-      'voiceConversation',
-      'userStory',
+  //  FUNCTION FOR RENDERING STEP NAVIGATION
+  const renderStepNavigation = () => {
+    const steps: { key: StepType; label: string }[] = [
+      { key: "words", label: "Words" },
+      { key: "learning", label: "Quiz" },
+      { key: "writing", label: "Write" },
+      { key: "voice", label: "Speak" },
+      { key: "results", label: "Results" },
     ];
-  
-    keysToRemove.forEach(key => localStorage.removeItem(key));
-  
-    // Reset all relevant state
-    setCurrentStep('words');
-    setStepProgress(0);
-    setUserStory('');
-    setStoryAnalysis(null);
-    setVoiceConversation([]);
-    setQuestionResults([]);
-    setCurrentQuestionIndex(0);
-    setSelectedTopic(null);
-    setShowQuestionFeedback(false);
-    setCurrentQuestionResult(null);
-    setCompletedSteps(new Set());
-    setFurthestStep('words');
-    setApprovedWords([]);
-    setDailyWords([]);
-    setPreviousWords([]);
-    setWritingStarted(false);  // ✅ Important for showing "Start Writing" again
-    setTopicCollapsed(false);  // Optional depending on UI flow
-  
-    // Clear transcript if available
-    clearTranscript?.();
-  };
-  
-// STORYTELLING RETURN
-  return (
-    <>
-    {isMobile? (
-      <div className="step-nav-bar">
-      {/* <button className="step-nav-back" onClick={onBack} aria-label="Back">
+    useEffect(() => {
+      if (dailyWords.length === 0) {
+        const savedWords = localStorage.getItem("aduffy-activity-words");
+        if (savedWords) {
+          setDailyWords(JSON.parse(savedWords));
+        }
+      }
+    }, []);
+    const handleTryAgain = () => {
+      // Remove all relevant localStorage items
+      const keysToRemove = [
+        "aduffy-activity-progress",
+        "aduffy-activity-words",
+        "aduffy-userStory",
+        "aduffy-storyAnalysis",
+        "aduffy-approvedWords",
+        "voiceConversation",
+        "userStory",
+      ];
+
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
+
+      // Reset all relevant state
+      setCurrentStep("words");
+      setStepProgress(0);
+      setUserStory("");
+      setStoryAnalysis(null);
+      setVoiceConversation([]);
+      setQuestionResults([]);
+      setCurrentQuestionIndex(0);
+      setSelectedTopic(null);
+      setShowQuestionFeedback(false);
+      setCurrentQuestionResult(null);
+      setCompletedSteps(new Set());
+      setFurthestStep("words");
+      setApprovedWords([]);
+      setDailyWords([]);
+      setPreviousWords([]);
+      setWritingStarted(false); // ✅ Important for showing "Start Writing" again
+      setTopicCollapsed(false); // Optional depending on UI flow
+
+      // Clear transcript if available
+      clearTranscript?.();
+    };
+
+    // STORYTELLING RETURN
+    return (
+      <>
+        {isMobile ? (
+          <div className="step-nav-bar">
+            {/* <button className="step-nav-back" onClick={onBack} aria-label="Back">
         <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
           <path d="M15 19l-7-7 7-7" stroke="#222b3a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </button> */}
-       {currentStep !== 'words' && (
-      <button className="step-nav-back"  onClick={() => {
-        const currentIndex = STEP_ORDER.indexOf(currentStep);
-        const previousStep = STEP_ORDER[currentIndex - 1];
-        if (previousStep) {
-          setCurrentStep(previousStep);
-        }
-      }} aria-label="Back">
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-          <path d="M15 19l-7-7 7-7" stroke="#222b3a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-    )}
-      <div className="step-nav-steps">
-        {steps.map((step, idx) => {
-          const isCurrent = step.key === currentStep;
-          const isCompleted = completedSteps.has(step.key);
-          if (isCurrent) {
-            return (
-              <div key={step.key} className="step-pill-current">
-                <span className="step-dot-current" />
-                <span className="step-label">{step.label}</span>
-              </div>
-            );
-          }
-          return (
-            <div
-              key={step.key}
-              className={`step-circle ${isCompleted ? 'completed' : 'upcoming'}`}
-              onClick={() => (isCompleted) && handleStepNavigation(step.key)}
-              style={{ cursor: isCompleted ? 'pointer' : 'default' }}
-            />
-          );
-        })}
-      </div>
-      <div className="step-count-badge">
-        {getStepNumber(currentStep)}/{steps.length}
-      </div>
-    </div> 
-
-    ):( <div className="step-nav">
-      {steps.map((step, idx) => {
-        const status = getStepStatus(step.key); // 'completed', 'current', 'upcoming'
-        return (
-          <div
-            key={step.key}
-            className={`step-nav-item ${status}`}
-            onClick={() => (status === 'completed' || status === 'current') && handleStepNavigation(step.key)}
-            style={{ pointerEvents: status === 'upcoming' ? 'none' : 'auto' }}
-          >
-            <span className="step-nav-icon">
-              {status === 'completed' && (
-                // Checkmark icon
+            {currentStep !== "words" && (
+              <button
+                className="step-nav-back"
+                onClick={() => {
+                  const currentIndex = STEP_ORDER.indexOf(currentStep);
+                  const previousStep = STEP_ORDER[currentIndex - 1];
+                  if (previousStep) {
+                    setCurrentStep(previousStep);
+                  }
+                }}
+                aria-label="Back"
+              >
                 <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                  <path d="M7 13l3 3 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path
+                    d="M15 19l-7-7 7-7"
+                    stroke="#222b3a"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
-              )}
-              {status === 'current' && (
-                // Filled circle
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="7" fill="currentColor"/>
-                </svg>
-              )}
-              {status === 'upcoming' && (
-                // Empty circle
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                </svg>
-              )}
-            </span>
-            <span>{step.label}</span>
+              </button>
+            )}
+            <div className="step-nav-steps">
+              {steps.map((step, idx) => {
+                const isCurrent = step.key === currentStep;
+                const isCompleted = completedSteps.has(step.key);
+                if (isCurrent) {
+                  return (
+                    <div key={step.key} className="step-pill-current">
+                      <span className="step-dot-current" />
+                      <span className="step-label">{step.label}</span>
+                    </div>
+                  );
+                }
+                return (
+                  <div
+                    key={step.key}
+                    className={`step-circle ${isCompleted ? "completed" : "upcoming"}`}
+                    onClick={() =>
+                      isCompleted && handleStepNavigation(step.key)
+                    }
+                    style={{ cursor: isCompleted ? "pointer" : "default" }}
+                  />
+                );
+              })}
+            </div>
+            <div className="step-count-badge">
+              {getStepNumber(currentStep)}/{steps.length}
+            </div>
           </div>
-        );
-      })}
-    </div>)}
-    </>
-
-  );
-};
- // Add this useEffect to restore story topics
+        ) : (
+          <div className="step-nav">
+            {steps.map((step, idx) => {
+              const status = getStepStatus(step.key); // 'completed', 'current', 'upcoming'
+              return (
+                <div
+                  key={step.key}
+                  className={`step-nav-item ${status}`}
+                  onClick={() =>
+                    (status === "completed" || status === "current") &&
+                    handleStepNavigation(step.key)
+                  }
+                  style={{
+                    pointerEvents: status === "upcoming" ? "none" : "auto",
+                  }}
+                >
+                  <span className="step-nav-icon">
+                    {status === "completed" && (
+                      // Checkmark icon
+                      <svg
+                        width="20"
+                        height="20"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          fill="none"
+                        />
+                        <path
+                          d="M7 13l3 3 6-6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                    {status === "current" && (
+                      // Filled circle
+                      <svg
+                        width="20"
+                        height="20"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle cx="12" cy="12" r="7" fill="currentColor" />
+                      </svg>
+                    )}
+                    {status === "upcoming" && (
+                      // Empty circle
+                      <svg
+                        width="20"
+                        height="20"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          fill="none"
+                        />
+                      </svg>
+                    )}
+                  </span>
+                  <span>{step.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </>
+    );
+  };
+  // Add this useEffect to restore story topics
   useEffect(() => {
     const mockTopics: StoryTopic[] = [
       {
         id: "topic1",
         title: "The Cross-Department Project Crisis",
-        scenario: "You're a project manager facing a critical deadline with multiple departments involved",
-        context: "A major client presentation is due in 48 hours, but different teams have conflicting approaches and communication has broken down.",
-        challenge: "Navigate team dynamics, resolve conflicts, and deliver a unified solution while maintaining professional relationships."
+        scenario:
+          "You're a project manager facing a critical deadline with multiple departments involved",
+        context:
+          "A major client presentation is due in 48 hours, but different teams have conflicting approaches and communication has broken down.",
+        challenge:
+          "Navigate team dynamics, resolve conflicts, and deliver a unified solution while maintaining professional relationships.",
       },
       {
         id: "topic2",
         title: "The Remote Team Integration Challenge",
-        scenario: "You're leading the integration of a newly acquired remote team into your company culture",
-        context: "Your company has just acquired a smaller tech startup, and you need to integrate their team of 15 remote employees into your existing workflow.",
-        challenge: "Bridge cultural differences, establish clear communication channels, and create a cohesive team environment."
+        scenario:
+          "You're leading the integration of a newly acquired remote team into your company culture",
+        context:
+          "Your company has just acquired a smaller tech startup, and you need to integrate their team of 15 remote employees into your existing workflow.",
+        challenge:
+          "Bridge cultural differences, establish clear communication channels, and create a cohesive team environment.",
       },
       {
         id: "topic3",
         title: "The Strategic Pivot Presentation",
-        scenario: "You need to present a major strategic change to skeptical stakeholders",
-        context: "Market conditions have forced your company to pivot its main product strategy, and you must convince investors and board members.",
-        challenge: "Present complex data clearly, address concerns diplomatically, and build consensus around the new direction."
+        scenario:
+          "You need to present a major strategic change to skeptical stakeholders",
+        context:
+          "Market conditions have forced your company to pivot its main product strategy, and you must convince investors and board members.",
+        challenge:
+          "Present complex data clearly, address concerns diplomatically, and build consensus around the new direction.",
       },
       {
         id: "topic4",
         title: "The Mentorship Dilemma",
-        scenario: "You're mentoring a talented but struggling team member while managing your own workload",
-        context: "A promising junior colleague is having difficulty with client presentations and seeks your guidance, but you're swamped with your own responsibilities.",
-        challenge: "Balance your time effectively, provide meaningful guidance, and help develop their professional skills."
-      }
+        scenario:
+          "You're mentoring a talented but struggling team member while managing your own workload",
+        context:
+          "A promising junior colleague is having difficulty with client presentations and seeks your guidance, but you're swamped with your own responsibilities.",
+        challenge:
+          "Balance your time effectively, provide meaningful guidance, and help develop their professional skills.",
+      },
     ];
     setStoryTopics(mockTopics);
   }, []);
@@ -3581,42 +4478,44 @@ const allWordsApproved = dailyWords.every(word =>
       {/* BACK TO DASHBOARD AND STEP BADGE  */}
       {/* <div className="flex justify-end mt-2 mb-1"> */}
       {/* <div className="flex items-center justify-between mt-2 mb-1"> */}
-        {/* <button className="back-to-dashboard-btn ml-1" onClick={onBack}>
+      {/* <button className="back-to-dashboard-btn ml-1" onClick={onBack}>
           <span className="arrow">←</span>
           Back to Dashboard
         </button> */}
-        {/* <span className="step-badge">
+      {/* <span className="step-badge">
           Step {getStepNumber(currentStep)} of 5
         </span>
       </div> */}
       {/* Progress Header */}
       <div className="space-y-4">
         <div>
-      { !isMobile &&(
-          <div className="flex justify-between">
-          <div className="progress-header-label ">Overall Progress</div>
-          <div className="progress-percentage">{Math.round(calculateProgress())}%</div>
-          </div>
-      )}
+          {!isMobile && (
+            <div className="flex justify-between">
+              <div className="progress-header-label ">Overall Progress</div>
+              <div className="progress-percentage">
+                {Math.round(calculateProgress())}%
+              </div>
+            </div>
+          )}
           {/* OLD BLOCK */}
           {/* <div className="flex justify-end">
             <div className="progress-percentage">{Math.round(calculateProgress())}%</div>
           </div> */}
           {/* <div className="progress-percentage ">{Math.round(calculateProgress())}%</div> */}
           {/* OLD BLOCK END*/}
-          {!isMobile&&(
-          <div className="progress-bar-container">
-            <div
-              className="progress-bar-fill"
-              style={{ width: `${calculateProgress()}%` }}
-            />
-          </div>
+          {!isMobile && (
+            <div className="progress-bar-container">
+              <div
+                className="progress-bar-fill"
+                style={{ width: `${calculateProgress()}%` }}
+              />
+            </div>
           )}
         </div>
 
         <div className="flex items-center justify-between">
           <div></div>
-      
+
           <div className="flex items-center gap-2">
             {/* {isViewOnly && (
               <Badge className="view-only-badge">
@@ -3638,7 +4537,7 @@ const allWordsApproved = dailyWords.every(word =>
             )} */}
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             {/* FUNCTION FOR RENDERING STEP NAVIGATION */}
