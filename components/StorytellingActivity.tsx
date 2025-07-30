@@ -136,9 +136,9 @@ interface QuestionResult {
   isCorrect: boolean;
   timeSpent: number;
 }
-
+// It is a custom type that can have only on of the five string values
 type StepType = "words" | "learning" | "writing" | "voice" | "results";
-
+// STEP_ORDER is an array of type StepType
 const STEP_ORDER: StepType[] = [
   "words",
   "learning",
@@ -285,6 +285,7 @@ export function StorytellingActivity({
   const [audioLoading, setAudioLoading] = useState(false);
   const [recording, setRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  // A state variable that checks if the browser supports audio recording initially set to false
   const [audioSupported, setAudioSupported] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -295,42 +296,119 @@ export function StorytellingActivity({
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [writingStarted, setWritingStarted] = useState(false);
   const [topicCollapsed, setTopicCollapsed] = useState(false);
-  //  LIVE TRANSCRIPT AI
+  //  It is a state variable that stores the live transcript of the AI's response.Initially it is an empty string
   const [aiLiveTranscript, setAiLiveTranscript] = useState<string>("");
   const [conversationStarted, setConversationStarted] = useState(false);
-
-  //  FUNCTION FOR TURNING START WRITING INTO COMPLETE PRACTICE AND NEXT QUESTION
+  /*
+  It is a helper function that speaks the AI message aloud using the browser's built-in speech engine.
+  While the AI is speaking it shows a live transcript by revealing words one by one,
+  either using a timed loop (mobile ) or word boundaries (desktop).
+  Once the speech ends, it clears the transcript and runs a completion callback
+  */ 
   const playBrowserTTSWithLiveTranscript = (
     text: string,
     onComplete?: () => void
-  ) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    const words = text.split(/\s+/);
-    let currentWordIndex = 0;
-
-    // Live transcript using `onboundary`
-    utterance.onboundary = (event) => {
-      if (event.name === "word" || event.charIndex != null) {
-        currentWordIndex++;
-        setAiLiveTranscript(words.slice(0, currentWordIndex).join(" "));
+  ): Promise<void> => {
+    return new Promise((resolve) => {
+      // Check if it's mobile
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        console.log("Mobile device detected, using fallback with audio");
+        const words = text.split(/\s+/);
+        let currentWordIndex = 0;
+        
+        // Try to play audio on mobile
+        try {
+          const utterance = new SpeechSynthesisUtterance(text);
+          let finished = false;
+          const finish = () => {
+            if (!finished) {
+              finished = true;
+              setAiLiveTranscript("");
+              if (onComplete) onComplete();
+              resolve();
+            }
+          };
+        
+          utterance.onend = () => {
+            console.log("Mobile speech ended");
+            finish();
+          };
+          utterance.onerror = (e) => {
+            console.error("Mobile speech error:", e.error);
+            finish();
+          };
+          speechSynthesis.cancel();
+          speechSynthesis.speak(utterance);
+        
+          // Show text word by word
+          const interval = setInterval(() => {
+            currentWordIndex++;
+            setAiLiveTranscript(words.slice(0, currentWordIndex).join(" "));
+            if (currentWordIndex >= words.length) {
+              clearInterval(interval);
+              setTimeout(finish, 2000);
+            }
+          }, 300);
+        } catch (error) {
+          console.error("Mobile speech synthesis failed:", error);
+        }
+        
+        
+        return;
       }
-    };
-
-    // When speech ends, clear transcript and run callback
-    utterance.onend = () => {
-      setAiLiveTranscript(""); // hide after end
-      if (onComplete) onComplete();
-    };
-
-    // Handle error gracefully
-    utterance.onerror = (e) => {
-      console.error("Browser TTS error:", e.error);
-      setAiLiveTranscript(""); // hide on error
-      if (onComplete) onComplete();
-    };
-
-    speechSynthesis.cancel(); // stop anything playing
-    speechSynthesis.speak(utterance);
+  
+      // Desktop version
+      if (!window.speechSynthesis) {
+        console.error("Speech synthesis not supported");
+        setAiLiveTranscript(text);
+        setTimeout(() => {
+          setAiLiveTranscript("");
+          if (onComplete) onComplete();
+          resolve(); // Resolve the promise
+        }, 3000);
+        return;
+      }
+  
+      try {
+        const utterance = new SpeechSynthesisUtterance(text);
+        const words = text.split(/\s+/);
+        let currentWordIndex = 0;
+  
+        utterance.onboundary = (event) => {
+          if (event.name === "word" || event.charIndex != null) {
+            currentWordIndex++;
+            setAiLiveTranscript(words.slice(0, currentWordIndex).join(" "));
+          }
+        };
+  
+        utterance.onend = () => {
+          console.log("Speech ended successfully");
+          setAiLiveTranscript("");
+          if (onComplete) onComplete();
+          resolve(); // Resolve the promise
+        };
+  
+        utterance.onerror = (e) => {
+          console.error("Browser TTS error:", e.error);
+          setAiLiveTranscript("");
+          if (onComplete) onComplete();
+          resolve(); // Resolve the promise
+        };
+  
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+      } catch (error) {
+        console.error("Error creating speech utterance:", error);
+        setAiLiveTranscript(text);
+        setTimeout(() => {
+          setAiLiveTranscript("");
+          if (onComplete) onComplete();
+          resolve(); // Resolve the promise
+        }, 3000);
+      }
+    });
   };
 
   const playElevenLabsWithLiveTranscript = useCallback(
@@ -341,7 +419,7 @@ export function StorytellingActivity({
         audioBlob = await getElevenLabsAudio(text);
       } catch (error) {
         console.error("Failed to fetch ElevenLabs audio:", error);
-        playBrowserTTSWithLiveTranscript(text, onComplete); // fallback
+        await playBrowserTTSWithLiveTranscript(text, onComplete); // fallback
         return;
       }
 
@@ -398,6 +476,7 @@ export function StorytellingActivity({
     },
     []
   );
+  
   function getStepButtonProps() {
     if (currentStep === "learning") {
       if (currentQuestionIndex < learningQuestions.length - 1) {
@@ -447,7 +526,7 @@ export function StorytellingActivity({
   }
   // P-1 STARTS
   // THIS PIECE OF CODE IS USED FOR RECORDING THE USER"S VOICE AND SENDING IT TO GEMINI IN AUDIO BLOB FORM AND THEN GETTING REPSONSE FROM GEMINI
-  // Check audio recording support on mount
+  // The useEffect hook uses the setAudioSupported function to assign the value of audioSupported based on the availability of MediaRecorder and navigator.mediaDevices in the browser
   useEffect(() => {
     setAudioSupported(!!window.MediaRecorder && !!navigator.mediaDevices);
   }, []);
@@ -832,6 +911,7 @@ export function StorytellingActivity({
     explanation: string;
   } | null>(null);
   const [userStory, setUserStory] = useState(savedProgress?.userStory || "");
+  // This is a state variable that stores the conversation history between the user and the AI.Initially it is an empty array
   const [voiceConversation, setVoiceConversation] = useState<any[]>([]);
   const [currentWordFocus, setCurrentWordFocus] = useState(0);
   const [finalScore, setFinalScore] = useState(0);
@@ -875,9 +955,7 @@ export function StorytellingActivity({
   };
   // FOR SEEING IF THE ANALYSIS IS DONE
   const [isAnalyzed, setIsAnalyzed] = useState(false);
-
-  // AUTO SCROLL FOR VOICE CONVERSATION TEXT BOX ENDS
-  // Step completion tracking - initialize from saved progress
+  // It is a state variable that initializes the completed steps from saved progress
   const [completedSteps, setCompletedSteps] = useState<Set<StepType>>(() => {
     if (savedProgress) {
       const completed = new Set<StepType>();
@@ -890,7 +968,7 @@ export function StorytellingActivity({
     return new Set<StepType>();
   });
 
-  // Initialize furthest step from saved progress
+  // furthestStep is a state varibale that initializes the furthest step the user has reached in the activity
   const [furthestStep, setFurthestStep] = useState<StepType>(() => {
     if (savedProgress) {
       // The furthest step is the current step from saved progress
@@ -1388,7 +1466,7 @@ export function StorytellingActivity({
     updateProgress();
   }, [updateProgress]);
 
-  // Check if current step is in view-only mode (completed and user navigated back)
+  // The isViewOnly constant is used to determine if the current step should be shown in 'view-only mode
   const isViewOnly = useMemo(() => {
     const currentIndex = STEP_ORDER.indexOf(currentStep);
     const furthestIndex = STEP_ORDER.indexOf(furthestStep);
@@ -1704,7 +1782,8 @@ export function StorytellingActivity({
   const startVoiceConversation = async () => {
     // Don't allow starting conversation in view-only mode
     if (isViewOnly) return;
-
+    if (conversationStarted) return;
+    setConversationStarted(true);
     console.log("Starting voice conversation...");
     console.log("Selected topic:", selectedTopic?.title);
     console.log("Voice supported:", isVoiceSupported);
@@ -1714,20 +1793,7 @@ export function StorytellingActivity({
       const intro = `Hello ${userProfile?.name || "user"}! Let's have a conversation about your approach to this scenario. I'll ask you questions and you should try to use each of our vocabulary words in your responses.`;
       const firstQuestion = `Here is the first question: How did you decide on your approach to handling this professional challenge?`;
       console.log("Speaking initial prompt:", intro, firstQuestion);
-
-      // setVoiceConversation([
-      //   { type: "ai", content: intro, timestamp: new Date() },
-      // ]);
-
-      // Then speak the prompt with error handling
-      // await safeSpeak(initialPrompt);
-      // USED ELEVENLABS FOR INITIAL PROMPT
       try {
-        // setVoiceConversation([
-        //   { type: "ai", content: intro, timestamp: new Date() },
-        // ]);
-        // First part: play intro with ElevenLabs or fallback
-        // setConversationStarted(true);
         setConversationStarted(true);
         await playElevenLabsWithLiveTranscript(intro, async () => {
           // When intro audio finishes:
@@ -1857,7 +1923,7 @@ export function StorytellingActivity({
       onComplete();
     }
   };
-
+// A helper function that conditionally shows helpful alerts based on microphone access
   const renderVoicePermissionAlert = () => {
     if (!audioSupported) {
       return (
@@ -1912,7 +1978,7 @@ export function StorytellingActivity({
 
     return null;
   };
-
+// This function displays an alert message when the app is in view-only mode
   const renderViewOnlyAlert = () => {
     if (!isViewOnly) return null;
 
@@ -3334,6 +3400,7 @@ export function StorytellingActivity({
   // [VC-STARTS]
   const renderVoiceStep = () => (
     <div className="space-y-8">
+      {/* This helper function displays an alert message when the app is in "view-only" mode */}
       {renderViewOnlyAlert()}
 
       <div className="text-center space-y-4">
@@ -3373,7 +3440,7 @@ export function StorytellingActivity({
             : "Have a natural conversation with AI about your story using audio. Record your voice and try to use each vocabulary word in your responses."}
         </p>
       </div>
-
+      {/* This helper function conditionally shows helpful alerts related to microphone access for voice conversation features. */}
       {renderVoicePermissionAlert()}
 
       <div className="conversation-main-grid">
@@ -3388,7 +3455,10 @@ export function StorytellingActivity({
               <div className="scrollable-fixed" ref={chatContainerRef}>
                 {voiceConversation.length === 0 ? (
                   <div className="text-center text-muted-foreground py-8">
-                    <div className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+
+                     {!aiLiveTranscript && (
+      <div className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+    )}
                     {!conversationStarted && (
                       <p>
                         {isViewOnly
@@ -3448,14 +3518,13 @@ export function StorytellingActivity({
                 )}
                 {!isViewOnly && aiLiveTranscript && (
                   <div className="flex justify-start">
-                    <div className="chat-bubble chat-bubble-ai live-transcript-bubble">
-                      <p className="text-sm live-transcript-text">
-                        {aiLiveTranscript}
-                      </p>
+                    <div className="chat-bubble chat-bubble-ai">
+                      {/* <p className="text-sm live-transcript-text">
+                      </p> */}
+                      {aiLiveTranscript}
                     </div>
                   </div>
                 )}
-                {/* new blcok neds */}
               </div>
               {/* CONVERSATION AREA ENDS */}
               {/* MOBILE VERSION VOCABULARY CHECKLIST */}
@@ -3509,11 +3578,13 @@ export function StorytellingActivity({
                   {/* --- MOBILE UI --- */}
                   {isMobile ? (
                     <div className="flex flex-col items-center justify-center w-full mt-4">
-                      {voiceConversation.length === 0 ? (
+             
+                      {voiceConversation.length === 0|| voiceConversation.length <=1 ? (
                         <button
                           type="button"
                           className="orange-action-btn"
                           onClick={startVoiceConversation}
+                          disabled={conversationStarted}
                         >
                           <svg
                             width="18"
@@ -3530,7 +3601,7 @@ export function StorytellingActivity({
                           </svg>
                           Start Conversation
                         </button>
-                      ) : (
+                      ) :(
                         <div className="voice-recorder-container">
                           <button
                             onClick={recording ? stopRecording : startRecording}
@@ -3540,13 +3611,6 @@ export function StorytellingActivity({
                               recording ? "Stop Recording" : "Start Recording"
                             }
                           >
-                            {/* {audioLoading ? (
-                              <div className="w-8 h-8 border-4 border-gray-800 border-t-white rounded-full animate-spin"></div>
-                            ) : (
-                              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z" />
-                              </svg>
-                            )} */}
                             <svg
                               width="32"
                               height="32"
@@ -3556,15 +3620,6 @@ export function StorytellingActivity({
                               <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z" />
                             </svg>
                           </button>
-                          {/* <p className="voice-recorder-label">
-                            {!audioSupported
-                              ? 'Audio not supported'
-                              : audioLoading
-                              ? 'Thinking...'
-                              : recording
-                              ? 'Listening...'
-                              : 'Tap to Speak'}
-                          </p> */}
                           <p className="voice-recorder-label">
                             {!audioSupported ? (
                               "Audio not supported"
@@ -4456,8 +4511,9 @@ export function StorytellingActivity({
     ];
     setStoryTopics(mockTopics);
   }, []);
-  // VOICE CONVERSATION AUTO SCROLL MOBILE VARIABLE
+  // It is a constant that checks if the users screen width is 768 pixels or less
   const isMobile = window.innerWidth <= 768;
+// This is a helper function that handles what happens when the user submits an audio response.It checks for device type, send the audio if ready and resets the related state
   const handleSubmitAudio = () => {
     if (isMobile) {
       scrollToConversationCard();
@@ -4474,18 +4530,6 @@ export function StorytellingActivity({
     <div className="space-y-8">
       {/* AUTO SCROLL */}
       <ScrollToTop trigger={currentStep} />
-      {/* Top row: Back to Dashboard (left), Step badge (right) */}
-      {/* BACK TO DASHBOARD AND STEP BADGE  */}
-      {/* <div className="flex justify-end mt-2 mb-1"> */}
-      {/* <div className="flex items-center justify-between mt-2 mb-1"> */}
-      {/* <button className="back-to-dashboard-btn ml-1" onClick={onBack}>
-          <span className="arrow">←</span>
-          Back to Dashboard
-        </button> */}
-      {/* <span className="step-badge">
-          Step {getStepNumber(currentStep)} of 5
-        </span>
-      </div> */}
       {/* Progress Header */}
       <div className="space-y-4">
         <div>
@@ -4497,12 +4541,6 @@ export function StorytellingActivity({
               </div>
             </div>
           )}
-          {/* OLD BLOCK */}
-          {/* <div className="flex justify-end">
-            <div className="progress-percentage">{Math.round(calculateProgress())}%</div>
-          </div> */}
-          {/* <div className="progress-percentage ">{Math.round(calculateProgress())}%</div> */}
-          {/* OLD BLOCK END*/}
           {!isMobile && (
             <div className="progress-bar-container">
               <div
@@ -4517,24 +4555,6 @@ export function StorytellingActivity({
           <div></div>
 
           <div className="flex items-center gap-2">
-            {/* {isViewOnly && (
-              <Badge className="view-only-badge">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <circle cx="10" cy="10" r="8" stroke="#1793b6" strokeWidth="1.5" fill="none"/>
-                  <circle cx="10" cy="10" r="2.5" stroke="#1793b6" strokeWidth="1.2" fill="none"/>
-                  <path d="M2 10c2-4 8-4 12 0s8 4 12 0" stroke="#1793b6" strokeWidth="1.2" fill="none"/>
-                </svg>
-                View Only
-              </Badge>
-            )} */}
           </div>
         </div>
 
