@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./styles/main.css";
 import { OnboardingData } from "./Onboarding";
-
+import { BsBook } from "react-icons/bs";
 interface DashboardProps {
   onSelectActivity: (activity: string) => void;
   userProfile?: OnboardingData | null;
@@ -18,8 +18,18 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onSelectActivity, userProfile, activityProgress }: DashboardProps) {
-  const [activeSection, setActiveSection] = useState("main");
-  const [activeTab, setActiveTab] = useState("main");
+  const [expandedSections, setExpandedSections] = useState({
+    course: true,
+    learningStats: true,
+    activities: true,
+  });
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
 
   const getUserName = () => {
     if (userProfile?.name) {
@@ -30,301 +40,226 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
   };
 
   const getStatsBasedOnLevel = () => {
-    // If no user profile, return reset values
     if (!userProfile) {
       return { wordsLearned: 0, weeklyGoal: 0, currentStreak: 0, totalScore: 0 };
     }
-
     const baseStats = {
       beginner: { wordsLearned: 89, weeklyGoal: 25, currentStreak: 5, totalScore: 650 },
       intermediate: { wordsLearned: 234, weeklyGoal: 50, currentStreak: 12, totalScore: 1450 },
       advanced: { wordsLearned: 412, weeklyGoal: 75, currentStreak: 18, totalScore: 2890 }
     };
-
     const level = userProfile?.vocabularyLevel || 'intermediate';
     return baseStats[level as keyof typeof baseStats] || baseStats.intermediate;
   };
 
   const userStats = getStatsBasedOnLevel();
 
-  const weeklySchedule = [
-    {
-      id: 1,
-      day: "Monday",
-      date: "Jan 20, 2025",
-      time: "10:00 AM - 11:00 AM",
-      topic: "Advanced Vocabulary in Business Context",
-      type: "Live Session"
-    },
-    {
-      id: 2,
-      day: "Wednesday",
-      date: "Jan 22, 2025",
-      time: "2:00 PM - 3:00 PM",
-      topic: "Presentation Skills & Public Speaking",
-      type: "Interactive Workshop"
-    },
-    {
-      id: 3,
-      day: "Friday",
-      date: "Jan 24, 2025",
-      time: "11:00 AM - 12:00 PM",
-      topic: "AI Storytelling & Creative Writing",
-      type: "Practice Session"
-    },
-    {
-      id: 4,
-      day: "Saturday",
-      date: "Jan 25, 2025",
-      time: "3:00 PM - 4:00 PM",
-      topic: "Mock Interview & Feedback",
-      type: "One-on-One"
-    }
+  // For the level progress bar
+  const levels = [
+    { label: "A1", status: "completed" },
+    { label: "A2", status: "current" },
+    { label: "B1", status: "locked" },
+    { label: "B2", status: "locked" },
+    { label: "C1", status: "locked" },
+    { label: "C2", status: "locked" },
   ];
+  const getConnectorStyle = (currentIndex: number) => {
+    if (currentIndex === 0) {
+      // Connector after A1 (completed) - should be green
+      return { background: '#22c55e' };
+    } else if (currentIndex === 1) {
+      // Connector after A2 (current) - should be grey
+      return { background: '#e5e5e5' };
+    } else {
+      // All other connectors - should be grey
+      return { background: '#e5e5e5' };
+    }
+  };
 
+
+  // Activities
   const mainActivities = [
     {
       id: 'storytelling',
-      title: 'AI Storytelling',
-      icon: '📚',
-      description: 'Build vocabulary through interactive storytelling with AI guidance',
-      currentField: activityProgress?.storytelling?.selectedField || 'Marketing',
-      progress: activityProgress?.storytelling ? {
-        current: activityProgress.storytelling.currentStep || 1,
-        total: 5
-      } : undefined
+      title: 'AI Vocabulary',
+      description: 'Build Vocabulary through interactive storytelling with AI guidance',
+      duration: '15 Min',
     }
   ];
-
-  const practiceTools = [
-    {
-      id: 'quiz',
-      title: 'Vocabulary Quiz',
-      icon: '🎯',
-      description: 'Test your knowledge with contextual vocabulary questions'
-    },
-    {
-      id: 'interview',
-      title: 'Interview Prep',
-      icon: '🎤',
-      description: 'Master professional vocabulary for promotion interviews'
-    },
-    {
-      id: 'voice-chat',
-      title: 'AI Voice Chat',
-      icon: '💬',
-      description: 'Have natural conversations with AI to practice speaking and vocabulary'
-    }
-  ];
-
-  const renderActivityCard = (activity: any) => (
-    <div key={activity.id} className="activity-card" onClick={() => onSelectActivity(activity.id)}>
-      <div className="activity-header">
-        <div className="activity-icon">
-          {activity.icon}
-        </div>
-        <div className="activity-info">
-          <h3>{activity.title}</h3>
-          <p>{activity.description}</p>
-        </div>
-      </div>
-      {activity.progress && (
-        <div className="activity-status">
-          <div style={{ width: '100%' }}>
-            <div className="progress-label">
-              <span>Progress</span>
-              <span>Step {activity.progress.current} of {activity.progress.total}</span>
-            </div>
-            <div className="progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{ width: `${(activity.progress.current / activity.progress.total) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-      )}
-      {activity.progress ? (
-        <button className="continue-button">
-          Continue from Step {activity.progress.current}
-        </button>
-      ) : (
-        <button className="continue-button">
-          Start Activity
-        </button>
-      )}
-    </div>
-  );
 
   return (
-    <div className="container">
-      {/* Welcome Section */}
-      <div className="welcome-section">
-        <div className="card card-hover">
-          <h1 className="welcome-title">
-            {userProfile ? `Welcome back, ${getUserName()}!` : 'Welcome to Aduffy Learning!'}
-          </h1>
-          <p className="welcome-subtitle">
-            {userProfile 
-              ? "Ready to transform your communication skills and advance your career with Aduffy Learning's professional vocabulary mastery program?"
-              : "Complete your onboarding to get started with personalized learning experiences."
-            }
-          </p>
-          {userProfile ? (
-            <>
-              <div className="badge badge-primary">
-                {userProfile?.vocabularyLevel || "Beginner"} Level
-              </div>
-              {userProfile?.fieldOfInterest && (
-                <div className="badge badge-success">
-                  {userProfile.fieldOfInterest} Focus
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="badge badge-warning">
-              Setup Required
-            </div>
-          )}
-        </div>
-      </div>
+    <div className="dashboard-container">
 
-      {/* Course Information */}
-      <div className="card course-card">
-        <div className="course-header">
-          <div>
-            <h3 className="course-title">Professional Communication Mastery</h3>
-            <p className="course-subtitle">Course Code: PCM-2024</p>
+      {/* Header */}
+      {/* <div className="dashboard-header">
+        <div className="header-left">
+          <div className="app-brand">
+            <span className="app-icon"></span>
+            <span className="app-name">Aduffy Learning</span>
           </div>
-          <div className="badge badge-success">Active</div>
+          <span className="user-greeting">
+            Hey, {getUserName()}
+          </span>
         </div>
-        
-        <div className="course-progress">
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: userProfile ? "68%" : "0%" }}></div>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem" }}>
-            <span className="text-secondary">Progress</span>
-            <span>{userProfile ? "68% Complete" : "0% Complete"}</span>
-          </div>
+        <div className="header-actions">
+          <button className="header-btn" aria-label="Search">
+            <svg width="20" height="20" fill="none" stroke="#222" strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="16.5" y1="16.5" x2="21" y2="21" />
+            </svg>
+          </button>
+          <button className="header-btn" aria-label="Menu">
+            <svg width="20" height="20" fill="none" stroke="#222" strokeWidth="2" viewBox="0 0 24 24">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
         </div>
-
-        {/* Instructor Card */}
-        <div className="instructor-card">
-          <div className="instructor-avatar">NS</div>
-          <div className="instructor-info">
-            <h4>Neelu Sharma</h4>
-            <p>Academic Head</p>
-            <p>IELTS Certified, MA Applied Linguistics</p>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
-              <span>⭐ 4.9</span>
-              <span className="badge badge-primary">Business Communication & IELTS</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      
-      
-        
-{/* NEW BLOCK */}
-      {/* Weekly Schedule */}
-      {/* <div className="card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-          <h2 style={{ fontSize: "var(--font-size-xl)", fontWeight: "600" }}>Weekly Class Schedule</h2>
-          <div className="badge badge-primary">This Week</div>
-        </div>
-        
-        <table className="schedule-table">
-          <tbody>
-            {weeklySchedule.map((session) => (
-              <tr key={session.id} className="schedule-row">
-                <td className="schedule-cell">
-                  <div className="schedule-time">
-                    {session.time}
-                  </div>
-                  <div>{session.topic}</div>
-                </td>
-                <td className="schedule-cell">
-                  <div className="badge badge-primary">{session.type}</div>
-                </td>
-                <td className="schedule-cell" style={{ textAlign: "right" }}>
-                  <button className="button button-primary">Join</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div> */}
 
+      {/* Course Details Section */}
+      <div className="dashboard-section">
+        <div className="section-header" onClick={() => toggleSection('course')}>
+          <h2>Course Details</h2>
+          {/* <span className={`section-chevron ${expandedSections.course ? 'up' : 'down'}`}>▼</span> */}
+          <span className="material-symbols-outlined">
+            {expandedSections.course ?  "expand_circle_up": 'expand_circle_down'}
+          </span>
+        </div>
+        {expandedSections.course && (
+          <div className="section-content">
+            <div className="course-info-grid">
+              <div className="course-info-item">
+                {/* <span className="info-icon" role="img" aria-label="Course">📘</span> */}
+                <div>
+                  <div className="info-label">Course Name</div>
+                  <div className="info-value">Professional Communication Mastery</div>
+                </div>
+              </div>
+              <div className="course-info-item">
+                {/* <span className="info-icon" role="img" aria-label="Duration">⏳</span> */}
+                <div>
+                  <div className="info-label">Course Duration</div>
+                  <div className="info-value">3 months</div>
+                </div>
+              </div>
+            </div>
+            <div className="course-info-item" style={{ marginTop: 16 }}>
+              {/* <span className="info-icon" role="img" aria-label="Level">💡</span> */}
+              <div>
+                <div className="info-label">Current Level</div>
+                <div className="level-progress">
+                  {levels.map((level, idx) => (
+                    <React.Fragment key={level.label}>
+                      <div className={`level-item ${level.status}`}>
+                        <div className="level-circle">{level.label}</div>
+                        <div className="level-label">
+                          {level.status === "completed" && "Completed"}
+                          {level.status === "current" && "Current"}
+                          {level.status === "locked" && "Locked"}
+                        </div>
+                      </div>
+                      {/* {idx < levels.length - 1 && <div className="level-connector"></div>} */}
+                      {idx < levels.length - 1 && (
+          <div 
+            className="level-connector"
+            style={getConnectorStyle(idx)}
+          ></div>
+        )}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Learning Statistics Section */}
+      <div className="dashboard-section">
+        <div className="section-header" onClick={() => toggleSection('learningStats')}>
+          <h2>Learning Statistics</h2>
+          <span className="material-symbols-outlined">
+            {expandedSections.course ?  "expand_circle_up": 'expand_circle_down'}
+          </span>
+        </div>
+        {expandedSections.learningStats && (
+          <div className="section-content">
+            <div className="stats-grid">
+              <div className="stat-card stat-words">
+                <div className="stat-label">Words Learned</div>
+                <div className="stat-value">{userStats.wordsLearned}</div>
+                <div className="stat-sub">+12 this week</div>
+              </div>
+              <div className="stat-card stat-streak">
+                <div className="stat-label">Current Streak</div>
+                <div className="stat-value">{userStats.currentStreak} days</div>
+                <div className="stat-sub">Keep it up! 🔥</div>
+              </div>
+              <div className="stat-card stat-score">
+                <div className="stat-label">Total Score</div>
+                <div className="stat-value">{userStats.totalScore}</div>
+                <div className="stat-sub">Expert level: 3000</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Activities Section */}
-      <div className="activities-section">
-        <div className="activities-header">
-          <h2 className="activities-title">AI Learning Activities</h2>
-          <div className="nav-tabs">
-            {/* NEW BLOCK */}
-            {/* <button 
-              className={`nav-tab ${activeTab === 'main' ? 'active' : ''}`}
-              onClick={() => setActiveTab('main')}
-            >
-              📚 Main Activities
-            </button> */}
-            {/* NEW BLOCK */}
-            {/* <button 
-              className={`nav-tab ${activeTab === 'practice' ? 'active' : ''}`}
-              onClick={() => setActiveTab('practice')}
-            >
-              🎯 Practice Tools
-            </button> */}
+      <div className="dashboard-section">
+        <div className="section-header" onClick={() => toggleSection('activities')}>
+          <h2>Activities</h2>
+          <span className="material-symbols-outlined">
+            {expandedSections.course ?  "expand_circle_up": 'expand_circle_down'}
+          </span>
+        </div>
+        {expandedSections.activities && (
+          <div className="section-content">
+            <div className="activity-list">
+              {mainActivities.map(activity => (
+                <div key={activity.id} className="activity-card">
+                  <div className="activity-header">
+                    <span className="activity-title">{activity.title}</span>
+                    <span className="activity-duration">{activity.duration}</span>
+                  </div>
+                  <div className="activity-desc">{activity.description}</div>
+                  <button
+                    className="activity-btn"
+                    onClick={() => onSelectActivity(activity.id)}
+                  >
+                    Start Activity
+                  </button>
+                </div>
+              ))}
+              {/* More Activities coming soon div */}
+              <div className="activity-card activity-card-disabled">
+                <div className="activity-desc" style={{ textAlign: "center" }}>
+                <span className="info-icon-small">i</span>
+                  More activities coming soon.
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div className="activities-content">
-          {activeTab === 'main' ? (
-            mainActivities.map(renderActivityCard)
-          ) : (
-            practiceTools.map(renderActivityCard)
-          )}
-        </div>
+        )}
       </div>
-      {/* Stats Grid */}
-      <div className="stats-grid">
-        <div className="card stat-card">
-          <div className="stat-value">{userStats.wordsLearned}</div>
-          <div className="stat-label">Words Learned</div>
-          <div style={{ color: userStats.wordsLearned > 0 ? "var(--success)" : "var(--text-secondary)", fontSize: "var(--font-size-sm)" }}>
-            {userStats.wordsLearned > 0 ? "+12 this week" : "No words learned yet"}
-          </div>
-        </div>
 
-        <div className="card stat-card">
-          <div className="stat-value">{userStats.weeklyGoal}/25</div>
-          <div className="stat-label">Weekly Progress</div>
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${(userStats.weeklyGoal/25) * 100}%` }}
-            ></div>
-          </div>
-          <div style={{ color: userStats.weeklyGoal > 0 ? "var(--success)" : "var(--text-secondary)", fontSize: "var(--font-size-sm)" }}>
-            {userStats.weeklyGoal > 0 ? "+12 this week" : "No progress yet"}
-          </div>
-        </div>
-
-        <div className="card stat-card">
-          <div className="stat-value">{userStats.currentStreak} days</div>
-          <div className="stat-label">Current Streak</div>
-          <div style={{ color: userStats.currentStreak > 0 ? "var(--success)" : "var(--text-secondary)", fontSize: "var(--font-size-sm)" }}>
-            {userStats.currentStreak > 0 ? "Keep it up! 🔥" : "Start your streak today!"}
-          </div>
-        </div>
-
-        <div className="card stat-card">
-          <div className="stat-value">{userStats.totalScore}</div>
-          <div className="stat-label">Total Score</div>
-          <div style={{ color: "var(--text-secondary)", fontSize: "var(--font-size-sm)" }}>Expert level: 3000</div>
-        </div>
-      </div>
+      {/* Bottom Navigation (mobile only) */}
+      <nav className="bottom-nav">
+        <button className="nav-btn active">
+          <span role="img" aria-label="Home">🏠</span>
+          <span>Home</span>
+        </button>
+        <button className="nav-btn">
+          <span role="img" aria-label="Activities">📚</span>
+          <span>Activities</span>
+        </button>
+        <button className="nav-btn">
+          <span role="img" aria-label="Profile">👤</span>
+          <span>Profile</span>
+        </button>
+      </nav>
     </div>
   );
 }

@@ -459,14 +459,21 @@ body {
 /* Top Navigation */
 .top-nav {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
-  align-items: center;
-  padding: var(--space-3) var(--space-6);
+  /* align-items: center; */
+  padding: var(--space-2) var(--space-4);
   background: white;
   border-bottom: 1px solid var(--bg-muted);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  /* position: sticky; */
+  /* top: 0;
+  z-index: 100; */
+}
+.nav-desktop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-6);
 }
 
 .nav-left {
@@ -506,8 +513,7 @@ body {
 }
 .nav-right {
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
+
 }
 
 .nav-icon-btn {
@@ -635,9 +641,9 @@ body {
   background: var(--bg-secondary);
 }
 
-.main-content-column {
+/* .main-content-column {
   padding: var(--space-6);
-}
+} */
 
 /* Updated Welcome Section */
 .welcome-section .card {

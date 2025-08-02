@@ -3,6 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { CiSettings,CiMail,CiPhone,CiStar  } from "react-icons/ci";
+import { LuPresentation,LuBrain } from "react-icons/lu";
+import { IoPeopleOutline,IoVideocamOutline  } from "react-icons/io5";
+import { FiMessageSquare,FiTarget} from "react-icons/fi";
+import { FaArrowTrendUp } from "react-icons/fa6";
+import { VscGraph } from "react-icons/vsc";
+import { CgDanger } from "react-icons/cg";
+import { BsStars } from "react-icons/bs";
+import { PiMedalLight } from "react-icons/pi";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
@@ -25,11 +34,11 @@ export interface OnboardingData {
   field?: string;
   experienceLevel?: string;
   communicationConfidence?: {
-    presentations: number;
-    meetings: number;
-    emails: number;
-    networking: number;
-    teamCollaboration: number;
+    presentations?: number;
+    meetings?: number;
+    emails?: number;
+    networking?: number;
+    teamCollaboration?: number;
   };
   communicationChallenges?: string[];
   improvementGoals?: string[];
@@ -42,30 +51,30 @@ interface OnboardingProps {
   onComplete: (data: OnboardingData) => void;
 }
 
-type Step = 'personal' | 'professional' | 'assessment' | 'goals' | 'preferences';
+type Step = 'personal' | 'professional' | 'assessment' | 'goals' |'goals-part2' | 'preferences';
 
 const communicationChallenges = [
-  { id: 'public-speaking', label: 'Public speaking and presentations', icon: '🖥️' },
-  { id: 'meeting-participation', label: 'Active participation in meetings', icon: '🧑‍🤝‍🧑' },
-  { id: 'email-clarity', label: 'Writing clear and professional emails', icon: '✉️' },
-  { id: 'difficult-conversations', label: 'Having difficult conversations', icon: '💬' },
-  { id: 'networking', label: 'Professional networking', icon: '📈' },
-  { id: 'cross-team-collaboration', label: 'Cross-team collaboration', icon: '⚙️' },
-  { id: 'client-communication', label: 'Client communication', icon: '📞' },
-  { id: 'virtual-meetings', label: 'Virtual meeting facilitation', icon: '🎥' },
-  { id: 'persuasive-writing', label: 'Persuasive writing and proposals', icon: '📊' },
-  { id: 'conflict-resolution', label: 'Conflict resolution', icon: 'ℹ️' }
+  { id: 'public-speaking', label: 'Public speaking and presentations', icon:<LuPresentation/> },
+  { id: 'meeting-participation', label: 'Active participation in meetings', icon: <IoPeopleOutline/> },
+  { id: 'email-clarity', label: 'Writing clear and professional emails', icon: <CiMail /> },
+  { id: 'difficult-conversations', label: 'Having difficult conversations', icon:<FiMessageSquare/> },
+  { id: 'networking', label: 'Professional networking', icon: <FaArrowTrendUp/> },
+  { id: 'cross-team-collaboration', label: 'Cross-team collaboration', icon: <CiSettings/>  },
+  { id: 'client-communication', label: 'Client communication', icon: <CiPhone /> },
+  { id: 'virtual-meetings', label: 'Virtual meeting facilitation', icon: <IoVideocamOutline />},
+  { id: 'persuasive-writing', label: 'Persuasive writing and proposals', icon: <VscGraph/> },
+  { id: 'conflict-resolution', label: 'Conflict resolution', icon: <CgDanger/> }
 ];
 
 const improvementGoals = [
-  { id: 'confidence', label: 'Build confidence in speaking',icon: '⭐' },
-  { id: 'vocabulary', label: 'Expand professional vocabulary', icon: '🧠' },
-  { id: 'clarity', label: 'Improve message clarity', icon: '💬' },
-  { id: 'persuasion', label: 'Enhance persuasive communication' , icon: '📈'},
-  { id: 'leadership', label: 'Develop leadership communication' , icon: '🧑‍💼'},
-  { id: 'storytelling', label: 'Master storytelling techniques', icon: '✨' },
-  { id: 'active-listening', label: 'Improve active listening skills', icon: '👂' },
-  { id: 'emotional-intelligence', label: 'Enhance emotional intelligence', icon: '🎯' }
+  { id: 'confidence', label: 'Build confidence in speaking',icon: <CiStar /> },
+  { id: 'vocabulary', label: 'Expand professional vocabulary', icon: <LuBrain /> },
+  { id: 'clarity', label: 'Improve message clarity', icon: <FiMessageSquare/> },
+  { id: 'persuasion', label: 'Enhance persuasive communication' , icon: <FaArrowTrendUp/>},
+  { id: 'leadership', label: 'Develop leadership communication' , icon: <PiMedalLight/> },
+  { id: 'storytelling', label: 'Master storytelling techniques', icon: <BsStars/> },
+  { id: 'active-listening', label: 'Improve active listening skills', icon: <IoPeopleOutline/> },
+  { id: 'emotional-intelligence', label: 'Enhance emotional intelligence',icon:<FiTarget/> }
 ];
 
 const learningPreferences = [
@@ -103,11 +112,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     vocabularyLevel: 'intermediate',
     learningGoals: '',
     communicationConfidence: {
-      presentations: 3,
-      meetings: 3,
-      emails: 3,
-      networking: 3,
-      teamCollaboration: 3
+      presentations: undefined,
+      meetings: undefined,
+      emails: undefined,
+      networking: undefined,
+      teamCollaboration: undefined
     },
     communicationChallenges: [],
     improvementGoals: [],
@@ -121,6 +130,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     { key: 'professional', title: 'Professional Background', description: 'Your work context' },
     { key: 'assessment', title: 'Communication Assessment', description: 'Rate your current skills' },
     { key: 'goals', title: 'Goals & Challenges', description: 'What you want to improve' },
+    { key: 'goals-part2', title: 'Improvement Goals', description: 'What you want to improve' },
     { key: 'preferences', title: 'Learning Preferences', description: 'How you like to learn' }
   ];
 
@@ -145,7 +155,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       
       // Default communication confidence (moderate level)
       communicationConfidence: {
-        presentations: 3,
+        presentations: undefined,
         meetings: 3,
         emails: 4,
         networking: 3,
@@ -161,6 +171,26 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       // Learning goals summary
       learningGoals: 'Improve professional communication confidence and expand vocabulary'
     };
+    
+  };
+   const handleCompleteSetup = () => {
+    // Create the final onboarding data
+    const finalData: OnboardingData = {
+      ...formData,
+      // Map field to fieldOfInterest for backward compatibility
+      fieldOfInterest: formData.field || formData.fieldOfInterest || '',
+      // Map currentSkillLevel to vocabularyLevel for backward compatibility
+      vocabularyLevel: mapSkillLevelToVocabularyLevel(formData.currentSkillLevel || ''),
+      // Create a learning goals summary from improvement goals
+      learningGoals: (formData.improvementGoals && formData.improvementGoals.length > 0)
+        ? `Focus on: ${formData.improvementGoals.map(goal => 
+            improvementGoals.find(ig => ig.id === goal)?.label || goal
+          ).join(', ')}`
+        : formData.learningGoals || ''
+    };
+    
+    // Call the onComplete callback to transition to dashboard
+    onComplete(finalData);
   };
 
   const handleSkipToEnd = () => {
@@ -225,6 +255,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         return formData.currentSkillLevel !== '';
       case 'goals':
         return formData.communicationChallenges!.length > 0 && formData.improvementGoals!.length > 0;
+        case 'goals-part2':
+      return formData.improvementGoals!.length > 0;
       case 'preferences':
         return formData.learningPreferences!.length > 0 && formData.primaryPainPoints!.length > 0;
       default:
@@ -233,490 +265,401 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   };
 
   const renderPersonalStep = () => (
-    <Card className="card-glass-welcome">
-      <CardHeader className="text-center">
-        <div className="w-16 h-16 bg-aduffy-yellow/10 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-          👤
-        </div>
-        <CardTitle className="text-aduffy-navy">Welcome to ADuffy Learning!</CardTitle>
-        <CardDescription className="text-lg">
+    <div className="onboarding-mobile-container">
+      {/* Header */}
+      <div className="onboarding-header">
+        <button 
+          onClick={() => setCurrentStep('personal')}
+          className="back-button"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <h1 className="onboarding-title">
           Let's get to know you better to personalize your learning experience
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex flex-row gap-6 justify-center">
-        <div className="form-fields-row">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name *</Label>
-            <Input
-              id="name"
-              autoComplete="off"
-              value={formData.name}
-              onChange={(e) => updateFormData({ name: e.target.value })}
-              placeholder="Enter your full name"
-              className="input-neutral-bg"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address *</Label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="off"
-              value={formData.email}
-              onChange={(e) => updateFormData({ email: e.target.value })}
-              placeholder="your.email@company.com"
-              className="input-neutral-bg"
-            />
-          </div>
-        </div>
-        </div>
-        {/* BOX THAT CONTAINS WHAT MAKES ADUFFY SPECIAL? */}
-        <div className="aduffy-special-box">
-          <div className="aduffy-special-flex">
-            <span className="aduffy-special-sparkle" aria-hidden="true">✨</span>
-            <div>
-              <h3 className="aduffy-special-title">What makes ADuffy Learning special?</h3>
-              <ul className="aduffy-special-list">
-                <li className="flex items-center gap-2">
-                  <span className="aduffy-special-check" aria-hidden="true">✔</span>
-                  AI-powered personalized learning paths
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="aduffy-special-check" aria-hidden="true">✔</span>
-                  Real workplace scenarios and practice
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="aduffy-special-check" aria-hidden="true">✔</span>
-                  Voice interaction and pronunciation coaching
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="aduffy-special-check" aria-hidden="true">✔</span>
-                  Progress tracking and skill analytics
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        
+        </h1>
+      </div>
 
-        {/* Quick start option after filling basic info */}
-        {/* SKIP TO DASHBOARD BOX */}
-        {isStepValid() && (
-          <div className="quickstart-box">
-            <div className="quickstart-flex">
-              <span className="quickstart-icon" aria-hidden="true">⚡</span>
-              <div className="flex-1">
-                <h3 className="quickstart-title">Want to get started quickly?</h3>
-                <p className="quickstart-desc">
-                  You can skip the detailed setup and start learning right away. We'll use smart defaults and you can always customize your preferences later in Settings.
-                </p>
-                <Button
-                  onClick={handleSkipToEnd}
-                  className="btn-outline-teal"
-                >
-                  <span className="teal-outline-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{display: 'inline-block', verticalAlign: 'middle'}}>
-                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="#00b3c6" strokeWidth="2" fill="none" strokeLinejoin="round"/>
-                    </svg>
-                  </span>
-                  Skip to Dashboard
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {/* Form Fields */}
+      <div className="onboarding-form">
+        <div className="form-field">
+          <Label htmlFor="name" className="field-label">What's your name?</Label>
+          <Input
+            id="name"
+            type="text"
+            autoComplete="off"
+            value={formData.name}
+            onChange={(e) => updateFormData({ name: e.target.value })}
+            placeholder="Enter your name"
+            className="mobile-input"
+          />
+        </div>
+        <div className="form-field">
+          <Label htmlFor="email" className="field-label">What's your email?</Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="off"
+            value={formData.email}
+            onChange={(e) => updateFormData({ email: e.target.value })}
+            placeholder="Enter your email"
+            className="mobile-input"
+          />
+        </div>
+      </div>
+
+      {/* Continue Button */}
+      <div className="onboarding-actions">
+        <Button
+          onClick={() => setCurrentStep('professional')}
+          disabled={!formData.name || !formData.email}
+          className="continue-button"
+        >
+          Continue
+        </Button>
+      </div>
+    </div>
   );
 
   const renderProfessionalStep = () => (
-    <Card className="card-glass-professional">
-      <CardHeader className="text-center">
-        <div className="w-16 h-16 bg-aduffy-teal/10 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-          💼
-        </div>
-        <CardTitle className="text-aduffy-navy">Professional Background</CardTitle>
-        <CardDescription>
+    <div className="onboarding-mobile-container">
+      {/* Header */}
+      <div className="onboarding-header">
+        <button 
+          onClick={() => setCurrentStep('personal')}
+          className="back-button"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <h1 className="onboarding-title">Professional Background</h1>
+        <p className="onboarding-subtitle">
           Help us understand your professional context for better personalization
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex flex-row gap-6 justify-center">
-        <div className="form-fields-row">
-          <div className="space-y-2">
-            <Label htmlFor="jobTitle">Job Title *</Label>
-            <Input
-              className="input-soft-glass"
-              id="jobTitle"
-              autoComplete="off"
-              value={formData.jobTitle}
-              onChange={(e) => updateFormData({ jobTitle: e.target.value })}
-              placeholder="e.g., Senior Marketing Manager"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="company" >Company (Optional)</Label>
-             
-            <Input
-            className="input-soft-glass"
-              id="company"
-              autoComplete="off"
-              value={formData.company}
-              onChange={(e) => updateFormData({ company: e.target.value })}
-              placeholder="Your company name"
-            />
-          </div>
+        </p>
+      </div>
+
+      {/* Form Fields */}
+      <div className="onboarding-form">
+        <div className="form-field">
+          <Label htmlFor="jobTitle" className="field-label">Job Title</Label>
+          <Input
+            id="jobTitle"
+            type="text"
+            autoComplete="off"
+            value={formData.jobTitle}
+            onChange={(e) => updateFormData({ jobTitle: e.target.value })}
+            placeholder="Enter your job title"
+            className="mobile-input"
+          />
         </div>
+        <div className="form-field">
+          <Label htmlFor="company" className="field-label">Company</Label>
+          <Input
+            id="company"
+            type="text"
+            autoComplete="off"
+            value={formData.company}
+            onChange={(e) => updateFormData({ company: e.target.value })}
+            placeholder="Enter your company name"
+            className="mobile-input"
+          />
         </div>
 
-        <div className="space-y-3">
-          <Label>Professional Field *</Label>
-          <RadioGroup className="grid grid-cols-2 gap-4">
-            {[
-              { value: "marketing", label: "📊 Marketing" },
-              { value: "technology", label: "💻 Technology" },
-              { value: "sales", label: "💼 Sales" },
-              { value: "product", label: "🚀 Product Management" },
-              { value: "finance", label: "💰 Finance" },
-              { value: "operations", label: "⚙️ Operations" },
-              { value: "consulting", label: "🎯 Consulting" },
-              { value: "other", label: "🌟 Other" },
-            ].map(opt => (
-            <label className="radio-label" key={opt.value}>
-                <input
-                  type="radio"
-                  className="custom-radio"
-                  checked={formData.field === opt.value}
-                  onChange={() => updateFormData({ field: opt.value, fieldOfInterest: opt.value })}
-                  name="field"
-                  value={opt.value}
-                />
-                {/* <span className="radio-icon">{opt.icon}</span> */}
-                {opt.label}
-              </label>
-            ))}
-          </RadioGroup>
+        <div className="form-field">
+          <Label htmlFor="field" className="field-label">Professional Field</Label>
+          <div className="select-wrapper">
+            <select
+              id="field"
+              value={formData.field || ''}
+              onChange={(e) => updateFormData({ field: e.target.value, fieldOfInterest: e.target.value })}
+              className="mobile-select"
+            >
+              <option value="">Choose your professional field</option>
+              <option value="marketing">Marketing</option>
+              <option value="technology">Technology</option>
+              <option value="sales">Sales</option>
+              <option value="product">Product Management</option>
+              <option value="finance">Finance</option>
+              <option value="operations">Operations</option>
+              <option value="consulting">Consulting</option>
+              <option value="other">Other</option>
+            </select>
+            <svg className="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            </div>
         </div>
 
-        <div className="space-y-3">
-          <Label>Experience Level *</Label>
-          <RadioGroup>
-            {[
-              { value: "entry", label: "Entry Level (0-2 years)" },
-              { value: "mid", label: "Mid-Level (3-7 years)" },
-              { value: "senior", label: "Senior Level (8-12 years)" },
-              { value: "executive", label: "Executive Level (13+ years)" },
-            ].map(opt => (
-              <label className="radio-label" key={opt.value}>
-    <input
-      type="radio"
-      className="custom-radio"
-      checked={formData.experienceLevel === opt.value}
-      onChange={() => updateFormData({ experienceLevel: opt.value })}
-      name="experienceLevel"
-      value={opt.value}
-    />
-    {opt.label}
-  </label>
-            ))}
-          </RadioGroup>
+        <div className="form-field">
+          <Label htmlFor="experienceLevel" className="field-label">Experience Level</Label>
+          <div className="select-wrapper">
+            <select
+              id="experienceLevel"
+              value={formData.experienceLevel || ''}
+              onChange={(e) => updateFormData({ experienceLevel: e.target.value })}
+              className="mobile-select"
+            >
+              <option value="">Choose your experience level</option>
+              <option value="entry">Entry Level (0-2 years)</option>
+              <option value="mid">Mid Level (3-7 years)</option>
+              <option value="senior">Senior Level (8-12 years)</option>
+              <option value="executive">Executive Level (13+ years)</option>
+            </select>
+            <svg className="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+       {/* Continue Button */}
+       <div className="onboarding-actions">
+        <Button
+          onClick={() => setCurrentStep('assessment')}
+          disabled={!formData.jobTitle || !formData.field || !formData.experienceLevel}
+          className="continue-button"
+        >
+      Continue
+        </Button>
+      </div>
+    </div>
   );
 
   const renderAssessmentStep = () => (
-    <Card className="card-glass-assessment">
-      <CardHeader className="text-center">
-        <div className="w-16 h-16 bg-aduffy-orange/10 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-          📊
-        </div>
-        <CardTitle className="text-aduffy-navy">Communication Skills Assessment</CardTitle>
-        <CardDescription>
+    <div className="onboarding-mobile-container">
+      {/* Header */}
+      <div className="onboarding-header">
+        <button 
+          onClick={() => setCurrentStep('professional')}
+          className="back-button"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <h1 className="onboarding-title">Communication Skills Assessment</h1>
+        <p className="onboarding-subtitle">
           Rate your current confidence level in these communication areas (1 = Not confident, 5 = Very confident)
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-8">
-        <div className="space-y-6">
-          {Object.entries(formData.communicationConfidence || {}).map(([key, value]) => {
-            const labelMap: Record<string, string> = {
-              presentations: 'Giving presentations',
-              meetings: 'Leading/participating in meetings',
-              emails: 'Writing professional emails',
-              networking: 'Professional networking',
-              teamCollaboration: 'Team collaboration',
-            };
-            return (
-              <div key={key} className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 text-aduffy-teal">🧠</span>
-                  <Label className="font-medium">{labelMap[key] || key}</Label>
-                </div>
-                <RadioGroup className="confidence-radio-group">
-                  {[1, 2, 3, 4].map((rating, idx) => (
-                    <div key={rating} className="confidence-radio-item">
-                      <RadioGroupItem
-                        checked={value === rating}
-                        onChange={() => updateFormData({
-                          communicationConfidence: {
-                            ...formData.communicationConfidence!,
-                            [key]: rating
-                          }
-                        })}
-                        id={`${key}-${rating}`}
-                        className="confidence-radio-dot"
-                      />
-                      {(idx !== 0 && idx !== 3) && (
-                        <Label htmlFor={`${key}-${rating}`} className="confidence-radio-label">
-                          {rating}
-                        </Label>
-                      )}
-                      <span className="confidence-radio-helper">
-                        {idx === 0
-                          ? "Not confident"
-                          : idx === 3
-                          ? "Very confident"
-                          : ""}
-                      </span>
-                    </div>
-                  ))}
-                </RadioGroup>
+        </p>
+      </div>
+
+      {/* Assessment Questions */}
+      <div className="onboarding-form">
+        {Object.entries(formData.communicationConfidence || {}).map(([key, value]) => {
+          const labelMap: Record<string, string> = {
+            presentations: 'Giving Presentations',
+            meetings: 'Leading/Participating in meetings',
+            emails: 'Writing professional emails',
+            networking: 'Professional Networking',
+            teamCollaboration: 'Team Collaboration',
+          };
+          return (
+            <div key={key} className="assessment-question">
+              <Label className="question-label">{labelMap[key] || key}</Label>
+              <div className="rating-buttons">
+                {[1, 2, 3, 4, 5].map((rating) => (
+                  <button
+                    key={rating}
+                    type="button"
+                    className={`rating-btn ${value === rating ? 'selected' : ''}`}
+                    onClick={() => updateFormData({
+                      communicationConfidence: {
+                        ...formData.communicationConfidence!,
+                        [key]: rating
+                      }
+                    })}
+                  >
+                    <span>{rating}</span>
+                  </button>
+                ))}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
 
-        <Separator />
-
-        <div className="space-y-3">
-          <Label>Overall, how would you rate your current professional communication skills? *</Label>
-          <RadioGroup>
+        <div className="assessment-question">
+          <Label className="question-label">
+            Overall, how would you rate your current professional communication skills?
+          </Label>
+          <div className="skill-level-options">
             {[
-              { value: "beginner", label: "Beginner - I need significant improvement" },
-              { value: "intermediate", label: "Intermediate - I'm comfortable but want to improve" },
-              { value: "advanced", label: "Advanced - I'm confident but want to refine specific areas" },
-              { value: "expert", label: "Expert - I want to master advanced techniques" },
-            ].map(opt => (
-              <label className="radio-label" key={opt.value}>
-              <input
-                type="radio"
-                className="custom-radio"
-                checked={formData.currentSkillLevel === opt.value}
-                onChange={() => updateFormData({ currentSkillLevel: opt.value })}
-                name="currentSkillLevel"
-                value={opt.value}
-              />
-              {opt.label}
-            </label>
-            ))}
-          </RadioGroup>
-        </div>
-      </CardContent>
-    </Card>
-  );
+               { value: "beginner", label: "Beginner" },
+               { value: "intermediate", label: "Intermediate" },
+               { value: "advanced", label: "Advanced" },
+               { value: "expert", label: "Expert" },
+             ].map(option => (
+               <label key={option.value} className="skill-level-option">
+                 <input
+                   type="radio"
+                   name="currentSkillLevel"
+                   value={option.value}
+                   checked={formData.currentSkillLevel === option.value}
+                   onChange={() => updateFormData({ currentSkillLevel: option.value })}
+                 />
+                 <span className="radio-custom"></span>
+                 <span className="option-label">{option.label}</span>
+               </label>
+             ))}
+           </div>
+         </div>
+       </div>
+ 
+       {/* Continue Button */}
+       <div className="onboarding-actions">
+         <Button
+           onClick={() => setCurrentStep('goals')}
+           disabled={!formData.currentSkillLevel}
+           className="continue-button"
+         >
+           Continue
+         </Button>
+       </div>
+     </div>
+   );
 
-  const renderGoalsStep = () => (
-    <Card className="card-glass-goals">
-      <CardHeader className="text-center">
-        <div className="w-16 h-16 bg-info/10 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-          🎯
-        </div>
-        <CardTitle className="text-aduffy-navy">Goals &amp; Challenges</CardTitle>
-        <CardDescription>
+
+   const renderGoalsStep = () => (
+    <div className="onboarding-mobile-container">
+      {/* Header */}
+      <div className="onboarding-header">
+        <button 
+          onClick={() => setCurrentStep('assessment')}
+          className="back-button"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <h1 className="onboarding-title">Goals & Challenges</h1>
+        <p className="onboarding-subtitle">
           Help us understand what you want to improve and what challenges you face
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-8">
-        <div className="space-y-4">
-          <div className="flex  challenge-label items-center gap-2">
-            <span className="w-5 h-5 text-aduffy-orange">⚠️</span>
-            <Label className="text-base font-medium">What communication challenges do you currently face? *</Label>
-          </div>
-          <p className="text-sm text-muted-foreground">Select all that apply</p>
-          <div className="skills-checkbox-grid">
-            {communicationChallenges.map(({ id, label, icon }) => (
-              <label
-                key={id}
-                className={`skill-checkbox-label${formData.communicationChallenges!.includes(id) ? ' selected' : ''}`}
-              >
-                <input
-                  type="checkbox"
-                  id={id}
-                  checked={formData.communicationChallenges!.includes(id)}
-                  onChange={e => {
-                    if (e.target.checked) {
-                      updateFormData({
-                        communicationChallenges: [...(formData.communicationChallenges || []), id]
-                      });
-                    } else {
-                      updateFormData({
-                        communicationChallenges: (formData.communicationChallenges || []).filter(c => c !== id)
-                      });
-                    }
-                  }}
-                  className="skill-checkbox"
-                />
-                <span className="skill-icon" style={{ color: '#1db5a3' }}>{icon}</span>
-                <span className="flex-1">{label}</span>
-              </label>
-            ))}
-          </div>
+        </p>
+      </div>
+
+      {/* Challenges Section */}
+      <div className="onboarding-form">
+        <div className="section-question">
+          <Label className="question-label">What communication challenges do you currently face?</Label>
+          <p className="question-hint">Select all that apply</p>
         </div>
 
-        <Separator />
-
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="w-5 h-5 text-aduffy-yellow">🌟</span>
-            <Label className="text-base font-medium">What are your primary improvement goals? *</Label>
-          </div>
-          <p className="text-sm text-muted-foreground">Select all that apply</p>
-          <div className="skills-checkbox-grid">
-            {improvementGoals.map(({ id, label, icon }) => (
-              <label
-                key={id}
-                className={`skill-checkbox-label${formData.improvementGoals!.includes(id) ? ' selected' : ''}`}
-              >
-                <input
-                  type="checkbox"
-                  id={id}
-                  checked={formData.improvementGoals!.includes(id)}
-                  onChange={e => {
-                    if (e.target.checked) {
-                      updateFormData({
-                        improvementGoals: [...(formData.improvementGoals || []), id]
-                      });
-                    } else {
-                      updateFormData({
-                        improvementGoals: (formData.improvementGoals || []).filter(g => g !== id)
-                      });
-                    }
-                  }}
-                  className="skill-checkbox"
-                />
-                <span className="skill-icon" style={{ color: '#fbb040' }}>{icon}</span>
-                <span className="flex-1">{label}</span>
-              </label>
-            ))}
-          </div>
+        <div className="challenges-grid">
+          {communicationChallenges.map(({ id, label, icon }) => (
+            <label
+              key={id}
+              className={`challenge-option ${formData.communicationChallenges!.includes(id) ? 'selected' : ''}`}
+            >
+               <input
+                type="checkbox"
+                checked={formData.communicationChallenges!.includes(id)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    updateFormData({
+                      communicationChallenges: [...(formData.communicationChallenges || []), id]
+                    });
+                  } else {
+                    updateFormData({
+                      communicationChallenges: (formData.communicationChallenges || []).filter(c => c !== id)
+                    });
+                  }
+                }}
+              />
+              <div className="challenge-icon">{icon}</div>
+              <span className="challenge-label">{label}</span>
+            </label>
+          ))}
         </div>
-      </CardContent>
-    </Card>
+        </div>
+
+        
+       
+
+      {/* Continue Button */}
+      <div className="onboarding-actions">
+        <Button
+          // onClick={() => setCurrentStep('preferences')}
+          // disabled={formData.communicationChallenges!.length === 0 || formData.improvementGoals!.length === 0}
+          onClick={() => setCurrentStep('goals-part2')}
+          disabled={formData.communicationChallenges!.length === 0}
+          className="continue-button"
+        >
+          Continue
+        </Button>
+
+      </div>
+    </div>
   );
+   const renderGoalsStepPart2 = () => (
+    <div className="onboarding-mobile-container">
+      {/* Header */}
+      <div className="onboarding-header">
+        <button 
+          onClick={() => setCurrentStep('assessment')}
+          className="back-button"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <h1 className="onboarding-title">Goals & Challenges</h1>
+        <p className="onboarding-subtitle">
+          Help us understand what you want to improve and what challenges you face
+        </p>
+      </div>
 
-  const renderPreferencesStep = () => (
-    <Card className="card-glass-preferences">
-      <CardHeader className="text-center">
-        <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-          ⚙️
-        </div>
-        <CardTitle className="text-aduffy-navy">Learning Preferences</CardTitle>
-        <CardDescription>
-          Tell us how you prefer to learn so we can customize your experience
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-8">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="w-5 h-5 text-aduffy-teal">🧠</span>
-            <Label className="text-base font-medium">How do you prefer to learn? *</Label>
-          </div>
-          <p className="text-sm text-muted-foreground">Select all that apply</p>
-          <div className="skills-checkbox-grid">
-            {learningPreferences.map(({ id, label, icon }) => (
-              <label
-                key={id}
-                className={`skill-checkbox-label${formData.learningPreferences!.includes(id) ? ' selected' : ''}`}
-              >
-                <input
-                  type="checkbox"
-                  id={id}
-                  checked={formData.learningPreferences!.includes(id)}
-                  onChange={e => {
-                    if (e.target.checked) {
-                      updateFormData({
-                        learningPreferences: [...(formData.learningPreferences || []), id]
-                      });
-                    } else {
-                      updateFormData({
-                        learningPreferences: (formData.learningPreferences || []).filter(g => g !== id)
-                      });
-                    }
-                  }}
-                  className="skill-checkbox"
-                />
-                <span className="skill-icon" style={{ color: '#1db5a3' }}>{icon}</span>
-                <span className="flex-1">{label}</span>
-              </label>
-            ))}
-          </div>
+      {/* Challenges Section */}
+      <div className="onboarding-form">
+       
+
+       
+
+        <div className="section-question">
+          <Label className="question-label">What are your primary improvement goals?</Label>
+          <p className="question-hint">Select all that apply</p>
         </div>
 
-        <Separator />
-
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="w-5 h-5 text-aduffy-orange">⚠️</span>
-            <Label className="text-base font-medium">What are your biggest pain points when it comes to communication? *</Label>
-          </div>
-          <p className="text-sm text-muted-foreground">Select all that apply</p>
-          <div className="skills-checkbox-grid" style={{ gridTemplateColumns: '1fr' }}>
-            {primaryPainPoints.map(({ id, label }) => (
-              <label
-                key={id}
-                className={`skill-checkbox-label${formData.primaryPainPoints!.includes(id) ? ' selected' : ''}`}
-              >
-                <input
-                  type="checkbox"
-                  id={id}
-                  checked={formData.primaryPainPoints!.includes(id)}
-                  onChange={e => {
-                    if (e.target.checked) {
-                      updateFormData({
-                        primaryPainPoints: [...(formData.primaryPainPoints || []), id]
-                      });
-                    } else {
-                      updateFormData({
-                        primaryPainPoints: (formData.primaryPainPoints || []).filter(p => p !== id)
-                      });
-                    }
-                  }}
-                  className="skill-checkbox"
-                />
-                <span className="flex-1">{label}</span>
-              </label>
-            ))}
-          </div>
+        <div className="goals-grid">
+          {improvementGoals.map(({ id, label, icon }) => (
+            <label
+              key={id}
+              className={`goal-option ${formData.improvementGoals!.includes(id) ? 'selected' : ''}`}
+            >
+               <input
+                type="checkbox"
+                checked={formData.improvementGoals!.includes(id)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    updateFormData({
+                      improvementGoals: [...(formData.improvementGoals || []), id]
+                    });
+                  } else {
+                    updateFormData({
+                      improvementGoals: (formData.improvementGoals || []).filter(g => g !== id)
+                    });
+                  }
+                }}
+              />
+              <div className="goal-icon">{icon}</div>
+              <span className="goal-label">{label}</span>
+            </label>
+          ))}
         </div>
+      </div>
 
-        <div className="almost-ready-box">
-          <div className="almost-ready-header">
-            <span style={{ fontSize: '1.5em', color: '#fbb040' }}>🏅</span>
-            You're almost ready!
-          </div>
-          <div className="almost-ready-desc">
-            Based on your responses, we'll create a personalized learning path that focuses on your specific challenges and goals.
-          </div>
-          <ul className="almost-ready-list">
-            <li>
-              <span style={{ color: '#1db5a3', fontSize: '1.2em' }}>✔️</span>
-              Customized vocabulary for your field
-            </li>
-            <li>
-              <span style={{ color: '#1db5a3', fontSize: '1.2em' }}>✔️</span>
-              Scenarios matching your experience level
-            </li>
-            <li>
-              <span style={{ color: '#1db5a3', fontSize: '1.2em' }}>✔️</span>
-              Activities aligned with your learning style
-            </li>
-          </ul>
-        </div>
-      </CardContent>
-    </Card>
+      
+      <div className="onboarding-actions">
+         <Button
+          onClick={handleCompleteSetup}
+          // disabled={formData.communicationChallenges!.length === 0 || formData.improvementGoals!.length === 0}
+          disabled={formData.improvementGoals!.length === 0}
+          className="complete-setup-button"
+        >
+          Complete Setup
+        </Button>
+      </div>
+    </div>
   );
-
   const renderStepContent = () => {
     switch (currentStep) {
       case 'personal':
@@ -727,102 +670,18 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         return renderAssessmentStep();
       case 'goals':
         return renderGoalsStep();
-      case 'preferences':
-        return renderPreferencesStep();
+        case 'goals-part2':
+          return renderGoalsStepPart2();
+      // case 'preferences':
+      //   return renderPreferencesStep();
       default:
         return renderPersonalStep();
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-aduffy-yellow/5 via-background to-aduffy-teal/5 py-8">
-      <div className="container mx-auto px-4 max-w-6xl">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-4 mb-6">
-            {/* <div className="w-20 h-20 bg-gradient-learning rounded-xl flex items-center justify-center shadow-lg text-4xl">
-              🧠
-            </div> */}
-            <div className="text-center">
-              <h1 className="hero-title">ADuffy Learning</h1>
-              <p className="hero-subtitle">Professional Communication Excellence</p>
-            </div>
-          </div>
-        </div>
-        <div className="hero-title-mobile">
-          <img style={{ width: "200px", height: "auto", }} src="https://aduffylearning.com/wp-content/uploads/2023/12/aduffy-logo.png" alt="AduffyLogo"/>
-
-        </div>
-
-        {/* Progress */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-aduffy-navy">
-              {steps.find(s => s.key === currentStep)?.title}
-            </h2>
-            <Badge className="soft-yellow-badge ">
-              Step {currentStepIndex + 1} of {steps.length}
-            </Badge>
-          </div>
-          <Progress value={progress} className="h-3 mb-2 progress-bar-responsive" />
-          <p className="text-sm text-muted-foreground text-center">
-            {steps.find(s => s.key === currentStep)?.description}
-          </p>
-        </div>
-
-        {/* Step Content */}
-        <div className="mb-12">
-          {renderStepContent()}
-        </div>
-
-        {/* Navigation */}
-        <div className="max-w-2xl mx-auto flex justify-between">
-          <Button
-            onClick={handleBack}
-            disabled={currentStep === 'personal'}
-            className="soft-yellow-outline-btn"
-          >
-            <span className="soft-yellow-outline-arrow">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{display: 'inline-block', verticalAlign: 'middle'}}>
-                <path d="M15 19l-7-7 7-7" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-            Back
-          </Button>
-          
-          <Button
-            onClick={handleNext}
-            disabled={!isStepValid()}
-            className="soft-yellow-btn"
-          >
-            {currentStep === 'preferences' ? (
-              <>
-                Complete Setup
-              </>
-            ) : (
-              <>
-                Continue
-              </>
-            )}
-          </Button>
-        </div>
-
-        {/* Step indicator */}
-        <div className="flex justify-center mt-8">
-          <div className="flex items-center gap-2">
-            {steps.map((step, index) => (
-              <div
-                key={step.key}
-                className={`w-3 h-3 rounded-full transition-colors ${
-                  index <= currentStepIndex
-                    ? 'bg-aduffy-yellow'
-                    : 'bg-muted'
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+    <div className="onboarding-wrapper">
+      {renderStepContent()}
     </div>
   );
 }

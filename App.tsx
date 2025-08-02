@@ -10,6 +10,8 @@ import { VoiceConversation } from "./components/VoiceConversation";
 import { PronunciationPractice } from "./components/PronunciationPractice";
 import { Navigation } from './components/Navigation';
 import { ScrollToTop } from "./components/ScrollToTop";
+import { SplashScreen } from "./components/SplashScreen";
+import { WelcomePages } from "./components/WelcomePages";
 
 type ActivityType = 'dashboard' | 'storytelling' | 'quiz' | 'interview' | 'voice-conversation' | 'pronunciation' | 'settings';
 //Why is the activity Progress only for storttelling?
@@ -29,7 +31,7 @@ export default function App() {
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<OnboardingData | null>(null);
   const [activityProgress, setActivityProgress] = useState<ActivityProgress>({});
-
+  const [currentScreen, setCurrentScreen] = useState<'splash' | 'welcome' | 'onboarding' | 'main'>('splash');
   // Check if user has completed onboarding on app load
   useEffect(() => {
     const onboardingStatus = localStorage.getItem('aduffy-onboarding-completed');
@@ -39,13 +41,53 @@ export default function App() {
     if (onboardingStatus === 'true' && savedProfile) {
       setHasCompletedOnboarding(true);
       setUserProfile(JSON.parse(savedProfile));
+      setCurrentScreen('main');
     }
 
     if (savedProgress) {
       setActivityProgress(JSON.parse(savedProgress));
     }
   }, []);
+   // Splash screen handlers
+   const handleSplashComplete = useCallback(() => {
+    setCurrentScreen('welcome');
+  }, []);
 
+  const handleWelcomeComplete = useCallback(() => {
+    setCurrentScreen('onboarding');
+  }, []);
+  const handleWelcomeSkip = useCallback(() => {
+    // Skip to dashboard with default data
+    const defaultProfile: OnboardingData = {
+      name: 'Guest User',
+      email: 'guest@example.com',
+      jobTitle: 'Professional',
+      company: '',
+      vocabularyLevel: 'intermediate',
+      learningGoals: 'Improve communication skills',
+      field: 'other',
+      experienceLevel: 'mid',
+      communicationConfidence: {
+        presentations: 3,
+        meetings: 3,
+        emails: 3,
+        networking: 3,
+        teamCollaboration: 3
+      },
+      communicationChallenges: [],
+      improvementGoals: [],
+      learningPreferences: [],
+      currentSkillLevel: 'intermediate',
+      primaryPainPoints: []
+    };
+    
+    localStorage.setItem('aduffy-onboarding-completed', 'true');
+    localStorage.setItem('aduffy-user-profile', JSON.stringify(defaultProfile));
+    
+    setUserProfile(defaultProfile);
+    setHasCompletedOnboarding(true);
+    setCurrentScreen('main');
+  }, []);
   const handleOnboardingComplete = useCallback((data: OnboardingData) => {
     // Save onboarding completion status and user profile
     localStorage.setItem('aduffy-onboarding-completed', 'true');
@@ -133,14 +175,28 @@ export default function App() {
     setUserProfile(null);
     setActivityProgress({});
     setCurrentActivity('dashboard');
-    
+    setCurrentScreen('splash');
     // Reload the page to ensure complete reset
     window.location.reload();
   }, []);
 
   // Show onboarding flow for first-time users
   if (!hasCompletedOnboarding) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
+    if (currentScreen === 'splash') {
+      return <SplashScreen onComplete={handleSplashComplete} />;
+    }
+    if (currentScreen === 'welcome') {
+      return (
+        <WelcomePages 
+          onComplete={handleWelcomeComplete}
+          onSkip={handleWelcomeSkip}
+        />
+      );
+    }
+    
+    if (currentScreen === 'onboarding') {
+      return <Onboarding onComplete={handleOnboardingComplete} />;
+    }
   }
 
   return (
