@@ -305,6 +305,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             onChange={(e) => updateFormData({ email: e.target.value })}
             placeholder="Enter your email"
             className="mobile-input"
+            required
           />
         </div>
       </div>
@@ -457,21 +458,24 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           return (
             <div key={key} className="assessment-question">
               <Label className="question-label">{labelMap[key] || key}</Label>
-              <div className="rating-buttons">
+              <div className="skill-level-options">
                 {[1, 2, 3, 4, 5].map((rating) => (
-                  <button
-                    key={rating}
-                    type="button"
-                    className={`rating-btn ${value === rating ? 'selected' : ''}`}
-                    onClick={() => updateFormData({
-                      communicationConfidence: {
-                        ...formData.communicationConfidence!,
-                        [key]: rating
-                      }
-                    })}
-                  >
-                    <span>{rating}</span>
-                  </button>
+                  <label key={rating} className="skill-level-option">
+                    <input
+                      type="radio"
+                      name={`communicationConfidence-${key}`}
+                      value={rating}
+                      checked={value === rating}
+                      onChange={() => updateFormData({
+                        communicationConfidence: {
+                          ...formData.communicationConfidence!,
+                          [key]: rating
+                        }
+                      })}
+                    />
+                    <span className="radio-custom"></span>
+                    <span className="option-label">{rating}</span>
+                  </label>
                 ))}
               </div>
             </div>

@@ -4005,6 +4005,27 @@ ml-auto{
   position: relative;
 }
 
+
+.skill-level-option input[type="radio"]:checked + .radio-custom {
+  border-color: #fbb040;
+  /* background: #fbb040; */
+  background: #ffffff;
+}
+
+.skill-level-option input[type="radio"]:checked + .radio-custom::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  /* background: white; */
+  background: #fbb040;
+  border-radius: 50%;
+}
+
+
 .rating-btn.selected::after {
   content: '';
   position: absolute;
@@ -4149,6 +4170,7 @@ ml-auto{
   justify-content: center;
   border-radius: 50%;
   background: #f5f5f5;
+  color: #fbb040;;
   transition: all 0.2s ease;
 }
 
