@@ -1,6 +1,11 @@
 #  .env
 #    .env.local
 #    .env.*.local
-   node_modules/
-   dist/
-   .DS_Store
+node_modules/
+
+dist/
+
+.DS_Store
+
+# Vite cache
+.vite/

@@ -264,63 +264,73 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     }
   };
 
-  const renderPersonalStep = () => (
-    <div className="onboarding-mobile-container">
-      {/* Header */}
-      <div className="onboarding-header">
-        <button 
-          onClick={() => setCurrentStep('personal')}
-          className="back-button"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <h1 className="onboarding-title">
-          Let's get to know you better to personalize your learning experience
-        </h1>
+const renderPersonalStep = () => (
+  <div className="onboarding-mobile-container">
+    {/* Header */}
+    <div className="onboarding-header">
+      <button 
+        onClick={() => setCurrentStep('personal')}
+        className="back-button"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      <h1 className="onboarding-title">
+        Let's get to know you better to personalize your learning experience
+      </h1>
+    </div>
+
+    {/* Form Fields */}
+    <form 
+      className="onboarding-form" 
+      onSubmit={(e) => {
+        e.preventDefault(); // prevent page reload
+        setCurrentStep('professional'); // move to next step
+      }}
+    >
+      <div className="form-field">
+        <Label htmlFor="name" className="field-label">What's your name?</Label>
+        <Input
+          id="name"
+          type="text"
+          autoComplete="off"
+          value={formData.name}
+          onChange={(e) => updateFormData({ name: e.target.value })}
+          placeholder="Enter your name"
+          className="mobile-input"
+          required
+        />
       </div>
 
-      {/* Form Fields */}
-      <div className="onboarding-form">
-        <div className="form-field">
-          <Label htmlFor="name" className="field-label">What's your name?</Label>
-          <Input
-            id="name"
-            type="text"
-            autoComplete="off"
-            value={formData.name}
-            onChange={(e) => updateFormData({ name: e.target.value })}
-            placeholder="Enter your name"
-            className="mobile-input"
-          />
-        </div>
-        <div className="form-field">
-          <Label htmlFor="email" className="field-label">What's your email?</Label>
-          <Input
-            id="email"
-            type="email"
-            autoComplete="off"
-            value={formData.email}
-            onChange={(e) => updateFormData({ email: e.target.value })}
-            placeholder="Enter your email"
-            className="mobile-input"
-          />
-        </div>
+      <div className="form-field">
+        <Label htmlFor="email" className="field-label">What's your email?</Label>
+        <Input
+          id="email"
+          type="email"
+          autoComplete="off"
+          value={formData.email}
+          onChange={(e) => updateFormData({ email: e.target.value })}
+          placeholder="Enter your email"
+          className="mobile-input"
+          required
+        />
       </div>
 
       {/* Continue Button */}
       <div className="onboarding-actions">
         <Button
-          onClick={() => setCurrentStep('professional')}
+          type="submit"
           disabled={!formData.name || !formData.email}
           className="continue-button"
         >
           Continue
         </Button>
       </div>
-    </div>
-  );
+    </form>
+  </div>
+);
+
 
   const renderProfessionalStep = () => (
     <div className="onboarding-mobile-container">
@@ -457,21 +467,24 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           return (
             <div key={key} className="assessment-question">
               <Label className="question-label">{labelMap[key] || key}</Label>
-              <div className="rating-buttons">
+              <div className="skill-level-options">
                 {[1, 2, 3, 4, 5].map((rating) => (
-                  <button
-                    key={rating}
-                    type="button"
-                    className={`rating-btn ${value === rating ? 'selected' : ''}`}
-                    onClick={() => updateFormData({
-                      communicationConfidence: {
-                        ...formData.communicationConfidence!,
-                        [key]: rating
-                      }
-                    })}
-                  >
-                    <span>{rating}</span>
-                  </button>
+                  <label key={rating} className="skill-level-option">
+                    <input
+                      type="radio"
+                      name={`communicationConfidence-${key}`}
+                      value={rating}
+                      checked={value === rating}
+                      onChange={() => updateFormData({
+                        communicationConfidence: {
+                          ...formData.communicationConfidence!,
+                          [key]: rating
+                        }
+                      })}
+                    />
+                    <span className="radio-custom"></span>
+                    <span className="option-label">{rating}</span>
+                  </label>
                 ))}
               </div>
             </div>
