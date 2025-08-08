@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./styles/main.css";
 import { OnboardingData } from "./Onboarding";
 import { BsBook } from "react-icons/bs";
+import CountUp from "../components/ui/Countup"
 interface DashboardProps {
   onSelectActivity: (activity: string) => void;
   userProfile?: OnboardingData | null;
@@ -189,17 +190,33 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
             <div className="stats-grid">
               <div className="stat-card stat-words">
                 <div className="stat-label">Words Learned</div>
-                <div className="stat-value">{userStats.wordsLearned}</div>
+                <CountUp  from={0}
+                    to={userStats.wordsLearned}
+                    separator=","
+                    direction="up"
+                    duration={1}
+                    className="count-up-text stat-value"/>
                 <div className="stat-sub">+12 this week</div>
+                
               </div>
               <div className="stat-card stat-streak">
                 <div className="stat-label">Current Streak</div>
-                <div className="stat-value">{userStats.currentStreak} days</div>
+                <CountUp  from={0}
+                    to={userStats.currentStreak}
+                    separator=","
+                    direction="up"
+                    duration={2}
+                    className="count-up-text stat-value"/>
                 <div className="stat-sub">Keep it up! 🔥</div>
               </div>
               <div className="stat-card stat-score">
                 <div className="stat-label">Total Score</div>
-                <div className="stat-value">{userStats.totalScore}</div>
+                <CountUp  from={0}
+                    to={userStats.totalScore}
+                    separator=","
+                    direction="up"
+                    duration={1}
+                    className="count-up-text stat-value"/>
                 <div className="stat-sub">Expert level: 3000</div>
               </div>
             </div>
