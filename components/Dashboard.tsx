@@ -185,10 +185,13 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
 
       {/* Learning Statistics Section */}
       <div className="dashboard-section">
+        
+
         <div className="section-header" onClick={() => toggleSection('learningStats')}>
           <h2>Learning Statistics</h2>
           <span className="material-symbols-outlined">
-            {expandedSections.course ?  "expand_circle_up": 'expand_circle_down'}
+            
+            {expandedSections.learningStats ?  'expand_circle_up': 'expand_circle_down'}
           </span>
         </div>
 
@@ -252,7 +255,7 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
         <div className="section-header" onClick={() => toggleSection('activities')}>
           <h2>Activities</h2>
           <span className="material-symbols-outlined">
-            {expandedSections.course ?  "expand_circle_up": 'expand_circle_down'}
+            {expandedSections.activities ?  "expand_circle_up": 'expand_circle_down'}
           </span>
         </div>
         {expandedSections.activities && (
