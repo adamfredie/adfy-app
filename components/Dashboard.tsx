@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import "./styles/main.css";
 import { OnboardingData } from "./Onboarding";
 import { BsBook } from "react-icons/bs";
+import { IoIosTrendingUp } from "react-icons/io";
+import { LuBrain } from "react-icons/lu";
+import { FiBookOpen } from "react-icons/fi";
 import CountUp from "../components/ui/Countup"
+import SpotlightCard from "../components/SpotlightCard";
 interface DashboardProps {
   onSelectActivity: (activity: string) => void;
   userProfile?: OnboardingData | null;
@@ -177,6 +181,8 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
         )}
       </div>
 
+
+
       {/* Learning Statistics Section */}
       <div className="dashboard-section">
         <div className="section-header" onClick={() => toggleSection('learningStats')}>
@@ -185,40 +191,57 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
             {expandedSections.course ?  "expand_circle_up": 'expand_circle_down'}
           </span>
         </div>
+
         {expandedSections.learningStats && (
           <div className="section-content">
             <div className="stats-grid">
-              <div className="stat-card stat-words">
-                <div className="stat-label">Words Learned</div>
-                <CountUp  from={0}
-                    to={userStats.wordsLearned}
-                    separator=","
-                    direction="up"
-                    duration={1}
-                    className="count-up-text stat-value"/>
-                <div className="stat-sub">+12 this week</div>
-                
-              </div>
-              <div className="stat-card stat-streak">
-                <div className="stat-label">Current Streak</div>
-                <CountUp  from={0}
-                    to={userStats.currentStreak}
-                    separator=","
-                    direction="up"
-                    duration={2}
-                    className="count-up-text stat-value"/>
-                <div className="stat-sub">Keep it up! 🔥</div>
-              </div>
-              <div className="stat-card stat-score">
-                <div className="stat-label">Total Score</div>
-                <CountUp  from={0}
-                    to={userStats.totalScore}
-                    separator=","
-                    direction="up"
-                    duration={1}
-                    className="count-up-text stat-value"/>
-                <div className="stat-sub">Expert level: 3000</div>
-              </div>
+            {/* Words Learned Component */}
+                <SpotlightCard className="custom-spotlight-card   stat-card stat-words" spotlightColor="rgba(238, 221, 194, 0.85)">
+                  <div className="stat-label flex justify-between w-full">Words Learned <div className="dashboardIco text-[#f8a725] bg-[#fee8c5] "><FiBookOpen  /></div></div>
+                  <CountUp  from={0}
+                      to={userStats.wordsLearned}
+                      separator=","
+                      direction="up"
+                      duration={1}
+                      className="count-up-text stat-value"/>
+                  <div className="stat-sub">
+                    <span className="text-[#28a745]">+12</span> this week</div>
+                </SpotlightCard>
+
+                {/* Streax Card component */}
+                <SpotlightCard className="custom-spotlight-card stat-card stat-streak" spotlightColor="rgba(195, 220, 202, 0.8)">
+                  <div className="stat-label flex justify-between w-full">Current Streak <div className="dashboardIco !text-[#28a745] bg-[#c8e7ce]"><IoIosTrendingUp /></div></div>
+                  <div className="streakCounter flex gap-3 items-center ">
+
+                  <CountUp  from={0}
+                      to={userStats.currentStreak}
+                      separator=","
+                      direction="up"
+                      duration={2}
+                      className="count-up-text stat-value !text-[#28a745]">
+                       </CountUp> 
+
+                  <span className=" !text-[#28a745] stat-value ">days</span>    
+                  </div>
+                  <div className="stat-sub">Keep it up! 🔥</div>
+                </SpotlightCard>
+
+                {/* Total Score card component */}
+                <SpotlightCard className="custom-spotlight-card stat-card stat-score" spotlightColor="rgba(192, 192, 192, 0.85)">
+                  <div className="stat-label flex justify-between w-full">Total Score
+                    <div className="dashboardIco bg-[#b4b4b4] "> 
+                      <LuBrain/>
+                    </div>
+                  </div>
+                  <CountUp  from={0}
+                      to={userStats.totalScore}
+                      separator=","
+                      direction="up"
+                      duration={1}
+                      className="count-up-text stat-value"/>
+                  <div className="stat-sub">Expert level: 3000</div>
+                </SpotlightCard>
+
             </div>
           </div>
         )}
