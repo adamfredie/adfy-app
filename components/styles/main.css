@@ -6,16 +6,23 @@
   - FIXED: Added utilities.css import to make custom utility classes available
   - UPDATED: Ensured proper CSS variable usage throughout the file
   - MAINTAINED: Existing component styles and layout structure
+  - ADDED: Tailwind CSS directives for react-bits components
   
   IMPORTS:
   - _variables.css: Contains CSS custom properties (colors, spacing, typography)
   - _reset.css: CSS reset for consistent cross-browser styling
   - utilities.css: Custom utility classes (imported to replace Tailwind)
+  - Tailwind CSS: For react-bits components
 */
 
+/* Tailwind CSS Directives */
 @import './base/_variables.css';
 @import './base/_reset.css';
 @import './utilities.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 /* Global Utility Classes */
 .container {
@@ -293,13 +300,13 @@ body {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--space-4);
+  gap: var(--space-3);
   margin-bottom: var(--space-8);
 }
 
 .stat-card {
   text-align: center;
-  padding: var(--space-6);
+  padding: var(--space-2);
 }
 
 .stat-value {
@@ -311,7 +318,16 @@ body {
 
 .stat-label {
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+  white-space: normal;
+  word-wrap: break-word;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  line-height: 1.3;
+  justify-content: space-between;
 }
 
 /* Responsive Design */
@@ -886,10 +902,11 @@ body {
   margin-bottom: var(--space-6);
 }
 
-.stat-card {
+/* Same code of allign as above */
+/* .stat-card {
   padding: var(--space-6);
   text-align: center;
-}
+} */
 
 .stat-value {
   font-size: var(--font-size-4xl);
@@ -898,11 +915,12 @@ body {
   margin-bottom: var(--space-2);
 }
 
-.stat-label {
+/* Same CSS as mentioned above */
+/* .stat-label {
   font-size: var(--font-size-base);
   color: var(--text-secondary);
   margin-bottom: var(--space-4);
-}
+} */
 
 /* Weekly Schedule */
 .schedule-table {
