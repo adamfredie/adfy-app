@@ -14,9 +14,9 @@
   USAGE: Import this file in main.css to make utilities available globally
 */
 
-/* Utility Classes */
 
-/* Text Utilities */
+
+/* Utility Classes */
 .text-center {
   text-align: center;
 }
@@ -3366,13 +3366,16 @@ ml-auto{
 }
 /* STYLING FOR DASHBOARD  */
 .dashboard-container {
-  padding:0px;
+  padding: 0px;
   max-width: 480px;
   margin: 0 auto;
   background: #fff;
   min-height: 100vh;
   padding-bottom: 80px;
   font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 @media (min-width: 700px) {
   .dashboard-container {
@@ -3450,6 +3453,9 @@ ml-auto{
   margin: 18px 12px 0 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.03);
   padding: 0;
+  overflow: hidden;
+  width: calc(100% - 24px);
+  box-sizing: border-box;
 }
 .section-header {
   display: flex;
@@ -3472,6 +3478,8 @@ ml-auto{
 }
 .section-content {
   padding: 12px 18px 18px 18px;
+  overflow-x: hidden;
+  word-wrap: break-word;
 }
 .course-info-grid {
   display: flex;
@@ -3512,6 +3520,15 @@ ml-auto{
   align-items: center;
   gap: 4px;
   margin-top: 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 0;
+}
+
+.level-progress::-webkit-scrollbar {
+  display: none;
 }
 @media(min-width:700px){
   .level-progress{
@@ -3612,54 +3629,136 @@ ml-auto{
   display: flex;
   flex-direction: row;
   gap: 12px;
+  justify-content: center;
+  align-items: center;
 }
 @media (min-width: 700px) {
   .stats-grid {
     flex-direction: row;
+    gap:8px;
   }
 }
 @media (max-width: 700px) {
   .stats-grid {
     flex-direction: row;
-    gap:5px;
+    gap:3px;
   }
 }
 .stat-card {
   flex: 1;
-  background: #f9f9f9;
-  /* background: #EBEAE8; */
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.02);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   min-width: 0;
+  position: relative;
+  overflow: hidden;
 }
+/* Dashboard icon styles */
+.dashboardIco {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  /* background: rgba(255, 255, 255, 0.8); */
+  border-radius: 100%;
+  font-size: 14px;
+  /* color: #f59e0b; */
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
 @media(max-width:700px){
   .stat-card{
     height:min-content;
+    padding: 6px;
+    min-width: 0;
+    flex-shrink: 1;
+  }
+  
+  .dashboardIco {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    margin-left: 6px;
+    border-radius: 100%;
+    flex-shrink: 0;
+  }
+}
+
+/* Extra small screen improvements */
+@media (max-width: 360px) {
+  .dashboard-section {
+    margin: 12px 8px 0 8px;
+    width: calc(100% - 16px);
+  }
+  
+  .section-content {
+    padding: 8px 12px 12px 12px;
+  }
+  
+  .stats-grid {
+    gap: 2px;
+    padding: 0 4px;
+  }
+  
+  .stat-card {
+    padding: 3px;
+  }
+  
+  .stat-label {
+    font-size: 9px;
+    margin-bottom: 2px;
+  }
+  
+  .stat-value {
+    font-size: var(--font-size-base);
+  }
+  
+  .stat-sub {
+    font-size: 8px;
+  }
+  
+  .dashboardIco {
+    width: 14px;
+    height: 14px;
+    border-radius: 100%;
+    font-size: 8px;
+    margin-left: 1px;
   }
 }
 .stat-words { background: #FEF6E9; }
 .stat-streak { background: #ECF6EC; }
-.stat-score { background: EBEAE8; }
+.stat-score { background: #EBEAE8; }
 @media (max-width: 768px) {
   .stats-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-3);
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: center;
+    align-items: stretch;
   }
   
   .stat-card {
-    padding: var(--space-4);
+    flex: 1;
+    padding: 8px;
+    min-width: 0;
   }
   
   .stat-value {
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-xl);
   }
   
   .stat-label {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.2;
   }
   
   .stat-sub {
@@ -3672,16 +3771,41 @@ ml-auto{
 }
 @media (max-width: 480px) {
   .stats-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-2);
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    justify-content: center;
+    align-items: stretch;
+    padding: 0 8px;
   }
   
   .stat-card {
-    padding: var(--space-3);
+    flex: 1;
+    padding: 4px;
+    min-width: 0;
   }
   
   .stat-value {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
+  }
+  
+  .stat-label {
+    font-size: 10px;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.1;
+  }
+  
+  .stat-sub {
+    font-size: 9px;
+  }
+  
+  .dashboardIco {
+    width: 16px;
+    height: 16px;
+    font-size: 9px;
+    margin-left: 2px;
+    border-radius: 100%;
   }
 }
 .activity-list {
@@ -4149,6 +4273,7 @@ ml-auto{
   justify-content: center;
   border-radius: 50%;
   background: #f5f5f5;
+  color: #fbb040;;
   transition: all 0.2s ease;
 }
 

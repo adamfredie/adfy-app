@@ -1,5 +1,6 @@
 @custom-variant dark (&:is(.dark *));
 @import "../components/styles/utilities.css";
+
 :root {
   --font-size: 14px;
   --background: #ffffff;
@@ -63,6 +64,7 @@
   --warning-foreground: #1a1a1a;
   --info: #17a2b8;
   --info-foreground: #ffffff;
+  --font-family: "Sarabun",sans-serif;
 }
 
 .dark {
@@ -281,7 +283,7 @@ html {
 body {
   background: var(--aduffy-bg);
   color: var(--aduffy-text);
-  font-family: 'Inter', Arial, sans-serif;
+  font-family: var(--font-family);
   margin: 0;
   padding: 0;
   min-height: 100vh;
