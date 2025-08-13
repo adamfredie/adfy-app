@@ -16,23 +16,28 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
+import { storeUserOnboardingData } from "../src/api/supabase";
+import { supabase } from "../src/api/supabase";
 
 // Keep the original interface for backward compatibility
 export interface OnboardingData {
-  // Original properties for backward compatibility
   name?: string;
   email?: string;
+  password?:string;
   jobTitle: string;
   company: string;
   industry?: string;
   experience?: string;
+  // This is  for Professional field 
   fieldOfInterest?: string;
+
   vocabularyLevel: string;
   learningGoals: string;
   
   // New communication assessment properties
   field?: string;
   experienceLevel?: string;
+  // Communication confidence properties
   communicationConfidence?: {
     presentations?: number;
     meetings?: number;
@@ -42,9 +47,7 @@ export interface OnboardingData {
   };
   communicationChallenges?: string[];
   improvementGoals?: string[];
-  learningPreferences?: string[];
   currentSkillLevel?: string;
-  primaryPainPoints?: string[];
 }
 
 interface OnboardingProps {
@@ -52,7 +55,7 @@ interface OnboardingProps {
 }
 
 type Step = 'personal' | 'professional' | 'assessment' | 'goals' |'goals-part2' | 'preferences';
-
+// Array of objects
 const communicationChallenges = [
   { id: 'public-speaking', label: 'Public speaking and presentations', icon:<LuPresentation/> },
   { id: 'meeting-participation', label: 'Active participation in meetings', icon: <IoPeopleOutline/> },
@@ -65,7 +68,7 @@ const communicationChallenges = [
   { id: 'persuasive-writing', label: 'Persuasive writing and proposals', icon: <VscGraph/> },
   { id: 'conflict-resolution', label: 'Conflict resolution', icon: <CgDanger/> }
 ];
-
+// Array of objects
 const improvementGoals = [
   { id: 'confidence', label: 'Build confidence in speaking',icon: <CiStar /> },
   { id: 'vocabulary', label: 'Expand professional vocabulary', icon: <LuBrain /> },
@@ -76,34 +79,13 @@ const improvementGoals = [
   { id: 'active-listening', label: 'Improve active listening skills', icon: <IoPeopleOutline/> },
   { id: 'emotional-intelligence', label: 'Enhance emotional intelligence',icon:<FiTarget/> }
 ];
-
-const learningPreferences = [
-  { id: 'interactive', label: 'Interactive exercises and quizzes', icon: '🧠' },
-  { id: 'real-scenarios', label: 'Real workplace scenarios', icon: '🏢' },
-  { id: 'voice-practice', label: 'Voice and speaking practice', icon: '🎤' },
-  { id: 'writing-exercises', label: 'Writing and composition exercises', icon: '✍️' },
-  { id: 'peer-feedback', label: 'Peer feedback and collaboration', icon: '🤝' },
-  { id: 'gamification', label: 'Gamified learning experience', icon: '🎮' },
-  { id: 'bite-sized', label: 'Short, bite-sized lessons', icon: '⏱️' },
-  { id: 'comprehensive', label: 'Comprehensive deep-dive sessions', icon: '🔎' }
-];
-
-const primaryPainPoints = [
-  { id: 'fear-judgment', label: 'Fear of being judged when speaking' },
-  { id: 'vocabulary-gaps', label: 'Limited professional vocabulary' },
-  { id: 'unclear-messaging', label: 'Messages often misunderstood' },
-  { id: 'low-engagement', label: 'Difficulty engaging audience' },
-  { id: 'speaking-anxiety', label: 'Speaking anxiety in groups' },
-  { id: 'cultural-barriers', label: 'Cultural communication barriers' },
-  { id: 'technical-translation', label: 'Translating technical concepts for non-experts' },
-  { id: 'time-constraints', label: 'Not enough time to practice communication skills' }
-];
-
+// Onboarding function starts from here
 export function Onboarding({ onComplete }: OnboardingProps) {
   const [currentStep, setCurrentStep] = useState<Step>('personal');
   const [formData, setFormData] = useState<OnboardingData>({
     name: '',
     email: '',
+    password: '',
     jobTitle: '',
     company: '',
     field: '',
@@ -120,9 +102,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     },
     communicationChallenges: [],
     improvementGoals: [],
-    learningPreferences: [],
-    currentSkillLevel: '',
-    primaryPainPoints: []
+    currentSkillLevel: ''
   });
 
   const steps: { key: Step; title: string; description: string }[] = [
@@ -140,7 +120,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const updateFormData = (updates: Partial<OnboardingData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
-
+// Function used for creating the default onboarding data
   const createDefaultOnboardingData = (): OnboardingData => {
     return {
       ...formData,
@@ -165,33 +145,81 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       // Common challenges and goals
       communicationChallenges: ['public-speaking', 'vocabulary-gaps'],
       improvementGoals: ['confidence', 'vocabulary'],
-      learningPreferences: ['interactive', 'real-scenarios'],
-      primaryPainPoints: ['vocabulary-gaps'],
       
       // Learning goals summary
       learningGoals: 'Improve professional communication confidence and expand vocabulary'
     };
     
   };
-   const handleCompleteSetup = () => {
-    // Create the final onboarding data
-    const finalData: OnboardingData = {
-      ...formData,
-      // Map field to fieldOfInterest for backward compatibility
-      fieldOfInterest: formData.field || formData.fieldOfInterest || '',
-      // Map currentSkillLevel to vocabularyLevel for backward compatibility
-      vocabularyLevel: mapSkillLevelToVocabularyLevel(formData.currentSkillLevel || ''),
-      // Create a learning goals summary from improvement goals
-      learningGoals: (formData.improvementGoals && formData.improvementGoals.length > 0)
-        ? `Focus on: ${formData.improvementGoals.map(goal => 
-            improvementGoals.find(ig => ig.id === goal)?.label || goal
-          ).join(', ')}`
-        : formData.learningGoals || ''
-    };
-    
-    // Call the onComplete callback to transition to dashboard
-    onComplete(finalData);
-  };
+// SUPABASE
+const handleCompleteSetup = async () => {
+  console.log(" handleCompleteSetup function started");
+  try {
+    console.log('Attempting to sign up with:', formData.email);
+    const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      email: formData.email!,
+      password: formData.password!,
+    });
+    console.log(' Signup response:', { authData, signUpError });
+if (signUpError) {
+  if (signUpError.message === 'User already registered') {
+    alert('This email is already registered. Please go back and sign in instead.');
+    return;
+  }
+  console.error('Signup error:', signUpError.message);
+  alert(signUpError.message);
+  return;
+}
+
+    alert('Please check your email and verify your account before proceeding. After verification, please log in again.');
+
+    const authListener = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log(' Auth event triggered:', event);
+      console.log(' Session data:', session);
+      console.log('Email confirmed:', session?.user?.email_confirmed_at);
+      if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at) {
+        // User is verified and signed in
+        console.log(' User verified and signed in!');
+        const finalData: OnboardingData = {
+          ...formData,
+          fieldOfInterest: formData.field || formData.fieldOfInterest || '',
+          vocabularyLevel: mapSkillLevelToVocabularyLevel(formData.currentSkillLevel || ''),
+          learningGoals: (formData.improvementGoals && formData.improvementGoals.length > 0)
+            ? `Focus on: ${formData.improvementGoals.map(goal => 
+                improvementGoals.find(ig => ig.id === goal)?.label || goal
+              ).join(', ')}`
+            : formData.learningGoals || ''
+        };
+
+        // Store the onboarding data in Supabase
+        if (session.user) {
+         const data= await storeUserOnboardingData(session.user.id, finalData);
+          console.log('Onboarding data stored in Supabase', data);
+        }
+        else{
+          console.log(
+            "THe data is not stored in supabase"
+          )
+        }
+
+        // Remove the listener
+        authListener.data.subscription.unsubscribe();
+        
+        // Proceed to dashboard
+        onComplete(finalData);
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Error during setup:', error.message);
+    alert(error.message);
+  }
+};
+
+
+
+
+// ... existing code ...
 
   const handleSkipToEnd = () => {
     const defaultData = createDefaultOnboardingData();
@@ -257,8 +285,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         return formData.communicationChallenges!.length > 0 && formData.improvementGoals!.length > 0;
         case 'goals-part2':
       return formData.improvementGoals!.length > 0;
-      case 'preferences':
-        return formData.learningPreferences!.length > 0 && formData.primaryPainPoints!.length > 0;
       default:
         return false;
     }
@@ -307,13 +333,25 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             className="mobile-input"
           />
         </div>
+        <div className="form-field">
+          <Label htmlFor="password" className="field-label">What's your password?</Label>
+          <Input
+            id="password"
+            type="password"
+            autoComplete="off"
+            value={formData.password}
+            onChange={(e) => updateFormData({ password: e.target.value })}
+            placeholder="Enter your password"
+            className="mobile-input"
+          />
+        </div>
       </div>
 
       {/* Continue Button */}
       <div className="onboarding-actions">
         <Button
           onClick={() => setCurrentStep('professional')}
-          disabled={!formData.name || !formData.email}
+          disabled={!formData.password || !formData.email}
           className="continue-button"
         >
           Continue

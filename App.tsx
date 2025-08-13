@@ -12,7 +12,9 @@ import { Navigation } from './components/Navigation';
 import { ScrollToTop } from "./components/ScrollToTop";
 import { SplashScreen } from "./components/SplashScreen";
 import { WelcomePages } from "./components/WelcomePages";
-
+import { Session} from '@supabase/supabase-js';
+import { supabase,getUserProfile, storeUserOnboardingData, signOut} from "./src/api/supabase";
+// It is a custom type having only 7 values
 type ActivityType = 'dashboard' | 'storytelling' | 'quiz' | 'interview' | 'voice-conversation' | 'pronunciation' | 'settings';
 //Why is the activity Progress only for storttelling?
 interface ActivityProgress {
@@ -25,12 +27,13 @@ interface ActivityProgress {
     isCompleted?: boolean;
   };
 }
-
+// App function starts from here
 export default function App() {
   const [currentActivity, setCurrentActivity] = useState<ActivityType>('dashboard');
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<OnboardingData | null>(null);
   const [activityProgress, setActivityProgress] = useState<ActivityProgress>({});
+  const [session, setSession] = useState<Session | null>(null);
   const [currentScreen, setCurrentScreen] = useState<'splash' | 'welcome' | 'onboarding' | 'main'>('splash');
   // Check if user has completed onboarding on app load
   useEffect(() => {
@@ -48,6 +51,55 @@ export default function App() {
       setActivityProgress(JSON.parse(savedProgress));
     }
   }, []);
+ 
+  
+  
+  // Used for checking if a session exists and if it does, get the user profile
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        getUserProfile(session.user.id)
+          .then(profile => {
+            if (profile) {
+              setUserProfile(profile);
+              setHasCompletedOnboarding(true);
+              localStorage.setItem('aduffy-onboarding-completed', 'true');
+              localStorage.setItem('aduffy-user-profile', JSON.stringify(profile));
+              setCurrentScreen('main');
+            }
+          })
+          .catch(console.error);
+      }
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+  
+    return () => subscription.unsubscribe();
+  }, []);
+// ... existing code ...
+
+
+
+// ... existing code ...
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        supabase.auth.refreshSession();
+      }
+    });
+  
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setSession(session);
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('Session refreshed');
+      }
+    });
+  
+    return () => subscription.unsubscribe();
+  }, []);
    // Splash screen handlers
    const handleSplashComplete = useCallback(() => {
     setCurrentScreen('welcome');
@@ -56,46 +108,72 @@ export default function App() {
   const handleWelcomeComplete = useCallback(() => {
     setCurrentScreen('onboarding');
   }, []);
-  const handleWelcomeSkip = useCallback(() => {
-    // Skip to dashboard with default data
-    const defaultProfile: OnboardingData = {
-      name: 'Guest User',
-      email: 'guest@example.com',
-      jobTitle: 'Professional',
-      company: '',
-      vocabularyLevel: 'intermediate',
-      learningGoals: 'Improve communication skills',
-      field: 'other',
-      experienceLevel: 'mid',
-      communicationConfidence: {
-        presentations: 3,
-        meetings: 3,
-        emails: 3,
-        networking: 3,
-        teamCollaboration: 3
-      },
-      communicationChallenges: [],
-      improvementGoals: [],
-      learningPreferences: [],
-      currentSkillLevel: 'intermediate',
-      primaryPainPoints: []
-    };
+  const handleWelcomeSkip = useCallback(async () => {
+    if (session?.user) {
+      try {
+        const profile = await getUserProfile(session.user.id);
+        if (profile) {
+          setUserProfile(profile);
+          // localStorage.setItem('aduffy-user-profile', JSON.stringify(profile));
+          // localStorage.setItem('aduffy-onboarding-completed', 'true');
+          setHasCompletedOnboarding(true);
+          setCurrentScreen('main');
+          console.log("Profile exits")
+        } else {
+          const defaultProfile = {
+            name: 'Guest User',
+            email: session.user.email || 'guest@example.com',
+            jobTitle: 'Professional',
+            company: '',
+            vocabularyLevel: 'intermediate',
+            learningGoals: 'Improve communication skills',
+            field: 'other',
+            experienceLevel: 'mid',
+            communicationConfidence: {
+              presentations: 3,
+              meetings: 3,
+              emails: 3,
+              networking: 3,
+              teamCollaboration: 3
+            },
+            communicationChallenges: [],
+            improvementGoals: [],
+            currentSkillLevel: 'intermediate'
+          };
+          setUserProfile(defaultProfile);
+          localStorage.setItem('aduffy-user-profile', JSON.stringify(defaultProfile));
+        }
+      } catch (error) {
+        console.error('Error getting user profile:', error);
+      }
+    }
+  }, [session]);
+  useEffect(() => {
+
+    if (session?.user) {
     
-    localStorage.setItem('aduffy-onboarding-completed', 'true');
-    localStorage.setItem('aduffy-user-profile', JSON.stringify(defaultProfile));
+    handleWelcomeSkip();
     
-    setUserProfile(defaultProfile);
-    setHasCompletedOnboarding(true);
-    setCurrentScreen('main');
-  }, []);
-  const handleOnboardingComplete = useCallback((data: OnboardingData) => {
-    // Save onboarding completion status and user profile
-    localStorage.setItem('aduffy-onboarding-completed', 'true');
-    localStorage.setItem('aduffy-user-profile', JSON.stringify(data));
+    }
     
-    setUserProfile(data);
-    setHasCompletedOnboarding(true);
-  }, []);
+    }, [session?.user, handleWelcomeSkip]);
+    
+  const handleOnboardingComplete = useCallback(async (data: OnboardingData) => {
+    try {
+      if (session?.user) {
+        // Save to Supabase first
+        await storeUserOnboardingData(session.user.id, data);
+      }
+      // Then save to localStorage
+      localStorage.setItem('aduffy-onboarding-completed', 'true');
+      localStorage.setItem('aduffy-user-profile', JSON.stringify(data));
+      
+      setUserProfile(data);
+      setHasCompletedOnboarding(true);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+    }
+  }, [session]);
 
   const handleActivitySelect = useCallback((activity: string) => {
     setCurrentActivity(activity as ActivityType);
@@ -147,9 +225,21 @@ export default function App() {
   };
 
   // Handler for signing out: clears localStorage and reloads the app
-  const handleSignOut = useCallback(() => {
-    localStorage.clear();
-    window.location.reload();
+  const handleSignOut = useCallback(async () => {
+    try {
+      await signOut(); // Supabase signOut
+      // Clear local storage
+      localStorage.clear();
+      // Reset app state
+      setSession(null);
+      setUserProfile(null);
+      setHasCompletedOnboarding(false);
+      setCurrentScreen('splash');
+      console.log('Signed out');
+      // No need to reload the page
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   }, []);
 
   // Handler for resetting onboarding: sets onboarding as incomplete
@@ -190,6 +280,7 @@ export default function App() {
         <WelcomePages 
           onComplete={handleWelcomeComplete}
           onSkip={handleWelcomeSkip}
+          
         />
       );
     }
@@ -198,7 +289,13 @@ export default function App() {
       return <Onboarding onComplete={handleOnboardingComplete} />;
     }
   }
-
+  // else {
+  //   if(currentScreen === 'main'){
+  //   return (
+  //   <Dashboard onSelectActivity={handleActivitySelect} userProfile={userProfile} activityProgress={activityProgress} />
+  //   )
+  // }}
+// Return statement for App Function 
   return (
 
     <div className="app-container-column">
