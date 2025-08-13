@@ -6,7 +6,13 @@ import { IoIosTrendingUp } from "react-icons/io";
 import { LuBrain } from "react-icons/lu";
 import { FiBookOpen } from "react-icons/fi";
 import CountUp from "../components/ui/Countup"
+import { HiOutlineBookOpen } from "react-icons/hi";
+import { MdMenuBook, MdHourglassEmpty, MdVerified } from "react-icons/md";
+
 import SpotlightCard from "../components/SpotlightCard";
+// import BadegeIcon from "../images/badge-icon.png
+// const BadgeIcon = require("../images/badge-icon.png");
+
 interface DashboardProps {
   onSelectActivity: (activity: string) => void;
   userProfile?: OnboardingData | null;
@@ -68,15 +74,17 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
     { label: "C1", status: "locked" },
     { label: "C2", status: "locked" },
   ];
+
+  // Fixed connector logic to match the first image design
   const getConnectorStyle = (currentIndex: number) => {
     if (currentIndex === 0) {
-      // Connector after A1 (completed) - should be green
+      // Connector after A1 (completed) - should be green to match completed status
       return { background: '#22c55e' };
     } else if (currentIndex === 1) {
-      // Connector after A2 (current) - should be grey
-      return { background: '#e5e5e5' };
+      // Connector after A2 (current) - should be orange to match current status
+      return { background: '#fbb040' };
     } else {
-      // All other connectors - should be grey
+      // All other connectors - should be grey for locked levels
       return { background: '#e5e5e5' };
     }
   };
@@ -126,7 +134,9 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
       {/* Course Details Section */}
       <div className="dashboard-section">
         <div className="section-header" onClick={() => toggleSection('course')}>
-          <h2>Course Details</h2>
+          
+            <h2>Course Details</h2>
+          
           {/* <span className={`section-chevron ${expandedSections.course ? 'up' : 'down'}`}>▼</span> */}
           <span className="material-symbols-outlined">
             {expandedSections.course ?  "expand_circle_up": 'expand_circle_down'}
@@ -138,40 +148,58 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
               <div className="course-info-item">
                 {/* <span className="info-icon" role="img" aria-label="Course">📘</span> */}
                 <div>
-                  <div className="info-label">Course Name</div>
+                  <div className="info-label flex gap-2">
+                    <HiOutlineBookOpen className="text-xl text-[#17A2B8]" />
+                    <div className="">
+                      Course Name
+                    </div>
+                  </div>
                   <div className="info-value">Professional Communication Mastery</div>
                 </div>
               </div>
               <div className="course-info-item">
                 {/* <span className="info-icon" role="img" aria-label="Duration">⏳</span> */}
                 <div>
-                  <div className="info-label">Course Duration</div>
+                  <div className="info-label flex gap-2">
+                    <MdHourglassEmpty className="text-xl text-[#28A745]"/>
+                    <div>
+                      Course Duration
+                    </div>
+                  </div>
                   <div className="info-value">3 months</div>
                 </div>
               </div>
             </div>
-            <div className="course-info-item" style={{ marginTop: 16 }}>
+            <div className="course-info-item w-full "  style={{ marginTop: 16 }}>
               {/* <span className="info-icon" role="img" aria-label="Level">💡</span> */}
-              <div>
-                <div className="info-label">Current Level</div>
+              <div className="w-full">
+                {/* Updated: Added shield icon and "Current Level" title to match the first image */}
+                <div className="info-label current-level-header flex items-center gap-2">
+                  <MdVerified className="text-lg text-[#F9A825]"/>
+                  <div>
+                    Current Level
+                  </div>
+                </div>
+
                 <div className="level-progress">
                   {levels.map((level, idx) => (
                     <React.Fragment key={level.label}>
                       <div className={`level-item ${level.status}`}>
                         <div className="level-circle">{level.label}</div>
-                        <div className="level-label">
-                          {level.status === "completed" && "Completed"}
-                          {level.status === "current" && "Current"}
-                          {level.status === "locked" && "Locked"}
+                          <div className="level-label">
+                            {level.status === "completed" && "Completed"}
+                            {level.status === "current" && "Current"}
+                            {level.status === "locked" && "Locked"}
+                          </div>
                         </div>
-                      </div>
-                      {/* {idx < levels.length - 1 && <div className="level-connector"></div>} */}
+
                       {idx < levels.length - 1 && (
-          <div 
-            className="level-connector"
-            style={getConnectorStyle(idx)}
-          ></div>
-        )}
+                        <div 
+                        className="level-connector"
+                        style={getConnectorStyle(idx)}
+                        >
+                        </div>
+                      )}
                     </React.Fragment>
                   ))}
                 </div>
@@ -181,11 +209,8 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
         )}
       </div>
 
-
-
       {/* Learning Statistics Section */}
       <div className="dashboard-section">
-        
 
         <div className="section-header" onClick={() => toggleSection('learningStats')}>
           <h2>Learning Statistics</h2>

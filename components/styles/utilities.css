@@ -3479,6 +3479,7 @@ ml-auto{
 .section-content {
   padding: 12px 18px 18px 18px;
   overflow-x: hidden;
+  width: 100%;
   word-wrap: break-word;
 }
 .course-info-grid {
@@ -3495,7 +3496,10 @@ ml-auto{
 .course-info-item {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  /* flex-direction: row !important; */
+  /* justify-content: space-between; */
+  /* gap: 12px; */
+  width: 100%;
 }
 .info-icon {
   font-size: 1.5rem;
@@ -3507,24 +3511,26 @@ ml-auto{
 }
 .info-label {
   font-size: 0.95rem;
-  color: #888;
-  font-weight: 500;
+  color: #1A1A1A;
+  font-weight: 600;
 }
 .info-value {
   font-size: 1.05rem;
-  font-weight: 600;
-  color: #222;
+  font-weight: 400;
+  color: #1A1A1A;
 }
 .level-progress {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  /* justify-content: space-between !important; */
+  width: 100%;
+  /* gap: 4px; */
+  margin-top: 8px; /* Increased margin to match the first image spacing */
+  overflow-x: hidden;
+  /* -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding: 4px 0;
+  -ms-overflow-style: none; */
+  padding: 8px 0; /* Increased padding for better visual spacing */
 }
 
 .level-progress::-webkit-scrollbar {
@@ -3532,14 +3538,15 @@ ml-auto{
 }
 @media(min-width:700px){
   .level-progress{
-  gap:2.5rem;
+  /* gap:2.5rem; */
   }
 }
 .level-item {
   display: flex;
+  position: relative;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px; /* Increased gap between circle and label to match the first image */
 }
 .level-circle {
   width: 32px;
@@ -3549,10 +3556,11 @@ ml-auto{
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: 500;
+  font-size: 0.9rem;
   color: #888;
   margin-bottom: 2px;
+  z-index: 1;
 }
 .level-item.completed .level-circle {
   background: #2ecc40;
@@ -3568,6 +3576,7 @@ ml-auto{
 }
 .level-label {
   font-size: 0.7rem;
+  font-weight: 500; /* Added font weight to match the first image */
   color: #888;
 }
 /* Level status styles */
@@ -3582,49 +3591,74 @@ ml-auto{
 
 .level-item.current .level-circle {
   background: #fbb040;
-  color: white;
+  color: black; /* Changed to black to match the first image design */
 }
 
 .level-item.current .level-label {
-  color: #fbb040;
+  color: #fbb040; /* Orange color for current level label */
 }
 
 .level-item.locked .level-circle {
-  background: #e5e5e5;
-  color: #6b7280;
+  background: #e5e5e5; /* Light grey background for locked levels */
+  color: #6b7280; /* Dark grey text for locked levels to match the first image */
 }
 
 .level-item.locked .level-label {
-  color: #6b7280;
+  color: #6b7280; /* Dark grey color for locked level labels to match the first image */
 }
 
 .level-connector {
-  height: 2px;
+  height: 3px;
+
   flex: 1;
-  margin: 0 var(--space-2);
-  margin-top: 20px; /* Align with center of circles */
+  background-color: #e5e5e5;
+  margin: 0;
+  /* connecting them at center */
+  transform: translateY(-100%);
+  position: relative;
+  top:-5px;
+  /* -16 px for getting inside the circle  */
+  margin: 0 -16px;
 }
-/* NEW */
-/* Green connector for completed sections */
+/* UPDATED: Connector styles to match the first image design */
+/* Green connector after completed sections */
 .level-item.completed + .level-connector {
-  background: #22c55e; /* Green color for completed */
+  background: #bfe4c6;
+  opacity: 0.5; /* Green color for completed */
 }
 
-/* Special case: connector between completed and current should be green */
-.level-item.completed + .level-connector + .level-item.current + .level-connector {
-  background: linear-gradient(to right, #22c55e 50%, #e5e5e5 50%);
+/* Current Level Header with Shield Icon - matches the first image design */
+.current-level-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #222;
 }
 
-/* Alternative approach for the transition connector */
+.shield-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #fbb040; /* Orange background to match current level */
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Orange connector after current section */
 .level-item.current + .level-connector {
-  background: #e5e5e5; /* Grey for current to next */
+  background: #fee4bc;
+  opacity: 0.5; /* Orange color for current */
 }
 
-/* Ensure the connector after current is grey */
-.level-item.current + .level-connector {
-  background: #e5e5e5;
+/* Grey connectors for locked sections */
+.level-item.locked + .level-connector {
+  background: #e5e5e5; /* Grey color for locked */
 }
-/* NEW ENDS */
 .stats-grid {
   display: flex;
   flex-direction: row;
