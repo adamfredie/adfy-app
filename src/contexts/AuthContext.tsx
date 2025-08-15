@@ -213,7 +213,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       throw error;
     }
   };
-
+// Update user profile
   // Update user profile
   const updateUserProfile = async (profile: Partial<OnboardingData>): Promise<void> => {
     if (!user) throw new Error('No user authenticated');
