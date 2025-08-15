@@ -12,11 +12,12 @@ import { Navigation } from './components/Navigation';
 import { ScrollToTop } from "./components/ScrollToTop";
 import { SplashScreen } from "./components/SplashScreen";
 import { WelcomePages } from "./components/WelcomePages";
-import { Session} from '@supabase/supabase-js';
-import { supabase,getUserProfile, storeUserOnboardingData, signOut} from "./src/api/supabase";
+import { useAuth } from "./src/contexts/AuthContext";
+
 // It is a custom type having only 7 values
 type ActivityType = 'dashboard' | 'storytelling' | 'quiz' | 'interview' | 'voice-conversation' | 'pronunciation' | 'settings';
-//Why is the activity Progress only for storttelling?
+
+// Activity progress interface - can be extended for other activities later
 interface ActivityProgress {
   storytelling?: {
     currentStep: number;
@@ -27,153 +28,130 @@ interface ActivityProgress {
     isCompleted?: boolean;
   };
 }
+
 // App function starts from here
-export default function App() {
+function AppContent() {
   const [currentActivity, setCurrentActivity] = useState<ActivityType>('dashboard');
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(false);
-  const [userProfile, setUserProfile] = useState<OnboardingData | null>(null);
   const [activityProgress, setActivityProgress] = useState<ActivityProgress>({});
-  const [session, setSession] = useState<Session | null>(null);
   const [currentScreen, setCurrentScreen] = useState<'splash' | 'welcome' | 'onboarding' | 'main'>('splash');
-  // Check if user has completed onboarding on app load
+  
+  // Use the auth context - this is our single source of truth
+  const { user, session, userProfile, loading, signOut } = useAuth();
+  
+  // Determine onboarding completion status from userProfile
+  // const hasCompletedOnboarding = !!userProfile && !!userProfile.name && !!userProfile.jobTitle;
+  const hasCompletedOnboarding = !!userProfile && !!userProfile.name;
+  // Add this useEffect to prevent unnecessary redirects on tab focus
+useEffect(() => {
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      console.log('�� Tab became visible, checking if redirect is needed...');
+      
+      // Only redirect if we're not already on the correct screen
+      if (session?.user && userProfile) {
+        const shouldBeOnMain = hasCompletedOnboarding;
+        const currentScreenIsCorrect = 
+          (shouldBeOnMain && currentScreen === 'main') ||
+          (!shouldBeOnMain && currentScreen === 'onboarding');
+        
+        if (!currentScreenIsCorrect) {
+          console.log('🔄 Redirecting to correct screen after tab focus...');
+          if (shouldBeOnMain) {
+            setCurrentScreen('main');
+          } else {
+            setCurrentScreen('onboarding');
+          }
+        }
+      }
+    }
+  };
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  
+  return () => {
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  };
+}, [session, userProfile, hasCompletedOnboarding, currentScreen]);
+  // Set initial screen based on auth state and onboarding completion
   useEffect(() => {
-    const onboardingStatus = localStorage.getItem('aduffy-onboarding-completed');
-    const savedProfile = localStorage.getItem('aduffy-user-profile');
-    const savedProgress = localStorage.getItem('aduffy-activity-progress');
-    
-    if (onboardingStatus === 'true' && savedProfile) {
-      setHasCompletedOnboarding(true);
-      setUserProfile(JSON.parse(savedProfile));
+    console.log('🔍 useEffect running:', {
+      loading,
+      hasSession: !!session?.user,
+      userProfile: userProfile,
+      userProfileName: userProfile?.name,
+      userProfileJobTitle: userProfile?.jobTitle,
+      hasCompletedOnboarding
+    });
+  
+    if (loading) {
+      return;
+    }
+
+    if (!session?.user) {
+      setCurrentScreen('splash');
+      return;
+    }
+    if (session?.user && userProfile === null) {
+      console.log('⏳ User logged in but profile still loading...');
+      return; // Wait for profile to load
+    }
+  
+    // if (hasCompletedOnboarding) {
+    //   setCurrentScreen('main');
+    if (userProfile && userProfile.name && userProfile.jobTitle) {
+      console.log('🚀 Profile complete, going to main');
       setCurrentScreen('main');
+    } else {
+      setCurrentScreen('onboarding');
     }
+  }, [session, userProfile, hasCompletedOnboarding, loading]);
 
-    if (savedProgress) {
-      setActivityProgress(JSON.parse(savedProgress));
-    }
-  }, []);
- 
-  
-  
-  // Used for checking if a session exists and if it does, get the user profile
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        getUserProfile(session.user.id)
-          .then(profile => {
-            if (profile) {
-              setUserProfile(profile);
-              setHasCompletedOnboarding(true);
-              localStorage.setItem('aduffy-onboarding-completed', 'true');
-              localStorage.setItem('aduffy-user-profile', JSON.stringify(profile));
-              setCurrentScreen('main');
-            }
-          })
-          .catch(console.error);
-      }
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-  
-    return () => subscription.unsubscribe();
-  }, []);
-// ... existing code ...
-
-
-
-// ... existing code ...
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        supabase.auth.refreshSession();
-      }
-    });
-  
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session);
-      if (event === 'TOKEN_REFRESHED') {
-        console.log('Session refreshed');
-      }
-    });
-  
-    return () => subscription.unsubscribe();
-  }, []);
-   // Splash screen handlers
-   const handleSplashComplete = useCallback(() => {
+  // Splash screen handlers
+  const handleSplashComplete = useCallback(() => {
     setCurrentScreen('welcome');
   }, []);
 
   const handleWelcomeComplete = useCallback(() => {
+    // Users go to onboarding after welcome
     setCurrentScreen('onboarding');
   }, []);
-  const handleWelcomeSkip = useCallback(async () => {
-    if (session?.user) {
-      try {
-        const profile = await getUserProfile(session.user.id);
-        if (profile) {
-          setUserProfile(profile);
-          // localStorage.setItem('aduffy-user-profile', JSON.stringify(profile));
-          // localStorage.setItem('aduffy-onboarding-completed', 'true');
-          setHasCompletedOnboarding(true);
-          setCurrentScreen('main');
-          console.log("Profile exits")
-        } else {
-          const defaultProfile = {
-            name: 'Guest User',
-            email: session.user.email || 'guest@example.com',
-            jobTitle: 'Professional',
-            company: '',
-            vocabularyLevel: 'intermediate',
-            learningGoals: 'Improve communication skills',
-            field: 'other',
-            experienceLevel: 'mid',
-            communicationConfidence: {
-              presentations: 3,
-              meetings: 3,
-              emails: 3,
-              networking: 3,
-              teamCollaboration: 3
-            },
-            communicationChallenges: [],
-            improvementGoals: [],
-            currentSkillLevel: 'intermediate'
-          };
-          setUserProfile(defaultProfile);
-          localStorage.setItem('aduffy-user-profile', JSON.stringify(defaultProfile));
-        }
-      } catch (error) {
-        console.error('Error getting user profile:', error);
-      }
-    }
-  }, [session]);
-  useEffect(() => {
 
-    if (session?.user) {
-    
-    handleWelcomeSkip();
-    
-    }
-    
-    }, [session?.user, handleWelcomeSkip]);
+  const handleWelcomeSkip = useCallback(() => {
+    console.log('🎬 App: handleWelcomeSkip called');
+    // if (session?.user) {
+    //   console.log('🚀 User authenticated, navigating to main dashboard');
+    //   console.log('📱 Setting currentScreen to "main"');
+    //   setCurrentScreen('main');
+    //   console.log('🎯 Setting currentActivity to "dashboard"');
+    //   setCurrentActivity('dashboard');
+    // } else {
+    //   console.log('⚠️ No authenticated user, going to onboarding');
+    //   setCurrentScreen('onboarding');
+    // }
+  }, []);
+  // }, [session?.user]);
     
   const handleOnboardingComplete = useCallback(async (data: OnboardingData) => {
     try {
-      if (session?.user) {
-        // Save to Supabase first
-        await storeUserOnboardingData(session.user.id, data);
-      }
-      // Then save to localStorage
-      localStorage.setItem('aduffy-onboarding-completed', 'true');
-      localStorage.setItem('aduffy-user-profile', JSON.stringify(data));
+      console.log('🎯 Onboarding completed with data:', data);
       
-      setUserProfile(data);
-      setHasCompletedOnboarding(true);
+      // Update the user profile in AuthContext
+      // This will store the onboarding data in Supabase
+      if (user) {
+        // The AuthContext will handle storing this data in Supabase
+        // We just need to wait for the context to update
+        console.log('🚀 Navigating to main dashboard after onboarding');
+        setCurrentScreen('main');
+        console.log('✅ Onboarding completed successfully, user profile updated');
+      }
+      
+      // Move to main app - the AuthContext will update userProfile
+      // console.log('🚀 Navigating to main dashboard after onboarding');
+      // setCurrentScreen('main');
     } catch (error) {
-      console.error('Error saving profile:', error);
+      console.error('Error during onboarding completion:', error);
     }
-  }, [session]);
+  }, [user]);
 
   const handleActivitySelect = useCallback((activity: string) => {
     setCurrentActivity(activity as ActivityType);
@@ -184,29 +162,25 @@ export default function App() {
   }, []);
 
   const handleProfileUpdate = useCallback((updatedProfile: OnboardingData) => {
-    // Update user profile in state and localStorage
-    localStorage.setItem('aduffy-user-profile', JSON.stringify(updatedProfile));
-    setUserProfile(updatedProfile);
+    // Profile updates are handled by AuthContext
+    // This function can be used for immediate UI updates if needed
+    // console.log('Profile update requested:', updatedProfile);
   }, []);
 
   const handleActivityProgressUpdate = useCallback((activityType: keyof ActivityProgress, progress: any) => {
-    setActivityProgress(prev => {
-      const updatedProgress = {
-        ...prev,
-        [activityType]: progress
-      };
-      localStorage.setItem('aduffy-activity-progress', JSON.stringify(updatedProgress));
-      return updatedProgress;
-    });
+    setActivityProgress(prev => ({
+      ...prev,
+      [activityType]: progress
+    }));
+    
+    // TODO: In the future, you could store activity progress in Supabase
+    // For now, we'll keep it in local state only
   }, []);
 
   const handleActivityComplete = useCallback((activityType: keyof ActivityProgress) => {
     setActivityProgress(prev => {
-      const updatedProgress = {
-        ...prev,
-        [activityType]: undefined // Clear completed activity progress
-      };
-      localStorage.setItem('aduffy-activity-progress', JSON.stringify(updatedProgress));
+      const updatedProgress = { ...prev };
+      delete updatedProgress[activityType]; // Clear completed activity progress
       return updatedProgress;
     });
   }, []);
@@ -221,83 +195,70 @@ export default function App() {
 
   const handleNavigate = (page: string) => {
     // Handle navigation
-    console.log('Navigating to:', page);
+    // console.log('Navigating to:', page);
   };
 
-  // Handler for signing out: clears localStorage and reloads the app
+  // Handler for signing out: clears state and returns to splash
   const handleSignOut = useCallback(async () => {
     try {
-      await signOut(); // Supabase signOut
-      // Clear local storage
-      localStorage.clear();
+      await signOut(); // Use auth context signOut
+      
       // Reset app state
-      setSession(null);
-      setUserProfile(null);
-      setHasCompletedOnboarding(false);
+      setCurrentActivity('dashboard');
       setCurrentScreen('splash');
-      console.log('Signed out');
-      // No need to reload the page
+      setActivityProgress({});
+      
+      // console.log('Signed out successfully');
     } catch (error) {
       console.error('Error signing out:', error);
     }
-  }, []);
+  }, [signOut]);
 
-  // Handler for resetting onboarding: sets onboarding as incomplete
+  // Handler for resetting onboarding: clears profile and returns to onboarding
   const handleResetOnboarding = useCallback(() => {
-    // Clear all localStorage items
-    localStorage.removeItem('aduffy-onboarding-completed');
-    localStorage.removeItem('aduffy-user-profile');
-    localStorage.removeItem('aduffy-profile-picture');
-    localStorage.removeItem('aduffy-activity-progress');
-    
-    // Clear any other potential storage
-    sessionStorage.clear();
-    
-    // Clear all localStorage keys that start with 'aduffy-'
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('aduffy-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    
     // Reset all state
-    setHasCompletedOnboarding(false);
-    setUserProfile(null);
-    setActivityProgress({});
     setCurrentActivity('dashboard');
-    setCurrentScreen('splash');
-    // Reload the page to ensure complete reset
-    window.location.reload();
+    setCurrentScreen('onboarding');
+    setActivityProgress({});
+    
+    // Note: We don't clear localStorage here since we're not using it anymore
+    // The AuthContext will handle clearing the user profile
+    // console.log('Onboarding reset requested');
   }, []);
 
   // Show onboarding flow for first-time users
   if (!hasCompletedOnboarding) {
+    // console.log('🔍 Current screen:', currentScreen, 'hasCompletedOnboarding:', hasCompletedOnboarding);
+    
     if (currentScreen === 'splash') {
+      // console.log('🎬 Rendering SplashScreen');
       return <SplashScreen onComplete={handleSplashComplete} />;
     }
+    
     if (currentScreen === 'welcome') {
+      // console.log('👋 Rendering WelcomePages');
       return (
         <WelcomePages 
           onComplete={handleWelcomeComplete}
           onSkip={handleWelcomeSkip}
-          
         />
       );
     }
     
     if (currentScreen === 'onboarding') {
+      // console.log('🎯 Rendering Onboarding');
       return <Onboarding onComplete={handleOnboardingComplete} />;
     }
+    
+    // Fallback: if no screen is set, show splash
+    // console.log('⚠️ No screen matched, defaulting to splash');
+    return <SplashScreen onComplete={handleSplashComplete} />;
   }
-  // else {
-  //   if(currentScreen === 'main'){
-  //   return (
-  //   <Dashboard onSelectActivity={handleActivitySelect} userProfile={userProfile} activityProgress={activityProgress} />
-  //   )
-  // }}
-// Return statement for App Function 
-  return (
 
+  // Return statement for App Function 
+  console.log('🎬 App rendering - currentScreen:', currentScreen, 'currentActivity:', currentActivity);
+  
+  return (
     <div className="app-container-column">
       <ScrollToTop trigger={currentActivity} />
       <Navigation 
@@ -316,9 +277,9 @@ export default function App() {
         {currentActivity !== 'dashboard' && currentActivity !== 'storytelling' && (
           <Header 
             currentActivity={currentActivity} 
-            onNavigateHome={currentActivity !== 'dashboard' ? handleBackToDashboard : undefined}
+            onNavigateHome={handleBackToDashboard}
             onNavigateToSettings={() => setCurrentActivity('settings')}
-            onResetOnboarding={handleResetOnboarding}//passed centralized function
+            onResetOnboarding={handleResetOnboarding}
             userProfile={userProfile}
           />
         )}
@@ -368,4 +329,9 @@ export default function App() {
       </main>
     </div>
   );
+}
+
+// Main App component that wraps everything with AuthProvider
+export default function App() {
+  return <AppContent />;
 }

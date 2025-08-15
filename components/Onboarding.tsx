@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useAuth } from "../src/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -16,14 +17,12 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
-import { storeUserOnboardingData } from "../src/api/supabase";
-import { supabase } from "../src/api/supabase";
+
 
 // Keep the original interface for backward compatibility
 export interface OnboardingData {
   name?: string;
-  email?: string;
-  password?:string;
+  email: string;
   jobTitle: string;
   company: string;
   industry?: string;
@@ -81,11 +80,12 @@ const improvementGoals = [
 ];
 // Onboarding function starts from here
 export function Onboarding({ onComplete }: OnboardingProps) {
+  // Add useAuth hook at the top level of the component
+  const { user, updateUserProfile, isAuthenticated } = useAuth();
+  
   const [currentStep, setCurrentStep] = useState<Step>('personal');
   const [formData, setFormData] = useState<OnboardingData>({
     name: '',
-    email: '',
-    password: '',
     jobTitle: '',
     company: '',
     field: '',
@@ -151,65 +151,41 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     };
     
   };
-// SUPABASE
-const handleCompleteSetup = async () => {
-  console.log(" handleCompleteSetup function started");
+
+
+
+
+  const handleCompleteSetup = async () => {
+
+  console.log("handleCompleteSetup function started");
+  
   try {
-    console.log('Attempting to sign up with:', formData.email);
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: formData.email!,
-      password: formData.password!,
-    });
-    console.log(' Signup response:', { authData, signUpError });
-if (signUpError) {
-  if (signUpError.message === 'User already registered') {
-    alert('This email is already registered. Please go back and sign in instead.');
-    return;
-  }
-  console.error('Signup error:', signUpError.message);
-  alert(signUpError.message);
-  return;
-}
+    if (!isAuthenticated || !user) {
+      throw new Error("No authenticated user found");
+    }
 
-    alert('Please check your email and verify your account before proceeding. After verification, please log in again.');
-
-    const authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log(' Auth event triggered:', event);
-      console.log(' Session data:', session);
-      console.log('Email confirmed:', session?.user?.email_confirmed_at);
-      if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at) {
-        // User is verified and signed in
-        console.log(' User verified and signed in!');
-        const finalData: OnboardingData = {
-          ...formData,
-          fieldOfInterest: formData.field || formData.fieldOfInterest || '',
-          vocabularyLevel: mapSkillLevelToVocabularyLevel(formData.currentSkillLevel || ''),
-          learningGoals: (formData.improvementGoals && formData.improvementGoals.length > 0)
-            ? `Focus on: ${formData.improvementGoals.map(goal => 
-                improvementGoals.find(ig => ig.id === goal)?.label || goal
-              ).join(', ')}`
-            : formData.learningGoals || ''
-        };
-
-        // Store the onboarding data in Supabase
-        if (session.user) {
-         const data= await storeUserOnboardingData(session.user.id, finalData);
-          console.log('Onboarding data stored in Supabase', data);
-        }
-        else{
-          console.log(
-            "THe data is not stored in supabase"
-          )
-        }
-
-        // Remove the listener
-        authListener.data.subscription.unsubscribe();
-        
-        // Proceed to dashboard
-        onComplete(finalData);
-      }
-    });
-
+    // Prepare the final onboarding data
+    const finalData: OnboardingData = {
+      ...formData,
+      fieldOfInterest: formData.field || formData.fieldOfInterest || '',
+      vocabularyLevel: mapSkillLevelToVocabularyLevel(formData.currentSkillLevel || ''),
+      learningGoals: (formData.improvementGoals && formData.improvementGoals.length > 0)
+        ? `Focus on: ${formData.improvementGoals.map(goal => 
+            improvementGoals.find(ig => ig.id === goal)?.label || goal
+          ).join(', ')}`
+        : formData.learningGoals || ''
+    };
+console.log("Fetching the data ")
+    // Use the centralized profile update method
+    await updateUserProfile(finalData);
+    console.log("The data was stored in the user profile", finalData);
+    // Store locally as backup (optional)
+    localStorage.setItem('aduffy-onboarding-completed', 'true');
+    localStorage.setItem('aduffy-user-profile', JSON.stringify(finalData));
+    
+    // Proceed to dashboard
+    onComplete(finalData);
+    
   } catch (error: any) {
     console.error('Error during setup:', error.message);
     alert(error.message);
@@ -276,7 +252,7 @@ if (signUpError) {
   const isStepValid = (): boolean => {
     switch (currentStep) {
       case 'personal':
-        return !!(formData.name && formData.email);
+        return !!(formData.name);
       case 'professional':
         return !!(formData.jobTitle && formData.field && formData.experienceLevel);
       case 'assessment':
@@ -329,39 +305,11 @@ const renderPersonalStep = () => (
         />
       </div>
 
-      <div className="form-field">
-        <Label htmlFor="email" className="field-label">What's your email?</Label>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="off"
-          value={formData.email}
-          onChange={(e) => updateFormData({ email: e.target.value })}
-          placeholder="Enter your email"
-          className="mobile-input"
-          required
-        />
-      </div>
-
-      <div className="form-field">
-        <Label htmlFor="password" className="field-label">What's your password?</Label>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="off"
-          value={formData.password}
-          onChange={(e) => updateFormData({ password: e.target.value })}
-          placeholder="Enter your password"
-          className="mobile-input"
-          required
-        />
-      </div>
-
       {/* Continue Button */}
       <div className="onboarding-actions">
         <Button
           type="submit"
-          disabled={!formData.password || !formData.email}
+          disabled={!formData.name}
           className="continue-button"
         >
           Continue
@@ -713,6 +661,7 @@ const renderPersonalStep = () => (
       </div>
     </div>
   );
+  // Redering each step of the onboarding process by using switch case
   const renderStepContent = () => {
     switch (currentStep) {
       case 'personal':
@@ -725,8 +674,6 @@ const renderPersonalStep = () => (
         return renderGoalsStep();
         case 'goals-part2':
           return renderGoalsStepPart2();
-      // case 'preferences':
-      //   return renderPreferencesStep();
       default:
         return renderPersonalStep();
     }

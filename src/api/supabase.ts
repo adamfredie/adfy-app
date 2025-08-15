@@ -4,16 +4,120 @@ import { OnboardingData } from "/Users/sadia/Documents/Learning Language/adfy-ap
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+const isDevelopment = import.meta.env.DEV;
+
+console.log('🔧 Supabase configuration check:', {
+  url: supabaseUrl,
+  hasKey: !!supabaseAnonKey,
+  keyLength: supabaseAnonKey?.length,
+  keyPreview: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'undefined'
+});
+
 if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('❌ Missing Supabase environment variables:', {
+        hasUrl: !!supabaseUrl,
+        hasKey: !!supabaseAnonKey
+    });
     throw new Error("Missing supabase environment variables")
 } else {
-    console.log("Supabase environment variables loaded")
+    if (isDevelopment) {
+        console.log("✅ Supabase environment variables loaded successfully")
+    }
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Create Supabase client with additional options for debugging
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+    },
+    global: {
+        headers: {
+            'X-Client-Info': 'adfy-app'
+        }
+    }
+})
 
+// Test Supabase connection immediately
+export const testSupabaseConnection = async () => {
+    try {
+        if (isDevelopment) {
+            console.log('🔍 Testing Supabase connection...');
+        }
+        
+        // Test basic connection
+        const { data, error } = await supabase.from('user_profiles').select('count').limit(1);
+        
+        if (error) {
+            if (isDevelopment) {
+                console.error('❌ Supabase connection test failed:', {
+                    code: error.code,
+                    message: error.message,
+                    details: error.details,
+                    hint: error.hint
+                });
+                
+                // Check for specific error types
+                if (error.code === 'PGRST301') {
+                    console.error('🚫 CORS issue detected - Request blocked by CORS policy');
+                } else if (error.code === 'PGRST116') {
+                    console.error('🔒 Authentication required - Check API key permissions');
+                } else if (error.code === '42P01') {
+                    console.error('📋 Table "user_profiles" does not exist - Check database schema');
+                }
+            }
+            
+            return { success: false, error };
+        } else {
+            if (isDevelopment) {
+                console.log('✅ Supabase connection test successful');
+            }
+            return { success: true, data };
+        }
+    } catch (err) {
+        if (isDevelopment) {
+            console.error('💥 Exception during Supabase connection test:', err);
+        }
+        return { success: false, error: err };
+    }
+};
 
-
+// Test table access
+export const testTableAccess = async () => {
+  try {
+    console.log('🔍 Testing user_profiles table access...');
+    
+    // Try to select from the table to see if it exists and is accessible
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .limit(1);
+    
+    if (error) {
+      console.error('❌ Table access test failed:', error);
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      });
+      
+      // Check if it's a table doesn't exist error
+      if (error.code === '42P01') {
+        console.error('📋 Table "user_profiles" does not exist! You need to create it in Supabase.');
+      }
+      
+      return { success: false, error };
+    } else {
+      console.log('✅ Table access test successful. Sample data:', data);
+      return { success: true, data };
+    }
+  } catch (err) {
+    console.error('💥 Exception testing table access:', err);
+    return { success: false, error: err };
+  }
+};
 
 export const signOut = async () => {
     const { error } = await supabase.auth.signOut()
@@ -22,12 +126,13 @@ export const signOut = async () => {
 
 // User data functions
 export const storeUserOnboardingData = async (userId: string, onboardingData: OnboardingData) => {
+  const { data: { user } } = await supabase.auth.getUser();
     const { data,error } = await supabase
         .from('user_profiles')
         .upsert({
             user_id: userId,
             name: onboardingData.name,
-            email: onboardingData.email,
+            email: user?.email || '',
             job_title: onboardingData.jobTitle,
             company: onboardingData.company,
             field: onboardingData.field,
@@ -42,8 +147,13 @@ export const storeUserOnboardingData = async (userId: string, onboardingData: On
         })
         .select()
 
-    if (error) throw error
-    return data 
+        if (error) {
+          console.error("storeUserOnboardingData failed:", error);
+          throw error;
+      }
+      
+      console.log("storeUserOnboardingData successful:", data);
+      return data;
 }
 
 // Get user profile data
@@ -57,5 +167,153 @@ export const getUserProfile = async (userId: string) => {
         .single()
 
     if (error) throw error
-    return data
+    // return data
+    return {
+      ...data,
+      jobTitle: data.job_title,
+      experienceLevel: data.experience_level,
+      vocabularyLevel: data.vocabulary_level,
+      communicationConfidence: data.communication_confidence,
+      communicationChallenges: data.communication_challenges,
+      improvementGoals: data.improvement_goals,
+      currentSkillLevel: data.current_skill_level
+  }
+}
+
+// Comprehensive Supabase diagnostic function
+export const runSupabaseDiagnostics = async () => {
+    console.log('🔍 Starting comprehensive Supabase diagnostics...');
+    
+    const results = {
+        envVars: false,
+        clientCreation: false,
+        connection: false,
+        tableAccess: false,
+        auth: false
+    };
+    
+    try {
+        // 1. Check environment variables
+        console.log('📋 Step 1: Environment Variables Check');
+        if (supabaseUrl && supabaseAnonKey) {
+            console.log('✅ Environment variables are present');
+            results.envVars = true;
+        } else {
+            console.error('❌ Environment variables missing');
+            return results;
+        }
+        
+        // 2. Test client creation
+        console.log('📋 Step 2: Client Creation Test');
+        try {
+            const testClient = createClient(supabaseUrl, supabaseAnonKey);
+            console.log('✅ Supabase client created successfully');
+            results.clientCreation = true;
+        } catch (error) {
+            console.error('❌ Failed to create Supabase client:', error);
+            return results;
+        }
+        
+        // 3. Test basic connection
+        console.log('📋 Step 3: Basic Connection Test');
+        const connectionTest = await testSupabaseConnection();
+        results.connection = connectionTest.success;
+        
+        // 4. Test table access
+        console.log('📋 Step 4: Table Access Test');
+        const tableTest = await testTableAccess();
+        results.tableAccess = tableTest.success;
+        
+        // 5. Test authentication
+        console.log('📋 Step 5: Authentication Test');
+        try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error) {
+                console.error('❌ Authentication test failed:', error);
+            } else {
+                console.log('✅ Authentication test successful, session:', session ? 'exists' : 'none');
+                results.auth = true;
+            }
+        } catch (error) {
+            console.error('❌ Authentication test exception:', error);
+        }
+        
+        // Summary
+        console.log('📊 Supabase Diagnostics Summary:', results);
+        
+        if (Object.values(results).every(Boolean)) {
+            console.log('🎉 All Supabase tests passed!');
+        } else {
+            console.log('⚠️ Some Supabase tests failed. Check the logs above for details.');
+        }
+        
+        return results;
+        
+    } catch (error) {
+        console.error('💥 Exception during Supabase diagnostics:', error);
+        return results;
+    }
+};
+
+// Browser console test function - can be called directly from browser console
+export const testFromConsole = async () => {
+    console.log('🔍 Testing Supabase from browser console...');
+    console.log('Environment variables:', {
+        url: supabaseUrl,
+        hasKey: !!supabaseAnonKey,
+        keyPreview: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'undefined'
+    });
+    
+    try {
+        // Test 1: Basic client creation
+        console.log('📋 Test 1: Client Creation');
+        const testClient = createClient(supabaseUrl, supabaseAnonKey);
+        console.log('✅ Client created successfully');
+        
+        // Test 2: Simple query
+        console.log('📋 Test 2: Simple Query Test');
+        const { data, error } = await testClient.from('user_profiles').select('count').limit(1);
+        
+        if (error) {
+            console.error('❌ Query failed:', {
+                code: error.code,
+                message: error.message,
+                details: error.details
+            });
+            
+            // Check for CORS issues
+            if (error.message.includes('CORS') || error.message.includes('blocked')) {
+                console.error('🚫 CORS issue detected! This is likely a browser security policy issue.');
+                console.log('💡 Solutions:');
+                console.log('1. Check if Supabase project has correct CORS origins');
+                console.log('2. Ensure you\'re running from an allowed origin');
+                console.log('3. Check browser console for CORS errors');
+            }
+        } else {
+            console.log('✅ Query successful:', data);
+        }
+        
+        // Test 3: Auth test
+        console.log('📋 Test 3: Authentication Test');
+        const { data: authData, error: authError } = await testClient.auth.getSession();
+        if (authError) {
+            console.error('❌ Auth test failed:', authError);
+        } else {
+            console.log('✅ Auth test successful:', authData);
+        }
+        
+    } catch (err) {
+        console.error('💥 Exception during console test:', err);
+        
+        // Check for network errors
+        if (err instanceof TypeError && err.message.includes('fetch')) {
+            console.error('🌐 Network error detected. This might be a CORS or network connectivity issue.');
+        }
+    }
+};
+
+// Make it available globally for console testing
+if (typeof window !== 'undefined') {
+    (window as any).testSupabase = testFromConsole;
+    console.log('🔧 Supabase test function available at: window.testSupabase()');
 }
