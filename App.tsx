@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Header } from "./components/Header";
+// import { Header } from "./components/Header";
 import { Dashboard } from "./components/Dashboard";
 import { Onboarding, OnboardingData } from "./components/Onboarding";
 import { Settings } from "./components/Settings";
@@ -12,8 +12,9 @@ import { Navigation } from './components/Navigation';
 import { ScrollToTop } from "./components/ScrollToTop";
 import { SplashScreen } from "./components/SplashScreen";
 import { WelcomePages } from "./components/WelcomePages";
+import UserProfile from "./components/UserProfile";
 
-type ActivityType = 'dashboard' | 'storytelling' | 'quiz' | 'interview' | 'voice-conversation' | 'pronunciation' | 'settings';
+type ActivityType = 'dashboard' | 'storytelling' | 'quiz' | 'interview' | 'voice-conversation' | 'pronunciation' | 'settings' | 'user-profile';
 //Why is the activity Progress only for storttelling?
 interface ActivityProgress {
   storytelling?: {
@@ -152,6 +153,10 @@ export default function App() {
     window.location.reload();
   }, []);
 
+
+  const onUserProfile = useCallback(()=>{
+    setCurrentActivity('user-profile')
+  },[])
   // Handler for resetting onboarding: sets onboarding as incomplete
   const handleResetOnboarding = useCallback(() => {
     // Clear all localStorage items
@@ -203,12 +208,18 @@ export default function App() {
 
     <div className="app-container-column">
       <ScrollToTop trigger={currentActivity} />
-      <Navigation 
-        currentActivity={currentActivity}
-        onSignOut={handleSignOut}
-        onResetOnboarding={handleResetOnboarding}
-        userProfile={userProfile}
-      />
+      {
+        currentActivity !== 'user-profile' && (
+
+          <Navigation 
+            currentActivity={currentActivity}
+            onSignOut={handleSignOut}
+            onResetOnboarding={handleResetOnboarding}
+            userProfile={userProfile}
+            onUserProfile = {onUserProfile}
+          />
+        )
+      }
       <main className="main-content-column">
         {/* 
           CHANGED: Conditional Header Rendering
@@ -216,15 +227,21 @@ export default function App() {
           - This was requested to create a cleaner UI for these specific activities
           - Header only shows on other activities (quiz, interview, voice-conversation, pronunciation, settings)
         */}
-        {currentActivity !== 'dashboard' && currentActivity !== 'storytelling' && (
+
+
+
+        {/* THis header is showing on user profile which we dont want thats why we havbe commented it out for now */}
+        {/* HEADER PROB */}
+        {/* {currentActivity !== 'dashboard' && currentActivity !== 'storytelling' && (
           <Header 
             currentActivity={currentActivity} 
             onNavigateHome={currentActivity !== 'dashboard' ? handleBackToDashboard : undefined}
             onNavigateToSettings={() => setCurrentActivity('settings')}
             onResetOnboarding={handleResetOnboarding}//passed centralized function
             userProfile={userProfile}
+            onNavigateToUserProfile={()=>setCurrentActivity('user-profile')}
           />
-        )}
+        )} */}
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           {currentActivity === 'dashboard' && (
             <Dashboard 
@@ -267,6 +284,17 @@ export default function App() {
           {currentActivity === 'pronunciation' && (
             <PronunciationPractice onBack={handleBackToDashboard} />
           )}
+
+            {currentActivity === "user-profile" && (
+            <UserProfile
+              userProfile={userProfile}     
+              currentActivity ={currentActivity}           // pass current profile data
+              onBack={handleBackToDashboard}           // allow going back to dashboard
+              onProfileUpdate={handleProfileUpdate}    // allow updating profile
+            />
+)}
+
+
         </div>
       </main>
     </div>

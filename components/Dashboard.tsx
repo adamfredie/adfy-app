@@ -160,7 +160,7 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
               <div className="course-info-item">
                 {/* <span className="info-icon" role="img" aria-label="Duration">⏳</span> */}
                 <div>
-                  <div className="info-label flex gap-2">
+                  <div className="info-label flex gap-2 ">
                     <MdHourglassEmpty className="text-xl text-[#28A745]"/>
                     <div>
                       Course Duration
@@ -239,7 +239,7 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
                 {/* Streax Card component */}
                 <SpotlightCard className="custom-spotlight-card stat-card stat-streak" spotlightColor="rgba(195, 220, 202, 0.8)">
                   <div className="stat-label flex justify-between w-full">Current Streak <div className="dashboardIco !text-[#28a745] bg-[#c8e7ce]"><IoIosTrendingUp /></div></div>
-                  <div className="streakCounter flex gap-3 items-center ">
+                  <div className="streakCounter flex gap-1 items-center ">
 
                   <CountUp  from={0}
                       to={userStats.currentStreak}

@@ -3756,6 +3756,8 @@ ml-auto{
   
   .stat-sub {
     font-size: 8px;
+    font-weight: 400;
+    color: var(--text-primary);
   }
   
   .dashboardIco {
@@ -4547,8 +4549,8 @@ ml-auto{
   background: white;
   border-bottom: 1px solid var(--bg-muted);
   /* position: sticky;
-  top: 0;
-  z-index: 100; */
+  /* top: 0; */
+  /* z-index: 100;  */
 }
 .nav-mobile {
   display: none;

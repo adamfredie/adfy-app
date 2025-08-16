@@ -311,7 +311,7 @@ body {
 
 .stat-value {
   font-size: var(--font-size-3xl);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   margin-bottom: var(--space-2);
 }
@@ -320,7 +320,7 @@ body {
   font-size: var(--font-size-sm);
   color: var(--text-primary);
   font-weight: 600;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-3);
   white-space: normal;
   word-wrap: break-word;
   display: flex;
@@ -614,6 +614,7 @@ body {
   padding: var(--space-2);
   display: flex;
   flex-direction: column;
+  z-index: 80;
 }
 
 .user-menu-header {

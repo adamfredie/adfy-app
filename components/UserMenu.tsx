@@ -1,7 +1,7 @@
 import React from 'react';
 import './styles/main.css';
 
-export function UserMenu({ onSignOut, onResetOnboarding }) {
+export function UserMenu({ onSignOut, onResetOnboarding,onUserProfile}) {
   return (
     <div className="user-menu">
       <div className="user-menu-header">
@@ -10,10 +10,10 @@ export function UserMenu({ onSignOut, onResetOnboarding }) {
         <div className="user-details">Executive Level (10+ years)</div>
       </div>
       <div className="user-menu-divider" />
-      <a href="#" className="user-menu-item">
+      {/* <a href="/" className="user-menu-item"> */}
         <span role="img" aria-label="profile">👤</span>
-        <span>Profile Settings</span>
-      </a>
+        <span onClick={onUserProfile}>Profile Settings</span>
+      {/* </a> */}
       <a href="#" className="user-menu-item">
         <span role="img" aria-label="preferences">⚙️</span>
         <span>Learning Preferences</span>
