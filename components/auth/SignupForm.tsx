@@ -70,6 +70,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
             onSuccess();
           }, 2000);
           // hello
+          // hello
         } else {
           setSuccessMessage('Account created successfully! Please check your email to verify your account.');
           // Proceed to onboarding
