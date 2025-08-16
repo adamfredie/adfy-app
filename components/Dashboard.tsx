@@ -5,10 +5,10 @@ import { BsBook } from "react-icons/bs";
 import { IoIosTrendingUp } from "react-icons/io";
 import { LuBrain } from "react-icons/lu";
 import { FiBookOpen } from "react-icons/fi";
-import CountUp from "../components/ui/Countup"
 import { HiOutlineBookOpen } from "react-icons/hi";
 import { MdMenuBook, MdHourglassEmpty, MdVerified } from "react-icons/md";
 
+import CountUp from "../components/ui/Countup"
 import SpotlightCard from "../components/SpotlightCard";
 // import BadegeIcon from "../images/badge-icon.png
 // const BadgeIcon = require("../images/badge-icon.png");

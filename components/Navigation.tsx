@@ -13,19 +13,25 @@ export function Navigation({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // NEW: Ref for detecting clicks outside the menu
-  const menuRef = useRef<HTMLDivElement>(null);
+    const desktopMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   // NEW: Close menu when clicking outside of it
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      if (
+        (desktopMenuRef.current &&
+          !desktopMenuRef.current.contains(e.target as Node)) &&
+        (mobileMenuRef.current &&
+          !mobileMenuRef.current.contains(e.target as Node))
+      ) {
         setIsMenuOpen(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
   return (
     <>
     {/* For desktop screen desktop UserMenu will open  */}
@@ -43,7 +49,7 @@ export function Navigation({
               </div>
             </a>
           </div>
-          <div className="nav-right" ref={menuRef}>
+          <div className="nav-right" ref={desktopMenuRef}>
             {/* User menu is now always visible, regardless of the current activity */}
             <div className="user-menu-container">
               <button
@@ -82,7 +88,7 @@ export function Navigation({
         </div>
       </header>
           {/* In spmall screen this will be seen on desktop it will be hidden */}
-      <header className="top-nav-mobile relative block md:hidden" ref={menuRef} >
+      <header className="top-nav-mobile relative block md:hidden" ref={mobileMenuRef} >
         {/* FOR MOBILE NAVIGATION */}
         <div className="nav-mobile">
           <div className="nav-left">

@@ -10,10 +10,10 @@ export function UserMenu({ onSignOut, onResetOnboarding,onUserProfile}) {
         <div className="user-details">Executive Level (10+ years)</div>
       </div>
       <div className="user-menu-divider" />
-      {/* <a href="/" className="user-menu-item"> */}
+      <div className="user-menu-item">
         <span role="img" aria-label="profile">👤</span>
         <span onClick={onUserProfile}>Profile Settings</span>
-      {/* </a> */}
+      </div>
       <a href="#" className="user-menu-item">
         <span role="img" aria-label="preferences">⚙️</span>
         <span>Learning Preferences</span>
