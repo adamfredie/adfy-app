@@ -69,9 +69,11 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
           setTimeout(() => {
             onSuccess();
           }, 2000);
+          // hello
         } else {
           setSuccessMessage('Account created successfully! Please check your email to verify your account.');
           // Proceed to onboarding
+          console.log("Proceeding to onboarding");
           setTimeout(() => {
             onSuccess();
           }, 2000);
