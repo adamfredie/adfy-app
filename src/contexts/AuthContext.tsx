@@ -76,18 +76,62 @@ export function AuthProvider({ children }: AuthProviderProps) {
     testConnection();
 
     // Check if this is an auth callback (email verification)
-    const checkAuthCallback = () => {
+    const checkAuthCallback = async () => {
       const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      
+      if (code) {
+        console.log('🔄 AuthContext: Detected auth code in URL, exchanging for session...');
+        
+        try {
+          // Exchange the code for a session
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          
+          if (error) {
+            console.error('❌ AuthContext: Failed to exchange code for session:', error);
+            return false;
+          }
+          
+          if (data.session) {
+            console.log('✅ AuthContext: Successfully exchanged code for session');
+            console.log('👤 User authenticated:', data.user?.email);
+            console.log('📧 Email confirmed:', data.user?.email_confirmed_at);
+            
+            // Clear the URL parameters to avoid issues
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Set the session and user immediately
+            setSession(data.session);
+            setUser(data.user);
+            
+            // Fetch user profile
+            if (data.user) {
+              await fetchUserProfile(data.user.id);
+            }
+            
+            return true;
+          } else {
+            console.warn('⚠️ AuthContext: No session returned from code exchange');
+            return false;
+          }
+        } catch (error) {
+          console.error('💥 AuthContext: Exception during code exchange:', error);
+          return false;
+        }
+      }
+      
+      // Check for legacy auth callback format
       const accessToken = urlParams.get('access_token');
       const refreshToken = urlParams.get('refresh_token');
       const type = urlParams.get('type');
       
       if (accessToken && refreshToken && type === 'recovery') {
-        console.log('🔄 AuthContext: Detected auth callback from email verification');
+        console.log('🔄 AuthContext: Detected legacy auth callback from email verification');
         // Clear the URL parameters to avoid issues
         window.history.replaceState({}, document.title, window.location.pathname);
         return true;
       }
+      
       return false;
     };
 
@@ -102,7 +146,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           
           // If we have a session, get the user profile
           if (initialSession?.user) {
+            console.log('🔍 AuthContext: Found existing session, fetching user profile...');
             await fetchUserProfile(initialSession.user.id);
+          } else {
+            console.log('🔍 AuthContext: No existing session found');
           }
         }
       } catch (error) {
@@ -143,20 +190,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     );
 
     // Check for auth callback after a short delay
-    if (checkAuthCallback()) {
-      // If this is an auth callback, we need to wait for the session to be established
-      setTimeout(async () => {
-        if (mounted) {
-          const { data: { session: callbackSession } } = await supabase.auth.getSession();
-          if (callbackSession?.user) {
-            console.log('✅ AuthContext: Session established after email verification');
-            setSession(callbackSession);
-            setUser(callbackSession.user);
-            await fetchUserProfile(callbackSession.user.id);
-          }
+    setTimeout(async () => {
+      if (mounted) {
+        const isAuthCallback = await checkAuthCallback();
+        if (isAuthCallback) {
+          console.log('✅ AuthContext: Auth callback processed successfully');
         }
-      }, 1000);
-    }
+      }
+    }, 100);
 
     return () => {
       mounted = false;
@@ -182,7 +223,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setAuthLoading(true);
     try {
       // Get the correct redirect URL for the current environment
-      const redirectTo = `${getURL()}/auth/callback`;
+      const redirectTo = getURL();
       
       console.log('🔐 AuthContext: Signing up with redirectTo:', redirectTo);
       
