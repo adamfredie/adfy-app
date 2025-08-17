@@ -6,11 +6,47 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 const isDevelopment = import.meta.env.DEV;
 
+// Helper function to get the correct URL for redirects based on environment
+export const getURL = () => {
+  // For Vercel deployments
+  if (import.meta.env.VITE_VERCEL_URL) {
+    return `https://${import.meta.env.VITE_VERCEL_URL}`;
+  }
+  
+  // For production with custom domain
+  if (import.meta.env.VITE_SITE_URL) {
+    return import.meta.env.VITE_SITE_URL;
+  }
+  
+  // For local development
+  if (isDevelopment) {
+    return 'http://localhost:3000';
+  }
+  
+  // Fallback - try to detect from window.location
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  
+  // Default fallback
+  return 'http://localhost:3000';
+};
+
+// Get the current URL for auth redirects
+const getCurrentURL = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.href;
+  }
+  return getURL();
+};
+
 console.log('🔧 Supabase configuration check:', {
   url: supabaseUrl,
   hasKey: !!supabaseAnonKey,
   keyLength: supabaseAnonKey?.length,
-  keyPreview: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'undefined'
+  keyPreview: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'undefined',
+  currentURL: getURL(),
+  isDevelopment
 });
 
 if (!supabaseUrl || !supabaseAnonKey) {
@@ -30,7 +66,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: true
+        detectSessionInUrl: true,
+        // Add these for better production handling
+        flowType: 'pkce',
+        debug: import.meta.env.DEV // Enable debug in development only
     },
     global: {
         headers: {
@@ -317,3 +356,42 @@ if (typeof window !== 'undefined') {
     (window as any).testSupabase = testFromConsole;
     console.log('🔧 Supabase test function available at: window.testSupabase()');
 }
+
+// Function to handle auth callbacks (email verification)
+export const handleAuthCallback = async () => {
+  try {
+    console.log('🔄 handleAuthCallback: Processing auth callback...');
+    
+    // Get the current session
+    const { data: { session }, error } = await supabase.auth.getSession();
+    
+    if (error) {
+      console.error('❌ handleAuthCallback: Session error:', error);
+      return { success: false, error };
+    }
+    
+    if (session?.user) {
+      console.log('✅ handleAuthCallback: User authenticated:', session.user.email);
+      console.log('📧 Email confirmed:', session.user.email_confirmed_at);
+      return { success: true, session, user: session.user };
+    } else {
+      console.log('⚠️ handleAuthCallback: No session found');
+      return { success: false, error: 'No session found' };
+    }
+  } catch (err) {
+    console.error('💥 handleAuthCallback: Exception:', err);
+    return { success: false, error: err };
+  }
+};
+
+// Function to check if current URL is an auth callback
+export const isAuthCallback = () => {
+  if (typeof window === 'undefined') return false;
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  const accessToken = urlParams.get('access_token');
+  const refreshToken = urlParams.get('refresh_token');
+  const type = urlParams.get('type');
+  
+  return !!(accessToken && refreshToken && type === 'recovery');
+};

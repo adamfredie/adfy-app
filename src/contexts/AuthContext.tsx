@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Session, User, AuthError } from '@supabase/supabase-js';
-import { supabase, testSupabaseConnection } from '../api/supabase';
+import { supabase, testSupabaseConnection, getURL } from '../api/supabase';
 import { OnboardingData } from '../../components/Onboarding';
 
 // Define the shape of our auth context
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Core auth state
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [userProfile, setUserProfile] = useState<OnboardingData | null>(null);
+  const [userProfile, setUserProfile] = useState<OnboardingData|null>(null);
   
   // Loading states
   const [loading, setLoading] = useState(true);
@@ -74,6 +74,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     testConnection();
+
+    // Check if this is an auth callback (email verification)
+    const checkAuthCallback = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const accessToken = urlParams.get('access_token');
+      const refreshToken = urlParams.get('refresh_token');
+      const type = urlParams.get('type');
+      
+      if (accessToken && refreshToken && type === 'recovery') {
+        console.log('🔄 AuthContext: Detected auth callback from email verification');
+        // Clear the URL parameters to avoid issues
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return true;
+      }
+      return false;
+    };
 
     // Get initial session
     const getInitialSession = async () => {
@@ -113,10 +129,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
             await fetchUserProfile(newSession.user.id);
           } else if (event === 'SIGNED_OUT') {
             setUserProfile(null);
+          } else if (event === 'TOKEN_REFRESHED' && newSession?.user) {
+            // Handle token refresh (important for email verification)
+            console.log('🔄 Token refreshed, user:', newSession.user.email);
+            await fetchUserProfile(newSession.user.id);
+          } else if (event === 'USER_UPDATED' && newSession?.user) {
+            // Handle user updates (like email confirmation)
+            console.log('👤 User updated:', newSession.user.email, 'confirmed:', newSession.user.email_confirmed_at);
+            await fetchUserProfile(newSession.user.id);
           }
         }
       }
     );
+
+    // Check for auth callback after a short delay
+    if (checkAuthCallback()) {
+      // If this is an auth callback, we need to wait for the session to be established
+      setTimeout(async () => {
+        if (mounted) {
+          const { data: { session: callbackSession } } = await supabase.auth.getSession();
+          if (callbackSession?.user) {
+            console.log('✅ AuthContext: Session established after email verification');
+            setSession(callbackSession);
+            setUser(callbackSession.user);
+            await fetchUserProfile(callbackSession.user.id);
+          }
+        }
+      }, 1000);
+    }
 
     return () => {
       mounted = false;
@@ -141,9 +181,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signUp = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setAuthLoading(true);
     try {
+      // Get the correct redirect URL for the current environment
+      const redirectTo = `${getURL()}/auth/callback`;
+      
+      console.log('🔐 AuthContext: Signing up with redirectTo:', redirectTo);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: redirectTo
+        }
       });
 
       if (error) {
