@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { LoginForm } from './LoginForm';
 import { SignupForm } from './SignupForm';
@@ -12,16 +13,87 @@ interface AuthWrapperProps {
 type AuthMode = 'login' | 'signup';
 
 export function AuthWrapper({ onAuthSuccess, onClose, skipAuthCheck = false }: AuthWrapperProps) {
+  const navigate = useNavigate();
   const [authMode, setAuthMode] = useState<AuthMode>('login'); // Default to login for existing users
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, userProfile } = useAuth();
+  const [hasCheckedProfile, setHasCheckedProfile] = useState(false);
 
   // Only check authentication if user is already authenticated AND we're not skipping the check
   // For new users or when explicitly requested, we don't need to wait for auth check
   React.useEffect(() => {
-    if (!skipAuthCheck && isAuthenticated && !loading) {
-      onAuthSuccess();
+    console.log('🔍 AuthWrapper: useEffect triggered', {
+      isAuthenticated,
+      loading,
+      userProfile: userProfile ? 'exists' : 'null',
+      skipAuthCheck,
+      hasCheckedProfile
+    });
+    
+    if (isAuthenticated && !loading) {
+      console.log('🔍 AuthWrapper: User is authenticated, checking onboarding status...');
+      
+      // If we have a userProfile, make navigation decision
+      if (userProfile !== null) {
+        setHasCheckedProfile(true);
+        console.log('🔍 AuthWrapper: userProfile details:', {
+          exists: !!userProfile,
+          name: userProfile?.name,
+          jobTitle: userProfile?.jobTitle,
+          fullProfile: userProfile
+        });
+        
+        // Check if user has completed onboarding
+        if (userProfile.name && userProfile.jobTitle) {
+          console.log('✅ User has completed onboarding, going to dashboard');
+          navigate('/app/dashboard');
+        } else {
+          console.log('⚠️ User needs to complete onboarding. Missing fields:', {
+            hasName: !!userProfile.name,
+            hasJobTitle: !!userProfile.jobTitle
+          });
+          navigate('/onboarding');
+        }
+      } else if (!hasCheckedProfile) {
+        // If no profile yet, wait a bit for it to be fetched
+        console.log('⏳ Waiting for user profile to be fetched...');
+        const timer = setTimeout(() => {
+          if (userProfile === null) {
+            console.log('⚠️ User profile still not available, assuming new user needs onboarding');
+            navigate('/onboarding');
+          }
+        }, 1000); // Wait 1 second for profile to be fetched
+        
+        return () => clearTimeout(timer);
+      }
     }
-  }, [isAuthenticated, loading, onAuthSuccess, skipAuthCheck]);
+  }, [isAuthenticated, loading, navigate, userProfile, hasCheckedProfile]);
+
+  // Handle navigation when userProfile becomes available
+  React.useEffect(() => {
+    if (isAuthenticated && !loading && userProfile && !hasCheckedProfile) {
+      console.log('🔍 AuthWrapper: userProfile became available, checking onboarding status...');
+      setHasCheckedProfile(true);
+      
+      console.log('🔍 AuthWrapper: userProfile details:', {
+        exists: !!userProfile,
+        name: userProfile?.name,
+        jobTitle: userProfile?.jobTitle,
+        fullProfile: userProfile
+      });
+      
+      // Check if user has completed onboarding
+      if (userProfile.name && userProfile.jobTitle) {
+        console.log('✅ User has completed onboarding, going to dashboard');
+        navigate('/app/dashboard');
+      } else {
+        console.log('⚠️ User needs to complete onboarding. Missing fields:', {
+          hasName: !!userProfile.name,
+          hasJobTitle: !!userProfile.jobTitle
+        });
+        navigate('/onboarding');
+      }
+    }
+  }, [userProfile, isAuthenticated, loading, hasCheckedProfile, navigate]);
 
   const handleSwitchToSignup = () => {
     setAuthMode('signup');
@@ -33,7 +105,8 @@ export function AuthWrapper({ onAuthSuccess, onClose, skipAuthCheck = false }: A
 
   const handleAuthSuccess = () => {
     console.log('🔄 AuthWrapper: handleAuthSuccess called');
-    onAuthSuccess();
+    // The useEffect above will handle navigation automatically when auth state updates
+    // No need for manual navigation here
   };
 
   // Skip loading state for new users or when skipping auth check - show forms immediately

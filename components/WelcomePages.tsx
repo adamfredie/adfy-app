@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./styles/main.css";
 import { AuthWrapper } from "./auth/AuthWrapper";
 import { SignupForm } from "./auth/SignupForm";
 
-interface WelcomePagesProps {
-  onComplete: () => void;
-  onSkip: () => void;
-}
-
-export function WelcomePages({ onComplete, onSkip}: WelcomePagesProps) {
+export function WelcomePages() {
+  const navigate = useNavigate();
   // currentPage is a number that keeps track of which welcome page is being shown from the welcomePages array.
   const [currentPage, setCurrentPage] = useState(0);
   // this state variable is used for showing the sign in and google sign in page.
@@ -47,7 +44,8 @@ export function WelcomePages({ onComplete, onSkip}: WelcomePagesProps) {
   const handleContinueWithGoogle = () => {
     // Implement Google sign-in logic here
     console.log("Continue with Google clicked");
-    onSkip(); // For now, just proceed as if signed in
+    // For now, navigate to onboarding (will be protected)
+    navigate('/onboarding');
   };
 
   // This Event handler is used for showing the sign in page and it is used in Continue With Email button
@@ -71,17 +69,8 @@ export function WelcomePages({ onComplete, onSkip}: WelcomePagesProps) {
 
   // Handle authentication success
   const handleAuthSuccess = () => {
-    // Check if user has completed onboarding
-    const onboardingStatus = localStorage.getItem('aduffy-onboarding-completed');
-    const savedProfile = localStorage.getItem('aduffy-user-profile');
-    
-    if (onboardingStatus === 'true' && savedProfile) {
-      // User has completed onboarding, go to dashboard
-      onSkip();
-    } else {
-      // User needs to complete onboarding
-      onComplete();
-    }
+    // Navigate to onboarding - the ProtectedRoute will handle redirects
+    navigate('/onboarding');
   };
 
   const handleCloseAuth = () => {
@@ -200,10 +189,9 @@ export function WelcomePages({ onComplete, onSkip}: WelcomePagesProps) {
     return (
       <AuthWrapper
         onAuthSuccess={() => {
-          console.log('🎯 WelcomePages: onAuthSuccess called, calling onSkip()');
-          // When login succeeds, go directly to main app
-          // This bypasses the welcome page logic
-          onSkip();
+          console.log('🎯 WelcomePages: onAuthSuccess called, navigating to onboarding');
+          // When login succeeds, navigate to onboarding - ProtectedRoute will handle redirects
+          navigate('/onboarding');
         }}
         onClose={() => setShowLoginForm(false)}
         skipAuthCheck={true}

@@ -20,7 +20,7 @@ export const getURL = () => {
   
   // For local development
   if (isDevelopment) {
-    return 'http://localhost:3000';
+    return 'http://localhost:5173';
   }
   
   // Fallback - try to detect from window.location
@@ -68,7 +68,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         persistSession: true,
         detectSessionInUrl: true,
         // Add these for better production handling
-        flowType: 'pkce',
+        // flowType: 'pkce',
         debug: import.meta.env.DEV // Enable debug in development only
     },
     global: {
@@ -165,58 +165,99 @@ export const signOut = async () => {
 
 // User data functions
 export const storeUserOnboardingData = async (userId: string, onboardingData: OnboardingData) => {
-  const { data: { user } } = await supabase.auth.getUser();
-    const { data,error } = await supabase
-        .from('user_profiles')
-        .upsert({
-            user_id: userId,
-            name: onboardingData.name,
-            email: user?.email || '',
-            job_title: onboardingData.jobTitle,
-            company: onboardingData.company,
-            field: onboardingData.field,
-            experience_level: onboardingData.experienceLevel,
-            vocabulary_level: onboardingData.vocabularyLevel,
-            communication_confidence: onboardingData.communicationConfidence,
-            communication_challenges: onboardingData.communicationChallenges,
-            improvement_goals: onboardingData.improvementGoals,
-            current_skill_level: onboardingData.currentSkillLevel,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-        })
-        .select()
+  try {
+    console.log('🔍 storeUserOnboardingData: Starting with data:', onboardingData);
+    console.log('🔍 storeUserOnboardingData: User ID:', userId);
+    
+    // No need to call supabase.auth.getUser() - we already have the user data from AuthContext
+    // The email is already in onboardingData.email
+    
+    // Prepare the data with proper fallbacks and validation
+    const profileData = {
+      user_id: userId,
+      name: onboardingData.name || 'Unknown User',
+      email: onboardingData.email || '', // Use email from onboardingData instead
+      job_title: onboardingData.jobTitle || '',
+      company: onboardingData.company || '',
+      field: onboardingData.field || onboardingData.fieldOfInterest || '',
+      experience_level: onboardingData.experienceLevel || '',
+      vocabulary_level: onboardingData.vocabularyLevel || 'intermediate',
+      communication_confidence: onboardingData.communicationConfidence || {},
+      communication_challenges: onboardingData.communicationChallenges || [],
+      improvement_goals: onboardingData.improvementGoals || [],
+      current_skill_level: onboardingData.currentSkillLevel || 'intermediate',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    
+    console.log('🔍 storeUserOnboardingData: Prepared profile data:', profileData);
+    console.log('🚀 storeUserOnboardingData: About to call Supabase upsert...');
+    console.log('🔍 storeUserOnboardingData: profileData for Supabase:', JSON.stringify(profileData, null, 2));
+    
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .upsert(profileData)
+      .select();
 
-        if (error) {
-          console.error("storeUserOnboardingData failed:", error);
-          throw error;
-      }
-      
-      console.log("storeUserOnboardingData successful:", data);
-      return data;
+    if (error) {
+      console.error("❌ storeUserOnboardingData failed:", error);
+      console.error("❌ Error details:", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      });
+      throw error;
+    }
+    
+    console.log("✅ storeUserOnboardingData successful:", data);
+    return data;
+  } catch (error) {
+    console.error("💥 storeUserOnboardingData exception:", error);
+    throw error;
+  }
 }
 
 // Get user profile data
 export const getUserProfile = async (userId: string) => {
-    const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('user_id', userId)
-        // .limit(1)
-        // .maybeSingle()
-        .single()
+    try {
+        const { data, error } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('user_id', userId)
+            .single()
 
-    if (error) throw error
-    // return data
-    return {
-      ...data,
-      jobTitle: data.job_title,
-      experienceLevel: data.experience_level,
-      vocabularyLevel: data.vocabulary_level,
-      communicationConfidence: data.communication_confidence,
-      communicationChallenges: data.communication_challenges,
-      improvementGoals: data.improvement_goals,
-      currentSkillLevel: data.current_skill_level
-  }
+        if (error) {
+            // If it's a "no rows returned" error, this is normal for new users
+            if (error.code === 'PGRST116' || error.message.includes('No rows returned')) {
+                console.log('ℹ️ No user profile found for user:', userId, '- This is normal for new users');
+                return null;
+            }
+            // For other errors, throw them
+            throw error;
+        }
+        
+        // Profile found, return mapped data
+        const mappedProfile = {
+          ...data,
+          name: data.name, // Add explicit mapping for name field
+          jobTitle: data.job_title,
+          experienceLevel: data.experience_level,
+          vocabularyLevel: data.vocabulary_level,
+          communicationConfidence: data.communication_confidence,
+          communicationChallenges: data.communication_challenges,
+          improvementGoals: data.improvement_goals,
+          currentSkillLevel: data.current_skill_level
+      };
+      
+      console.log('🔍 getUserProfile: Raw data from database:', data);
+      console.log('🔍 getUserProfile: Mapped profile:', mappedProfile);
+      
+      return mappedProfile;
+    } catch (error) {
+        console.error('Error in getUserProfile:', error);
+        throw error;
+    }
 }
 
 // Comprehensive Supabase diagnostic function

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../src/contexts/AuthContext';
 
 interface LoginFormProps {
@@ -8,10 +9,11 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess, onSwitchToSignup, onClose }: LoginFormProps) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { signIn, authLoading, session, user, userProfile } = useAuth();
+  const { signIn, authLoading, session, user, userProfile, isAuthenticated } = useAuth();
 
   // const handleSubmit = async (e: React.FormEvent) => {
   //   console.log('📝 LoginForm: handleSubmit called');
@@ -55,30 +57,15 @@ export function LoginForm({ onSuccess, onSwitchToSignup, onClose }: LoginFormPro
     }
 
     try {
-      console.log(' LoginForm: Calling signIn...');
+      console.log('📝 LoginForm: Calling signIn...');
       const result = await signIn(email, password);
       console.log('📝 LoginForm: signIn completed, result:', result);
       
       if (result.success) {
-        console.log('✅ Login successful, waiting for session to update...');
-        
-        const waitForSession = () => {
-          if (session?.user && user) {
-            console.log('✅ Session and user updated, checking onboarding status...');
-            
-            // Check if user has completed onboarding
-            if (userProfile && userProfile.name && userProfile.jobTitle) {
-              console.log('✅ User has completed onboarding, going to dashboard');
-              onSuccess(); // This will go to dashboard
-            } else {
-              console.log('⚠️ User needs to complete onboarding');
-              onSuccess(); // This will go to onboarding
-            }
-          } else {
-            setTimeout(waitForSession, 100);
-          }
-        };
-        waitForSession();
+        console.log('✅ Login successful, calling onSuccess()');
+        // Call onSuccess immediately - the AuthWrapper will handle navigation
+        // The auth state change listener will update the state asynchronously
+        onSuccess();
       } else {
         console.log('❌ Login failed:', result.error);
         setError(result.error || 'Login failed');

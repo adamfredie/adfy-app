@@ -81,14 +81,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const code = urlParams.get('code');
       
       if (code) {
-        console.log('🔄 AuthContext: Detected auth code in URL, exchanging for session...');
+        console.log('🔍 AuthContext: Detected auth code in URL, exchanging for session...');
+        console.log('🔍 AuthContext: Code length:', code.length);
+        
+        // Validate the code before using it
+        if (code.length < 10) {
+          console.error('❌ AuthContext: Invalid auth code (too short)');
+          // Clear the invalid URL parameters
+          window.history.replaceState({}, document.title, window.location.pathname);
+          return false;
+        }
         
         try {
-          // Exchange the code for a session
+          // Exchange the code for a session - Updated for Supabase v2.55.0+
           const { data, error } = await supabase.auth.exchangeCodeForSession(code);
           
           if (error) {
             console.error('❌ AuthContext: Failed to exchange code for session:', error);
+            // Clear the invalid URL parameters on error
+            window.history.replaceState({}, document.title, window.location.pathname);
             return false;
           }
           
@@ -110,26 +121,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
             }
             
             return true;
-          } else {
-            console.warn('⚠️ AuthContext: No session returned from code exchange');
-            return false;
           }
         } catch (error) {
-          console.error('💥 AuthContext: Exception during code exchange:', error);
+          console.error('❌ AuthContext: Exception during code exchange:', error);
+          // Clear the invalid URL parameters on exception
+          window.history.replaceState({}, document.title, window.location.pathname);
           return false;
         }
-      }
-      
-      // Check for legacy auth callback format
-      const accessToken = urlParams.get('access_token');
-      const refreshToken = urlParams.get('refresh_token');
-      const type = urlParams.get('type');
-      
-      if (accessToken && refreshToken && type === 'recovery') {
-        console.log('🔄 AuthContext: Detected legacy auth callback from email verification');
-        // Clear the URL parameters to avoid issues
-        window.history.replaceState({}, document.title, window.location.pathname);
-        return true;
       }
       
       return false;
@@ -211,9 +209,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const { getUserProfile } = await import('../api/supabase');
       const profile = await getUserProfile(userId);
       setUserProfile(profile);
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-      // Profile might not exist yet (new user)
+    } catch (error: any) {
+      console.log('ℹ️ User profile not found (this is normal for new users):', error.message);
+      // Profile might not exist yet (new user) - this is not an error
+      // Only log as error if it's not a "not found" type error
+      if (error.code !== 'PGRST116' && error.message !== 'No rows returned') {
+        console.error('Error fetching user profile:', error);
+      }
       setUserProfile(null);
     }
   };
@@ -305,16 +307,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
 // Update user profile
   // Update user profile
   const updateUserProfile = async (profile: Partial<OnboardingData>): Promise<void> => {
-    if (!user) throw new Error('No user authenticated');
+    console.log('🔧 AuthContext: updateUserProfile called with:', profile);
+    
+    if (!user) {
+      console.error('❌ AuthContext: No user found');
+      throw new Error('No user authenticated');
+    }
+    
+    console.log('👤 AuthContext: Current user:', user.id);
     
     try {
+      console.log('📦 AuthContext: Importing storeUserOnboardingData...');
       const { storeUserOnboardingData } = await import('../api/supabase');
+      console.log('✅ AuthContext: storeUserOnboardingData imported successfully');
+      
+      console.log('🚀 AuthContext: Calling storeUserOnboardingData...');
       await storeUserOnboardingData(user.id, { ...userProfile, ...profile } as OnboardingData);
+      console.log('✅ AuthContext: storeUserOnboardingData completed successfully');
       
       // Refresh the profile
+      console.log('🔄 AuthContext: Refreshing user profile...');
       await refreshUserProfile();
+      console.log('✅ AuthContext: User profile refreshed successfully');
+      
     } catch (error) {
-      console.error('Error updating user profile:', error);
+      console.error('❌ AuthContext: Error updating user profile:', error);
+      console.error('❌ AuthContext: Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        name: error instanceof Error ? error.name : 'Unknown error type'
+      });
       throw error;
     }
   };

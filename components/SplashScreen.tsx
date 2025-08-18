@@ -1,21 +1,19 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./styles/main.css";
 
-interface SplashScreenProps {
-  onComplete: () => void;
-}
-
-export function SplashScreen({ onComplete }: SplashScreenProps) {
+export function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
-      setTimeout(onComplete, 500); // Wait for fade out animation
+      setTimeout(() => navigate('/welcome'), 500); // Wait for fade out animation
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [onComplete]);
+  }, [navigate]);
 
   return (
     <div className={`splash-screen ${isVisible ? 'visible' : 'fade-out'}`}>

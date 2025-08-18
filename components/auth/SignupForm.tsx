@@ -1,4 +1,5 @@
 import React, { useState,useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../src/contexts/AuthContext';
 
 interface SignupFormProps {
@@ -8,6 +9,7 @@ interface SignupFormProps {
 }
 
 export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormProps) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -30,13 +32,13 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
       // Check if user has completed onboarding
       if (userProfile && userProfile.name && userProfile.jobTitle) {
         console.log('✅ User has completed onboarding, going to dashboard');
-        onSuccess(); // This will go to dashboard
+        navigate('/app/dashboard'); // Navigate to dashboard
       } else {
         console.log('⚠️ User needs to complete onboarding');
-        onSuccess(); // This will go to onboarding
+        navigate('/onboarding'); // Navigate to onboarding
       }
     }
-  }, [user, isEmailVerified, userProfile, onSuccess]);
+  }, [user, isEmailVerified, userProfile, navigate]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -67,7 +69,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
           setSuccessMessage(result.error);
           // Still proceed to onboarding - user can verify email later
           setTimeout(() => {
-            onSuccess();
+            navigate('/onboarding');
           }, 2000);
           // hello
           // hello
@@ -76,7 +78,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
           // Proceed to onboarding
           console.log("Proceeding to onboarding");
           setTimeout(() => {
-            onSuccess();
+            navigate('/onboarding');
           }, 2000);
         }
       } else {

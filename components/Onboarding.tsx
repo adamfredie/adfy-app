@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../src/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -50,10 +51,10 @@ export interface OnboardingData {
 }
 
 interface OnboardingProps {
-  onComplete: (data: OnboardingData) => void;
+  // Remove onComplete prop - we'll use navigation instead
 }
 
-type Step = 'personal' | 'professional' | 'assessment' | 'goals' |'goals-part2' | 'preferences';
+type Step = 'personal' | 'professional' | 'assessment' | 'goals' | 'goals-part2';
 // Array of objects
 const communicationChallenges = [
   { id: 'public-speaking', label: 'Public speaking and presentations', icon:<LuPresentation/> },
@@ -79,13 +80,15 @@ const improvementGoals = [
   { id: 'emotional-intelligence', label: 'Enhance emotional intelligence',icon:<FiTarget/> }
 ];
 // Onboarding function starts from here
-export function Onboarding({ onComplete }: OnboardingProps) {
+export function Onboarding() {
+  const navigate = useNavigate();
   // Add useAuth hook at the top level of the component
-  const { user, updateUserProfile, isAuthenticated } = useAuth();
+  const { user, updateUserProfile, isAuthenticated, loading } = useAuth();
   
   const [currentStep, setCurrentStep] = useState<Step>('personal');
   const [formData, setFormData] = useState<OnboardingData>({
     name: '',
+    email: user?.email || '', // Add the required email property
     jobTitle: '',
     company: '',
     field: '',
@@ -105,13 +108,49 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     currentSkillLevel: ''
   });
 
+  // Show loading state while auth is initializing
+  if (loading) {
+    return (
+      <div className="onboarding-wrapper">
+        <div className="onboarding-mobile-container">
+          <div className="onboarding-header">
+            <h1 className="onboarding-title">Loading...</h1>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Ensure user is authenticated
+  if (!isAuthenticated || !user) {
+    console.log('Onboarding: User not authenticated, redirecting to welcome');
+    navigate('/welcome');
+    return null;
+  }
+
+  // Update email in form data when user is available
+  React.useEffect(() => {
+    if (user?.email && user.email !== formData.email) {
+      updateFormData({ email: user.email });
+    }
+  }, [user?.email, formData.email]);
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('🔍 Onboarding component mounted:', {
+      isAuthenticated,
+      user: user?.email,
+      loading,
+      currentStep
+    });
+  }, [isAuthenticated, user?.email, loading, currentStep]);
+
   const steps: { key: Step; title: string; description: string }[] = [
     { key: 'personal', title: 'Personal Info', description: 'Tell us about yourself' },
     { key: 'professional', title: 'Professional Background', description: 'Your work context' },
     { key: 'assessment', title: 'Communication Assessment', description: 'Rate your current skills' },
     { key: 'goals', title: 'Goals & Challenges', description: 'What you want to improve' },
-    { key: 'goals-part2', title: 'Improvement Goals', description: 'What you want to improve' },
-    { key: 'preferences', title: 'Learning Preferences', description: 'How you like to learn' }
+    { key: 'goals-part2', title: 'Improvement Goals', description: 'What you want to improve' }
   ];
 
   const currentStepIndex = steps.findIndex(step => step.key === currentStep);
@@ -124,6 +163,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const createDefaultOnboardingData = (): OnboardingData => {
     return {
       ...formData,
+      email: user?.email || '', // Add the required email property
       // Professional defaults
       jobTitle: formData.jobTitle || 'Professional',
       company: formData.company || '',
@@ -149,7 +189,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       // Learning goals summary
       learningGoals: 'Improve professional communication confidence and expand vocabulary'
     };
-    
   };
 
 
@@ -167,6 +206,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     // Prepare the final onboarding data
     const finalData: OnboardingData = {
       ...formData,
+      email: user?.email || '', // Add the required email property
       fieldOfInterest: formData.field || formData.fieldOfInterest || '',
       vocabularyLevel: mapSkillLevelToVocabularyLevel(formData.currentSkillLevel || ''),
       learningGoals: (formData.improvementGoals && formData.improvementGoals.length > 0)
@@ -175,20 +215,44 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           ).join(', ')}`
         : formData.learningGoals || ''
     };
-console.log("Fetching the data ")
-    // Use the centralized profile update method
-    await updateUserProfile(finalData);
+    
+    console.log("Fetching the data");
+    console.log("Final data prepared:", finalData);
+    console.log("About to call updateUserProfile...");
+    
+    try {
+      // Use the centralized profile update method
+      await updateUserProfile(finalData);
+      console.log("updateUserProfile completed successfully");
+    } catch (updateError: any) {
+      console.error("❌ updateUserProfile failed:", updateError);
+      console.error("❌ Error details:", {
+        message: updateError.message,
+        stack: updateError.stack,
+        name: updateError.name
+      });
+      throw updateError; // Re-throw timage.pngo be caught by outer catch
+    }
+    
     console.log("The data was stored in the user profile", finalData);
+    
     // Store locally as backup (optional)
     localStorage.setItem('aduffy-onboarding-completed', 'true');
     localStorage.setItem('aduffy-user-profile', JSON.stringify(finalData));
+    console.log("Local storage updated");
     
     // Proceed to dashboard
-    onComplete(finalData);
+    console.log("Onboarding completed successfully, navigating to dashboard...");
+    navigate('/app/dashboard');
     
   } catch (error: any) {
-    console.error('Error during setup:', error.message);
-    alert(error.message);
+    console.error('Error during setup:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    alert(`Setup failed: ${error.message}`);
   }
 };
 
@@ -199,11 +263,12 @@ console.log("Fetching the data ")
 
   const handleSkipToEnd = () => {
     const defaultData = createDefaultOnboardingData();
-    onComplete(defaultData);
+    // Navigate to main app instead of calling onComplete
+    navigate('/app/dashboard');
   };
 
   const handleNext = () => {
-    const stepOrder: Step[] = ['personal', 'professional', 'assessment', 'goals', 'preferences'];
+    const stepOrder: Step[] = ['personal', 'professional', 'assessment', 'goals', 'goals-part2'];
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex < stepOrder.length - 1) {
       setCurrentStep(stepOrder[currentIndex + 1]);
@@ -223,12 +288,13 @@ console.log("Fetching the data ")
           : formData.learningGoals || ''
       };
       
-      onComplete(mappedData);
+      // Navigate to main app instead of calling onComplete
+      navigate('/app/dashboard');
     }
   };
 
   const handleBack = () => {
-    const stepOrder: Step[] = ['personal', 'professional', 'assessment', 'goals', 'preferences'];
+    const stepOrder: Step[] = ['personal', 'professional', 'assessment', 'goals', 'goals-part2'];
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex > 0) {
       setCurrentStep(stepOrder[currentIndex - 1]);
@@ -579,8 +645,6 @@ const renderPersonalStep = () => (
       {/* Continue Button */}
       <div className="onboarding-actions">
         <Button
-          // onClick={() => setCurrentStep('preferences')}
-          // disabled={formData.communicationChallenges!.length === 0 || formData.improvementGoals!.length === 0}
           onClick={() => setCurrentStep('goals-part2')}
           disabled={formData.communicationChallenges!.length === 0}
           className="continue-button"
