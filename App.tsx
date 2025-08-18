@@ -249,6 +249,13 @@ export default function App() {
               userProfile={userProfile}
               activityProgress={activityProgress}
             />
+            // <UserProfile
+            //   userProfile={userProfile}     
+            //   currentActivity ={currentActivity}           // pass current profile data
+            //   onBack={handleBackToDashboard}           // allow going back to dashboard
+            //   onProfileUpdate={handleProfileUpdate}    // allow updating profile
+            // />
+
           )}
           
           {currentActivity === 'settings' && (

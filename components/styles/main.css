@@ -473,18 +473,36 @@ body {
 }
 
 /* Top Navigation */
-.top-nav {
+/* .top-nav {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   /* align-items: center; */
-  padding: var(--space-2) var(--space-4);
-  background: white;
-  border-bottom: 1px solid var(--bg-muted);
+  /* padding: var(--space-2) var(--space-4); */
+  /* background: white; */
+  /* border-bottom: 1px solid var(--bg-muted); */
   /* position: sticky; */
   /* top: 0;
   z-index: 100; */
+/* } */ 
+
+.top-nav {
+  display: none;
 }
+
+
+@media (min-width: 768px) {
+  .top-nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-4);
+    background: white;
+    border-bottom: 1px solid var(--bg-muted);
+  }
+}
+
+
 .nav-desktop {
   display: flex;
   align-items: center;

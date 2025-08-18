@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { OnboardingData } from "./Onboarding";
 
-interface HeaderProps {
+interface Props {
   currentActivity: string;
   onNavigateHome?: () => void;
   onNavigateToSettings?: () => void;

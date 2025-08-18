@@ -35,7 +35,7 @@ export function Navigation({
   return (
     <>
     {/* For desktop screen desktop UserMenu will open  */}
-      <header className="top-nav hidden md:block">
+      <header className="top-nav hidden bg-red-400 md:flex">
         {/* DESKTOP NAVIGATION */}
         <div className="nav-desktop">
           <div className="nav-left">
