@@ -1,13 +1,29 @@
 import React from 'react';
 import './styles/main.css';
+import { useAuth } from '../src/contexts/AuthContext';
 
-export function UserMenu({ onSignOut, onResetOnboarding,onUserProfile}) {
+export function UserMenu({ onSignOut, onResetOnboarding }) {
+  const { userProfile } = useAuth();
+  const formatExperienceLevel = (level) => {
+    if (!level) return '';
+    
+    const levelMap = {
+      'entry': 'Entry Level (0-2 years)',
+      'mid': 'Mid Level (3-7 years)',
+      'senior': 'Senior Level (8-12 years)',
+      'executive': 'Executive Level (13+ years)'
+    };
+    
+    return levelMap[level] || level;
+  };
   return (
     <div className="user-menu">
       <div className="user-menu-header">
-        <div className="user-name">Owner</div>
+        {/* <div className="user-name">Owner</div> */}
+        <div className="user-name">{userProfile?.name || ''}</div>
         <div className="user-details">Aduffy Learning • Technology</div>
-        <div className="user-details">Executive Level (10+ years)</div>
+        {/* <div className="user-details">Executive Level (10+ years)</div> */}
+        <div className="user-details">{formatExperienceLevel(userProfile?.experienceLevel)}</div>
       </div>
       <div className="user-menu-divider" />
       <div className="user-menu-item">

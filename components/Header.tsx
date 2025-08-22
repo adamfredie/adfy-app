@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { OnboardingData } from "./Onboarding";
+import { useAuth } from "../src/contexts/AuthContext";
 
 interface Props {
   currentActivity: string;
@@ -16,6 +17,26 @@ interface Props {
 }
 
 export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, onResetOnboarding, userProfile }: HeaderProps) {
+  const { runDiagnostics } = useAuth();
+
+  const handleDebugClick = async () => {
+    try {
+      console.log('🔍 Running Supabase diagnostics...');
+      const results = await runDiagnostics();
+      console.log('📊 Diagnostics results:', results);
+      
+      // Show results in a simple alert for now
+      const summary = Object.entries(results)
+        .map(([key, value]) => `${key}: ${value ? '✅' : '❌'}`)
+        .join('\n');
+      
+      alert(`Supabase Diagnostics Results:\n\n${summary}`);
+    } catch (error) {
+      console.error('Error running diagnostics:', error);
+      alert('Error running diagnostics. Check console for details.');
+    }
+  };
+
   const getActivityTitle = (activity: string) => {
     switch (activity) {
       case 'storytelling': return 'AI Storytelling';
@@ -83,6 +104,17 @@ export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, 
           {/* User Profile Section */}
           {userProfile && (
             <div className="flex items-center gap-4">
+              {/* Debug Button (Development Only) */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border-yellow-200"
+                onClick={handleDebugClick}
+                title="Run Supabase Diagnostics"
+              >
+                🐛 Debug
+              </Button>
+
               {/* Settings Icon */}
               {onNavigateToSettings && (
                 <Button

@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../src/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -17,22 +19,25 @@ import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 
+
 // Keep the original interface for backward compatibility
 export interface OnboardingData {
-  // Original properties for backward compatibility
   name?: string;
-  email?: string;
+  email: string;
   jobTitle: string;
   company: string;
   industry?: string;
   experience?: string;
+  // This is  for Professional field 
   fieldOfInterest?: string;
+
   vocabularyLevel: string;
   learningGoals: string;
   
   // New communication assessment properties
   field?: string;
   experienceLevel?: string;
+  // Communication confidence properties
   communicationConfidence?: {
     presentations?: number;
     meetings?: number;
@@ -42,17 +47,15 @@ export interface OnboardingData {
   };
   communicationChallenges?: string[];
   improvementGoals?: string[];
-  learningPreferences?: string[];
   currentSkillLevel?: string;
-  primaryPainPoints?: string[];
 }
 
 interface OnboardingProps {
-  onComplete: (data: OnboardingData) => void;
+  // Remove onComplete prop - we'll use navigation instead
 }
 
-type Step = 'personal' | 'professional' | 'assessment' | 'goals' |'goals-part2' | 'preferences';
-
+type Step = 'personal' | 'professional' | 'assessment' | 'goals' | 'goals-part2';
+// Array of objects
 const communicationChallenges = [
   { id: 'public-speaking', label: 'Public speaking and presentations', icon:<LuPresentation/> },
   { id: 'meeting-participation', label: 'Active participation in meetings', icon: <IoPeopleOutline/> },
@@ -65,7 +68,7 @@ const communicationChallenges = [
   { id: 'persuasive-writing', label: 'Persuasive writing and proposals', icon: <VscGraph/> },
   { id: 'conflict-resolution', label: 'Conflict resolution', icon: <CgDanger/> }
 ];
-
+// Array of objects
 const improvementGoals = [
   { id: 'confidence', label: 'Build confidence in speaking',icon: <CiStar /> },
   { id: 'vocabulary', label: 'Expand professional vocabulary', icon: <LuBrain /> },
@@ -76,34 +79,16 @@ const improvementGoals = [
   { id: 'active-listening', label: 'Improve active listening skills', icon: <IoPeopleOutline/> },
   { id: 'emotional-intelligence', label: 'Enhance emotional intelligence',icon:<FiTarget/> }
 ];
-
-const learningPreferences = [
-  { id: 'interactive', label: 'Interactive exercises and quizzes', icon: '🧠' },
-  { id: 'real-scenarios', label: 'Real workplace scenarios', icon: '🏢' },
-  { id: 'voice-practice', label: 'Voice and speaking practice', icon: '🎤' },
-  { id: 'writing-exercises', label: 'Writing and composition exercises', icon: '✍️' },
-  { id: 'peer-feedback', label: 'Peer feedback and collaboration', icon: '🤝' },
-  { id: 'gamification', label: 'Gamified learning experience', icon: '🎮' },
-  { id: 'bite-sized', label: 'Short, bite-sized lessons', icon: '⏱️' },
-  { id: 'comprehensive', label: 'Comprehensive deep-dive sessions', icon: '🔎' }
-];
-
-const primaryPainPoints = [
-  { id: 'fear-judgment', label: 'Fear of being judged when speaking' },
-  { id: 'vocabulary-gaps', label: 'Limited professional vocabulary' },
-  { id: 'unclear-messaging', label: 'Messages often misunderstood' },
-  { id: 'low-engagement', label: 'Difficulty engaging audience' },
-  { id: 'speaking-anxiety', label: 'Speaking anxiety in groups' },
-  { id: 'cultural-barriers', label: 'Cultural communication barriers' },
-  { id: 'technical-translation', label: 'Translating technical concepts for non-experts' },
-  { id: 'time-constraints', label: 'Not enough time to practice communication skills' }
-];
-
-export function Onboarding({ onComplete }: OnboardingProps) {
+// Onboarding function starts from here
+export function Onboarding() {
+  const navigate = useNavigate();
+  // Add useAuth hook at the top level of the component
+  const { user, updateUserProfile, isAuthenticated, loading } = useAuth();
+  
   const [currentStep, setCurrentStep] = useState<Step>('personal');
   const [formData, setFormData] = useState<OnboardingData>({
     name: '',
-    email: '',
+    email: user?.email || '', // Add the required email property
     jobTitle: '',
     company: '',
     field: '',
@@ -120,18 +105,52 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     },
     communicationChallenges: [],
     improvementGoals: [],
-    learningPreferences: [],
-    currentSkillLevel: '',
-    primaryPainPoints: []
+    currentSkillLevel: ''
   });
+
+  // Show loading state while auth is initializing
+  if (loading) {
+    return (
+      <div className="onboarding-wrapper">
+        <div className="onboarding-mobile-container">
+          <div className="onboarding-header">
+            <h1 className="onboarding-title">Loading...</h1>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Ensure user is authenticated
+  if (!isAuthenticated || !user) {
+    console.log('Onboarding: User not authenticated, redirecting to welcome');
+    navigate('/welcome');
+    return null;
+  }
+
+  // Update email in form data when user is available
+  React.useEffect(() => {
+    if (user?.email && user.email !== formData.email) {
+      updateFormData({ email: user.email });
+    }
+  }, [user?.email, formData.email]);
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('🔍 Onboarding component mounted:', {
+      isAuthenticated,
+      user: user?.email,
+      loading,
+      currentStep
+    });
+  }, [isAuthenticated, user?.email, loading, currentStep]);
 
   const steps: { key: Step; title: string; description: string }[] = [
     { key: 'personal', title: 'Personal Info', description: 'Tell us about yourself' },
     { key: 'professional', title: 'Professional Background', description: 'Your work context' },
     { key: 'assessment', title: 'Communication Assessment', description: 'Rate your current skills' },
     { key: 'goals', title: 'Goals & Challenges', description: 'What you want to improve' },
-    { key: 'goals-part2', title: 'Improvement Goals', description: 'What you want to improve' },
-    { key: 'preferences', title: 'Learning Preferences', description: 'How you like to learn' }
+    { key: 'goals-part2', title: 'Improvement Goals', description: 'What you want to improve' }
   ];
 
   const currentStepIndex = steps.findIndex(step => step.key === currentStep);
@@ -140,10 +159,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const updateFormData = (updates: Partial<OnboardingData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
-
+// Function used for creating the default onboarding data
   const createDefaultOnboardingData = (): OnboardingData => {
     return {
       ...formData,
+      email: user?.email || '', // Add the required email property
       // Professional defaults
       jobTitle: formData.jobTitle || 'Professional',
       company: formData.company || '',
@@ -165,23 +185,30 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       // Common challenges and goals
       communicationChallenges: ['public-speaking', 'vocabulary-gaps'],
       improvementGoals: ['confidence', 'vocabulary'],
-      learningPreferences: ['interactive', 'real-scenarios'],
-      primaryPainPoints: ['vocabulary-gaps'],
       
       // Learning goals summary
       learningGoals: 'Improve professional communication confidence and expand vocabulary'
     };
-    
   };
-   const handleCompleteSetup = () => {
-    // Create the final onboarding data
+
+
+
+
+  const handleCompleteSetup = async () => {
+
+  console.log("handleCompleteSetup function started");
+  
+  try {
+    if (!isAuthenticated || !user) {
+      throw new Error("No authenticated user found");
+    }
+
+    // Prepare the final onboarding data
     const finalData: OnboardingData = {
       ...formData,
-      // Map field to fieldOfInterest for backward compatibility
+      email: user?.email || '', // Add the required email property
       fieldOfInterest: formData.field || formData.fieldOfInterest || '',
-      // Map currentSkillLevel to vocabularyLevel for backward compatibility
       vocabularyLevel: mapSkillLevelToVocabularyLevel(formData.currentSkillLevel || ''),
-      // Create a learning goals summary from improvement goals
       learningGoals: (formData.improvementGoals && formData.improvementGoals.length > 0)
         ? `Focus on: ${formData.improvementGoals.map(goal => 
             improvementGoals.find(ig => ig.id === goal)?.label || goal
@@ -189,17 +216,59 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         : formData.learningGoals || ''
     };
     
-    // Call the onComplete callback to transition to dashboard
-    onComplete(finalData);
-  };
+    console.log("Fetching the data");
+    console.log("Final data prepared:", finalData);
+    console.log("About to call updateUserProfile...");
+    
+    try {
+      // Use the centralized profile update method
+      await updateUserProfile(finalData);
+      console.log("updateUserProfile completed successfully");
+    } catch (updateError: any) {
+      console.error("❌ updateUserProfile failed:", updateError);
+      console.error("❌ Error details:", {
+        message: updateError.message,
+        stack: updateError.stack,
+        name: updateError.name
+      });
+      throw updateError; // Re-throw timage.pngo be caught by outer catch
+    }
+    
+    console.log("The data was stored in the user profile", finalData);
+    
+    // Store locally as backup (optional)
+    localStorage.setItem('aduffy-onboarding-completed', 'true');
+    localStorage.setItem('aduffy-user-profile', JSON.stringify(finalData));
+    console.log("Local storage updated");
+    
+    // Proceed to dashboard
+    console.log("Onboarding completed successfully, navigating to dashboard...");
+    navigate('/app/dashboard');
+    
+  } catch (error: any) {
+    console.error('Error during setup:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    alert(`Setup failed: ${error.message}`);
+  }
+};
+
+
+
+
+// ... existing code ...
 
   const handleSkipToEnd = () => {
     const defaultData = createDefaultOnboardingData();
-    onComplete(defaultData);
+    // Navigate to main app instead of calling onComplete
+    navigate('/app/dashboard');
   };
 
   const handleNext = () => {
-    const stepOrder: Step[] = ['personal', 'professional', 'assessment', 'goals', 'preferences'];
+    const stepOrder: Step[] = ['personal', 'professional', 'assessment', 'goals', 'goals-part2'];
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex < stepOrder.length - 1) {
       setCurrentStep(stepOrder[currentIndex + 1]);
@@ -219,12 +288,13 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           : formData.learningGoals || ''
       };
       
-      onComplete(mappedData);
+      // Navigate to main app instead of calling onComplete
+      navigate('/app/dashboard');
     }
   };
 
   const handleBack = () => {
-    const stepOrder: Step[] = ['personal', 'professional', 'assessment', 'goals', 'preferences'];
+    const stepOrder: Step[] = ['personal', 'professional', 'assessment', 'goals', 'goals-part2'];
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex > 0) {
       setCurrentStep(stepOrder[currentIndex - 1]);
@@ -248,7 +318,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const isStepValid = (): boolean => {
     switch (currentStep) {
       case 'personal':
-        return !!(formData.name && formData.email);
+        return !!(formData.name);
       case 'professional':
         return !!(formData.jobTitle && formData.field && formData.experienceLevel);
       case 'assessment':
@@ -257,8 +327,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         return formData.communicationChallenges!.length > 0 && formData.improvementGoals!.length > 0;
         case 'goals-part2':
       return formData.improvementGoals!.length > 0;
-      case 'preferences':
-        return formData.learningPreferences!.length > 0 && formData.primaryPainPoints!.length > 0;
       default:
         return false;
     }
@@ -303,25 +371,11 @@ const renderPersonalStep = () => (
         />
       </div>
 
-      <div className="form-field">
-        <Label htmlFor="email" className="field-label">What's your email?</Label>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="off"
-          value={formData.email}
-          onChange={(e) => updateFormData({ email: e.target.value })}
-          placeholder="Enter your email"
-          className="mobile-input"
-          required
-        />
-      </div>
-
       {/* Continue Button */}
       <div className="onboarding-actions">
         <Button
           type="submit"
-          disabled={!formData.name || !formData.email}
+          disabled={!formData.name}
           className="continue-button"
         >
           Continue
@@ -591,8 +645,6 @@ const renderPersonalStep = () => (
       {/* Continue Button */}
       <div className="onboarding-actions">
         <Button
-          // onClick={() => setCurrentStep('preferences')}
-          // disabled={formData.communicationChallenges!.length === 0 || formData.improvementGoals!.length === 0}
           onClick={() => setCurrentStep('goals-part2')}
           disabled={formData.communicationChallenges!.length === 0}
           className="continue-button"
@@ -673,6 +725,7 @@ const renderPersonalStep = () => (
       </div>
     </div>
   );
+  // Redering each step of the onboarding process by using switch case
   const renderStepContent = () => {
     switch (currentStep) {
       case 'personal':
@@ -685,8 +738,6 @@ const renderPersonalStep = () => (
         return renderGoalsStep();
         case 'goals-part2':
           return renderGoalsStepPart2();
-      // case 'preferences':
-      //   return renderPreferencesStep();
       default:
         return renderPersonalStep();
     }
