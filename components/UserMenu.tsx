@@ -2,7 +2,7 @@ import React from 'react';
 import './styles/main.css';
 import { useAuth } from '../src/contexts/AuthContext';
 
-export function UserMenu({ onSignOut, onResetOnboarding }) {
+export function UserMenu({ onSignOut, onResetOnboarding, onUserProfile }) {
   const { userProfile } = useAuth();
   const formatExperienceLevel = (level) => {
     if (!level) return '';

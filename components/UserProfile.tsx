@@ -7,11 +7,12 @@ import {
 } from "react-icons/fi";
 import Learningstatics from "./Learningstatics";
 import { FaArrowRight } from "react-icons/fa6";
+import { OnboardingData } from "./Onboarding";
 
 // Main UserProfile Component
 const UserProfile: React.FC<{
   onBack: () => void;
-  userProfile: { name: Object };
+  userProfile: OnboardingData | null;
 }> = ({ onBack, userProfile }) => {
 
   const [activeTab, setActiveTab] = useState<"profile" | "preferences">("profile");
@@ -46,7 +47,7 @@ const [activeSection, setActiveSection] = useState("profile");
       advanced: { wordsLearned: 412, weeklyGoal: 75, currentStreak: 18, totalScore: 2890 },
     };
 
-    const level = userProfile?.vocabulary_level || "intermediate";
+    const level = userProfile?.vocabularyLevel || "intermediate";
     return baseStats[level as keyof typeof baseStats] || baseStats.intermediate;
   };
 
@@ -87,7 +88,7 @@ const [activeSection, setActiveSection] = useState("profile");
 
         {/* Name + Subtitle */}
         <div className="flex-1 ml-4">
-          <h2 className="text-base font-semibold">{userProfile.name}</h2>
+          <h2 className="text-base font-semibold">{userProfile?.name}</h2>
           <p className="text-sm text-gray-600">Professional Communication Mastery</p>
         </div>
 

@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Dashboard } from './Dashboard';
+import { Onboarding, OnboardingData } from './Onboarding';
 import { Settings } from './Settings';
 import { StorytellingActivity } from './StorytellingActivity';
 import { VocabularyQuiz } from './VocabularyQuiz';
@@ -10,6 +11,9 @@ import { VoiceConversation } from './VoiceConversation';
 import { PronunciationPractice } from './PronunciationPractice';
 import { Navigation } from './Navigation';
 import { ScrollToTop } from './ScrollToTop';
+import { SplashScreen } from './SplashScreen';
+import { WelcomePages } from './WelcomePages';
+import UserProfile from './UserProfile';
 import { useAuth } from '../src/contexts/AuthContext';
 
 // Activity progress interface - can be extended for other activities later
@@ -102,6 +106,7 @@ export function MainApp() {
         onSignOut={handleSignOut}
         onResetOnboarding={handleResetOnboarding}
         userProfile={userProfile}
+        onUserProfile={() => navigate('/app/user-profile')}
       />
       <main className="main-content-column">
         {/* 
@@ -110,7 +115,7 @@ export function MainApp() {
           - This was requested to create a cleaner UI for these specific activities
           - Header only shows on other activities (quiz, interview, voice-conversation, pronunciation, settings)
         */}
-        {currentActivity !== 'dashboard' && currentActivity !== 'storytelling' && (
+        {currentActivity !== 'dashboard' && currentActivity !== 'storytelling' && currentActivity !== 'user-profile' && (
           <Header 
             currentActivity={currentActivity} 
             onNavigateHome={handleBackToDashboard}
@@ -134,6 +139,13 @@ export function MainApp() {
                 onBack={handleBackToDashboard}
                 userProfile={userProfile}
                 onProfileUpdate={handleProfileUpdate}
+              />
+            } />
+            
+            <Route path="user-profile" element={
+              <UserProfile
+                onBack={handleBackToDashboard}
+                userProfile={userProfile}
               />
             } />
             

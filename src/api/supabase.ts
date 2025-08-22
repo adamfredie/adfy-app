@@ -15,7 +15,7 @@ export const getURL = () => {
   
   // For production with custom domain
   if (import.meta.env.VITE_SITE_URL) {
-    return import.meta.env.VITE_SITE_URL;
+    return `${import.meta.env.VITE_SITE_URL}`;
   }
   
   // For local development
@@ -25,7 +25,7 @@ export const getURL = () => {
   
   // Fallback - try to detect from window.location
   if (typeof window !== 'undefined') {
-    return window.location.origin;
+    return `${window.location.origin}`;
   }
   
   // Default fallback
