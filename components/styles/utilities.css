@@ -4405,7 +4405,7 @@ ml-auto{
 
 /* Welcome Pages */
 .welcome-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

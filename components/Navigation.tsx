@@ -105,9 +105,9 @@ export function Navigation({
               </div>
             </div>
           </div>
-          <div className="nav-right">
+          {/* <div className="nav-right">
             {/* Search button */}
-            <button className="nav-icon-btn ">
+            {/* <button className="nav-icon-btn ">
               <svg
                 width="20"
                 height="20"
@@ -119,14 +119,14 @@ export function Navigation({
                 <circle cx="11" cy="11" r="7" />
                 <line x1="16.5" y1="16.5" x2="21" y2="21" />
               </svg>
-            </button>
+            </button> */}
 
             {/* Mobile hamburger menu toggle */}
-            <button
+            {/* <button
               className="nav-icon-btn "
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <svg
+            > */}
+              {/* <svg
                 width="20"
                 height="20"
                 fill="none"
@@ -136,10 +136,10 @@ export function Navigation({
               >
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            </button>
-          </div>
+                <line x1="3" y1="18" x2="21" y2="18" /> */}
+              {/* </svg> */}
+            {/* </button> */}
+          {/* </div> */} 
         </div>
         {isMenuOpen && (
           <UserMenu

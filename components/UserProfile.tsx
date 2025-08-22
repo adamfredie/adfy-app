@@ -1,31 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FiArrowLeft,
-  FiSearch,
-  FiMenu,
   FiSettings,
 } from "react-icons/fi";
 import Learningstatics from "./Learningstatics";
 import { FaArrowRight } from "react-icons/fa6";
 import { OnboardingData } from "./Onboarding";
 
-// Main UserProfile Component
 const UserProfile: React.FC<{
   onBack: () => void;
   userProfile: OnboardingData | null;
 }> = ({ onBack, userProfile }) => {
-
   const [activeTab, setActiveTab] = useState<"profile" | "preferences">("profile");
+  const [activeSection, setActiveSection] = useState("profile");
 
-  // Toggle expand/collapse for sections in "Learning Preferences"
   const [expandedSections, setExpandedSections] = useState({
     course: true,
     learningStats: false,
-    // activities: true,
     goalsChallenges: false,
   });
 
-  // Function to toggle open/close section
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
       ...prev,
@@ -33,21 +27,36 @@ const UserProfile: React.FC<{
     }));
   };
 
-const [activeSection, setActiveSection] = useState("profile"); 
+  // ---------------- Profile Form States ----------------
+  const initialForm = {
+    jobTitle: "Marketing Head",
+    company: "Acufly",
+    professionalField: "Marketing",
+    experienceLevel: "Mid level 3–7",
+  };
 
-  // Helper: Return stats based on user’s vocabulary level
+  const [form, setForm] = useState(initialForm);
+  const [ischanged, setischanged] = useState(false);
+
+  // Check if form changed
+  useEffect(() => {
+    const changed = Object.keys(initialForm).some(
+      (key) => form[key as keyof typeof form] !== initialForm[key as keyof typeof initialForm]
+    );
+    setischanged(changed);
+  }, [form]);
+
+  // ---------------- Stats Section ----------------
   const getStatsBasedOnLevel = () => {
     if (!userProfile) {
       return { wordsLearned: 0, weeklyGoal: 0, currentStreak: 0, totalScore: 0 };
     }
-
     const baseStats = {
       beginner: { wordsLearned: 89, weeklyGoal: 25, currentStreak: 5, totalScore: 650 },
       intermediate: { wordsLearned: 234, weeklyGoal: 50, currentStreak: 12, totalScore: 1450 },
       advanced: { wordsLearned: 412, weeklyGoal: 75, currentStreak: 18, totalScore: 2890 },
     };
-
-    const level = userProfile?.vocabularyLevel || "intermediate";
+    const level = userProfile?.vocabulary_level || "intermediate";
     return baseStats[level as keyof typeof baseStats] || baseStats.intermediate;
   };
 
@@ -57,26 +66,16 @@ const [activeSection, setActiveSection] = useState("profile");
     <div className="w-full max-w-[500px] mx-auto bg-white h-screen shadow-lg flex flex-col">
       {/* ------------------- HEADER ------------------- */}
       <div className="flex items-center justify-between px-4 py-2 ">
-        {/* Back button */}
         <button onClick={onBack}>
           <FiArrowLeft size={22} className="text-yellow-500" />
         </button>
-
-        {/* Page Title */}
         <div className="titleContainer px-3 w-full">
           <h1 className="text-lg font-semibold">Profile</h1>
-        </div>
-
-        {/* Search + Menu Icons */}
-        <div className="flex gap-4">
-          <FiSearch size={20} className="text-black font-bold" />
-          <FiMenu size={22} className="text-black font-bold" />
         </div>
       </div>
 
       {/* ------------------- PROFILE HEADER ------------------- */}
       <div className="flex items-center justify-between px-4 mt-4">
-        {/* Avatar + Edit button */}
         <div className="relative">
           <div className="w-20 h-20 rounded-full bg-pink-300 flex items-center justify-center">
             <span className="text-3xl">👤</span>
@@ -86,205 +85,156 @@ const [activeSection, setActiveSection] = useState("profile");
           </button>
         </div>
 
-        {/* Name + Subtitle */}
         <div className="flex-1 ml-4">
           <h2 className="text-base font-semibold">{userProfile?.name}</h2>
           <p className="text-sm text-gray-600">Professional Communication Mastery</p>
         </div>
 
-        {/* Settings Icon */}
-          <FiSettings
-            size={22}
-            className="text-gray-700 cursor-pointer"
-            onClick={() => setActiveSection((elem)=>{
-              if(elem =="settings"){
-                return 'profile'
-              }else{
-                return 'settings'
-              }
-            })}
-          />
+        <FiSettings
+          size={22}
+          className="text-gray-700 cursor-pointer"
+          onClick={() =>
+            setActiveSection((elem) => (elem === "settings" ? "profile" : "settings"))
+          }
+        />
       </div>
 
-      {/* // at bottom of return(), just before closing </div> of main container: */}
-     {activeSection === "settings" ? (
-  <div className=" flex flex-col mt-16">
-
-    <div className="border-t-[3px] border-[var(--primary)] pt-2"></div>
-
-    <div className="privacy px-6">
-
-      <div className="w-full text-left py-2  font-bold flex justify-between">
-        Privacy Policy
-        <button className="text-gray-300">
-          <FaArrowRight/>
-          </button>
-        </div>
-       <div className="w-full text-left py-2  font-bold flex justify-between">
-        Terms of use
-        <button className="text-gray-300">
-          <FaArrowRight/>
-          </button>
-        </div>
-       <div className="w-full text-left py-2  font-bold flex justify-between">
-        Support
-        <button className="text-gray-300">
-          <FaArrowRight/>
-          </button>
-        </div>
-    </div>
-
-    <div className="border-t-2 px-6 mt-4 pt-4">
-      <button className="text-[var(--primary)] font-semibold">Log out</button>
-    </div>
-  </div>
-):
-
-      <div className="container">
-
-      <div className="flex border-b mt-6">
-        <button
-          onClick={() => setActiveTab("profile")}
-          className={`flex-1 py-2 text-center font-medium ${
-            activeTab === "profile"
-              ? "  border-b-[3px] border-[var(--primary)] font-extrabold"
-              : "text-[var(--font-size-sm)] font-extrabold  border-b-2 border-gray-300"
-          }`}
-        >
-          Profile
-        </button>
-
-        <button
-          onClick={() => setActiveTab("preferences")}
-          className={`flex-1 py-2 text-center font-medium ${
-            activeTab === "preferences"
-              ? "  border-b-[3px] border-[var(--primary)] font-extrabold"
-              : "text-[var(--font-size-sm)] font-extrabold border-b-2 border-gray-300"
-          }`}
-        >
-          <h2>
-            Learning Preferences
-          </h2>
-        </button>
-      </div>
-
-      {/* ------------------- CONTENT AREA ------------------- */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        {activeTab === "profile" ? (
-          // ---------------- PROFILE FORM ----------------
-          <div>
-            <h3 className="userProfileLabel">Professional Information</h3>
-            <p className="text-sm text-gray-700 mb-4">
-              Update your job title, company, and professional details
-            </p>
-
-            {/* Job Title */}
-            <div className="mb-3">
-              <label className="userProfileLabel">Job Title</label>
-              <input
-                type="text"
-                defaultValue={userProfile?.jobTitle || ""}
-                className="w-full border rounded-md px-3 py-2 text-sm mt-1"
-              />
+      {/* ------------------- MAIN CONTENT ------------------- */}
+      {activeSection === "settings" ? (
+        <div className="flex flex-col mt-16">
+          <div className="border-t-[3px] border-[var(--primary)] pt-2"></div>
+          <div className="privacy px-6">
+            <div className="w-full text-left py-2 font-bold flex justify-between">
+              Privacy Policy <FaArrowRight className="text-gray-300" />
             </div>
-
-            {/* Company */}
-            <div className="mb-3">
-              <label className="userProfileLabel">Company</label>
-              <input
-                type="text"
-                defaultValue={userProfile?.company || ""}
-                className="w-full border rounded-md px-3 py-2 text-sm mt-1"
-              />
+            <div className="w-full text-left py-2 font-bold flex justify-between">
+              Terms of use <FaArrowRight className="text-gray-300" />
             </div>
-
-            {/* Professional Field */}
-            <div className="mb-3">
-              <label className="userProfileLabel">Professional Field</label>
-                <select 
-                 defaultValue={userProfile?.field || ""}
-                 className="w-full border rounded-md px-3 py-2 text-sm mt-1"
-               >
-
-                 <option value="">Select a field</option>
-                 {/* <option value={userProfile?.field}>{userProfile?.field}</option> */}
-                 {/* <option value="Marketing">Marketing</option>
-                 <option value="Engineering">Engineering</option>
-                 <option value="Design">Design</option>
-                 <option value="Product">Product</option>
-                 <option value="Sales">Sales</option>
-                 <option value="Finance">Finance</option>
-                 <option value="Healthcare">Healthcare</option>
-                 <option value="Education">Education</option>
-                 <option value="Technology">Technology</option>
-                 <option value="Research">Research</option>
-                 <option value="Consulting">Consulting</option>
-                 <option value="Operations">Operations</option>
-                 <option value="Human Resources">Human Resources</option>
-                 <option value="Legal">Legal</option>
-                 <option value="Other">Other</option> */}
-                 <option value="">Choose your professional field</option>
-              <option value="marketing">Marketing</option>
-              <option value="technology">Technology</option>
-              <option value="sales">Sales</option>
-              <option value="product">Product Management</option>
-              <option value="finance">Finance</option>
-              <option value="operations">Operations</option>
-              <option value="consulting">Consulting</option>
-              <option value="other">Other</option>
-               </select>
-            </div>
-
-            {/* Experience Level */}
-            <div className="mb-3">
-              <label className="userProfileLabel">Experience Level</label>
-              <select 
-                defaultValue={userProfile?.experienceLevel || ""}
-                className="w-full border rounded-md px-3 py-2 text-sm mt-1"
-              >
-               <option value="">Choose your experience level</option>
-              <option value="entry">Entry Level (0-2 years)</option>
-              <option value="mid">Mid Level (3-7 years)</option>
-              <option value="senior">Senior Level (8-12 years)</option>
-              <option value="executive">Executive Level (13+ years)</option>
-              </select>
+            <div className="w-full text-left py-2 font-bold flex justify-between">
+              Support <FaArrowRight className="text-gray-300" />
             </div>
           </div>
-        ) : (
-          // ---------------- LEARNING PREFERENCES ----------------
-          <div>
-            {/* Learning Statistics Section */}
-            <Learningstatics userStats={userStats} expandedSections={expandedSections} toggleSection={toggleSection} />
+          <div className="border-t-2 px-6 mt-4 pt-4">
+            <button className="text-[var(--primary)] font-semibold">Log out</button>
+          </div>
+        </div>
+      ) : (
+        <div className="container">
+          {/* Tabs */}
+          <div className="flex border-b mt-6">
+            <button
+              onClick={() => setActiveTab("profile")}
+              className={`flex-1 py-2 text-center font-medium ${
+                activeTab === "profile"
+                  ? "  border-b-[3px] border-[var(--primary)] font-extrabold"
+                  : "text-[var(--font-size-sm)] font-extrabold  border-b-2 border-gray-300"
+              }`}
+            >
+              Profile
+            </button>
+            <button
+              onClick={() => setActiveTab("preferences")}
+              className={`flex-1 py-2 text-center font-medium ${
+                activeTab === "preferences"
+                  ? "  border-b-[3px] border-[var(--primary)] font-extrabold"
+                  : "text-[var(--font-size-sm)] font-extrabold border-b-2 border-gray-300"
+              }`}
+            >
+              <h2>Learning Preferences</h2>
+            </button>
+          </div>
 
-            {/* Goals & Challenges */}
-            <div className="dashboard-section">
-              <div className="section-header" onClick={() => toggleSection('goalsChallenges')}>
-                <h2>Goals & Challenges</h2>
-                <span className="material-symbols-outlined">
-                  {expandedSections.goalsChallenges ? "expand_circle_up" : "expand_circle_down"}
-                </span>
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto px-4 py-4">
+            {activeTab === "profile" ? (
+              <div>
+                <h3 className="userProfileLabel">Professional Information</h3>
+                <p className="text-sm text-gray-700 mb-4">
+                  Update your job title, company, and professional details
+                </p>
+
+                <div className="mb-3">
+                  <label className="userProfileLabel">Job Title</label>
+                  <input
+                    type="text"
+                    value={form.jobTitle}
+                    onChange={(e) => setForm({ ...form, jobTitle: e.target.value })}
+                    className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="userProfileLabel">Company</label>
+                  <input
+                    type="text"
+                    value={form.company}
+                    onChange={(e) => setForm({ ...form, company: e.target.value })}
+                    className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="userProfileLabel">Professional Field</label>
+                  <select
+                    value={form.professionalField}
+                    onChange={(e) => setForm({ ...form, professionalField: e.target.value })}
+                    className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+                  >
+                    <option>Marketing</option>
+                    <option>Engineering</option>
+                    <option>Design</option>
+                  </select>
+                </div>
+
+                <div className="mb-3">
+                  <label className="userProfileLabel">Experience Level</label>
+                  <select
+                    value={form.experienceLevel}
+                    onChange={(e) => setForm({ ...form, experienceLevel: e.target.value })}
+                    className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+                  >
+                    <option>Mid level 3–7</option>
+                    <option>Entry level 0–2</option>
+                    <option>Senior level 8+</option>
+                  </select>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div>
+                <Learningstatics
+                  userStats={userStats}
+                  expandedSections={expandedSections}
+                  toggleSection={toggleSection}
+                />
+                <div className="dashboard-section">
+                  <div
+                    className="section-header"
+                    onClick={() => toggleSection("goalsChallenges")}
+                  >
+                    <h2>Goals & Challenges</h2>
+                    <span className="material-symbols-outlined">
+                      {expandedSections.goalsChallenges
+                        ? "expand_circle_up"
+                        : "expand_circle_down"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* ------------------- SAVE BUTTON ------------------- */}
-      <div className="px-4 py-3 mb-10">
-        <button className="w-full bg-[var(--primary)]  py-2 rounded-md font-semibold">
-          Save
-        </button>
-      </div>
-      </div>
-
-}
-
-
-      {/* ------------------- TABS ------------------- */}
-
+          {/* Save button appears only if changes are made */}
+          {ischanged && (
+            <div className="px-4 py-3 mb-10">
+              <button className="w-full bg-[var(--primary)]  py-2 rounded-md font-semibold">
+                Save
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ------------------- BOTTOM NAV ------------------- */}
-      {/* Bottom Navigation (mobile only) */}
       <nav className="bottom-nav">
         <button className="nav-btn">
           <span role="img" aria-label="Home">🏠</span>
