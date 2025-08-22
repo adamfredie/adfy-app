@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../src/contexts/AuthContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -18,6 +17,17 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
+
+
+import { 
+  Presentation, Users, Mail, 
+  Settings, Phone, Video, FileText, AlertTriangle 
+} from "lucide-react";
+
+import { 
+  Star, Brain, MessageSquare, TrendingUp, Award, 
+  Sparkles, Target 
+} from "lucide-react";
 
 
 // Keep the original interface for backward compatibility
@@ -57,27 +67,27 @@ interface OnboardingProps {
 type Step = 'personal' | 'professional' | 'assessment' | 'goals' | 'goals-part2';
 // Array of objects
 const communicationChallenges = [
-  { id: 'public-speaking', label: 'Public speaking and presentations', icon:<LuPresentation/> },
-  { id: 'meeting-participation', label: 'Active participation in meetings', icon: <IoPeopleOutline/> },
-  { id: 'email-clarity', label: 'Writing clear and professional emails', icon: <CiMail /> },
-  { id: 'difficult-conversations', label: 'Having difficult conversations', icon:<FiMessageSquare/> },
-  { id: 'networking', label: 'Professional networking', icon: <FaArrowTrendUp/> },
-  { id: 'cross-team-collaboration', label: 'Cross-team collaboration', icon: <CiSettings/>  },
-  { id: 'client-communication', label: 'Client communication', icon: <CiPhone /> },
-  { id: 'virtual-meetings', label: 'Virtual meeting facilitation', icon: <IoVideocamOutline />},
-  { id: 'persuasive-writing', label: 'Persuasive writing and proposals', icon: <VscGraph/> },
-  { id: 'conflict-resolution', label: 'Conflict resolution', icon: <CgDanger/> }
-];
+  { id: 'public-speaking', label: 'Public speaking and presentations', icon:<Presentation/> },
+  { id: 'meeting-participation', label: 'Active participation in meetings', icon:<Users/> },
+  { id: 'email-clarity', label: 'Writing clear and professional emails', icon: <Mail /> },
+  { id: 'difficult-conversations', label: 'Having difficult conversations', icon:<MessageSquare/> },
+  { id: 'networking', label: 'Professional networking', icon: <TrendingUp/> },
+  { id: 'cross-team-collaboration', label: 'Cross-team collaboration', icon: <Settings/>  },
+  { id: 'client-communication', label: 'Client communication', icon: <Phone /> },
+  { id: 'virtual-meetings', label: 'Virtual meeting facilitation', icon: <Video />},
+  { id: 'persuasive-writing', label: 'Persuasive writing and proposals', icon: <FileText/> },
+  { id: 'conflict-resolution', label: 'Conflict resolution', icon: <AlertTriangle/> }
+]
 // Array of objects
 const improvementGoals = [
-  { id: 'confidence', label: 'Build confidence in speaking',icon: <CiStar /> },
-  { id: 'vocabulary', label: 'Expand professional vocabulary', icon: <LuBrain /> },
-  { id: 'clarity', label: 'Improve message clarity', icon: <FiMessageSquare/> },
-  { id: 'persuasion', label: 'Enhance persuasive communication' , icon: <FaArrowTrendUp/>},
-  { id: 'leadership', label: 'Develop leadership communication' , icon: <PiMedalLight/> },
-  { id: 'storytelling', label: 'Master storytelling techniques', icon: <BsStars/> },
-  { id: 'active-listening', label: 'Improve active listening skills', icon: <IoPeopleOutline/> },
-  { id: 'emotional-intelligence', label: 'Enhance emotional intelligence',icon:<FiTarget/> }
+  { id: 'confidence', label: 'Build confidence in speaking', icon: <Star /> },
+  { id: 'vocabulary', label: 'Expand professional vocabulary', icon: <Brain /> },
+  { id: 'clarity', label: 'Improve message clarity', icon: <MessageSquare /> },
+  { id: 'persuasion', label: 'Enhance persuasive communication', icon: <TrendingUp /> },
+  { id: 'leadership', label: 'Develop leadership communication', icon: <Award /> },
+  { id: 'storytelling', label: 'Master storytelling techniques', icon: <Sparkles /> },
+  { id: 'active-listening', label: 'Improve active listening skills', icon: <Users /> },
+  { id: 'emotional-intelligence', label: 'Enhance emotional intelligence', icon: <Target /> }
 ];
 // Onboarding function starts from here
 export function Onboarding() {

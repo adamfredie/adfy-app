@@ -472,19 +472,6 @@ body {
   background: var(--warning-dark);
 }
 
-/* Top Navigation */
-/* .top-nav {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  /* align-items: center; */
-  /* padding: var(--space-2) var(--space-4); */
-  /* background: white; */
-  /* border-bottom: 1px solid var(--bg-muted); */
-  /* position: sticky; */
-  /* top: 0;
-  z-index: 100; */
-/* } */ 
 
 .top-nav {
   display: none;

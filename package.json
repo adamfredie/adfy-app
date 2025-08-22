@@ -20,6 +20,7 @@
     "@supabase/auth-helpers-react": "^0.5.0",
     "@supabase/supabase-js": "^2.55.0",
     "axios": "^1.10.0",
+    "lucide-react": "^0.541.0",
     "motion": "^12.23.12",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
