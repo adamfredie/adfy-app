@@ -7,11 +7,12 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { OnboardingData } from "./Onboarding";
 import { useAuth } from "../src/contexts/AuthContext";
 
-interface HeaderProps {
+interface Props {
   currentActivity: string;
   onNavigateHome?: () => void;
   onNavigateToSettings?: () => void;
   onResetOnboarding?: () => void;
+  onNavigateToUserProfile?: () => void;
   userProfile?: OnboardingData | null;
 }
 
@@ -80,6 +81,7 @@ export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, 
               </div>
               <div>
                 <h1 className="font-bold text-xl text-aduffy-navy">Aduffy Learning</h1>
+                sdasdasdasdassd
                 <p className="text-xs text-muted-foreground">Professional Vocabulary Mastery</p>
               </div>
             </div>
@@ -125,7 +127,7 @@ export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, 
               {/* Vocabulary Level Badge */}
               <Badge className={getVocabularyLevelColor(userProfile.vocabularyLevel)}>
                 <span role="img" aria-label="award">🏅</span>
-                {userProfile.vocabularyLevel.charAt(0).toUpperCase() + userProfile.vocabularyLevel.slice(1)} Level
+                {userProfile.vocabularyLevel?.charAt(0)?.toUpperCase() + userProfile?.vocabularyLevel?.slice(1)} Level
               </Badge>
 
               {/* User Menu */}
@@ -164,6 +166,7 @@ export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, 
                     onClick={onNavigateToSettings}
                   >
                     <span role="img" aria-label="profile">👤</span>
+                    ,nzclkjbzljvkhbsclc cohbzckj jxbckjxzbhc
                     Profile Settings
                   </DropdownMenuItem>
                   
@@ -192,7 +195,7 @@ export function Header({ currentActivity, onNavigateHome, onNavigateToSettings, 
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          )}
+          )} 
         </div>
       </div>
     </header>

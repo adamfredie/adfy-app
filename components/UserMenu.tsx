@@ -2,7 +2,6 @@ import React from 'react';
 import './styles/main.css';
 import { useAuth } from '../src/contexts/AuthContext';
 
-
 export function UserMenu({ onSignOut, onResetOnboarding }) {
   const { userProfile } = useAuth();
   const formatExperienceLevel = (level) => {
@@ -27,10 +26,10 @@ export function UserMenu({ onSignOut, onResetOnboarding }) {
         <div className="user-details">{formatExperienceLevel(userProfile?.experienceLevel)}</div>
       </div>
       <div className="user-menu-divider" />
-      <a href="#" className="user-menu-item">
+      <div className="user-menu-item">
         <span role="img" aria-label="profile">👤</span>
-        <span>Profile Settings</span>
-      </a>
+        <span onClick={onUserProfile}>Profile Settings</span>
+      </div>
       <a href="#" className="user-menu-item">
         <span role="img" aria-label="preferences">⚙️</span>
         <span>Learning Preferences</span>
