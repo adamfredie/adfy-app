@@ -4,29 +4,11 @@ import { useAuth } from "../src/contexts/AuthContext";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { CiSettings,CiMail,CiPhone,CiStar  } from "react-icons/ci";
-import { LuPresentation,LuBrain } from "react-icons/lu";
-import { IoPeopleOutline,IoVideocamOutline  } from "react-icons/io5";
-import { FiMessageSquare,FiTarget} from "react-icons/fi";
-import { FaArrowTrendUp } from "react-icons/fa6";
-import { VscGraph } from "react-icons/vsc";
-import { CgDanger } from "react-icons/cg";
-import { BsStars } from "react-icons/bs";
-import { PiMedalLight } from "react-icons/pi";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { Progress } from "./ui/progress";
-import { Badge } from "./ui/badge";
-import { Separator } from "./ui/separator";
-
-
 import { 
   Presentation, Users, Mail, 
-  Settings, Phone, Video, FileText, AlertTriangle 
-} from "lucide-react";
-
-import { 
+  Settings, Phone, Video, FileText, AlertTriangle ,
   Star, Brain, MessageSquare, TrendingUp, Award, 
-  Sparkles, Target 
+  Sparkles, Target
 } from "lucide-react";
 
 

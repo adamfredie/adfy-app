@@ -235,20 +235,7 @@ const UserProfile: React.FC<{
       )}
 
       {/* ------------------- BOTTOM NAV ------------------- */}
-      <nav className="bottom-nav">
-        <button className="nav-btn">
-          <span role="img" aria-label="Home">🏠</span>
-          <span>Home</span>
-        </button>
-        <button className="nav-btn">
-          <span role="img" aria-label="Activities">📚</span>
-          <span>Activities</span>
-        </button>
-        <button className="nav-btn active">
-          <span role="img" aria-label="Profile">👤</span>
-          <span>Profile</span>
-        </button>
-      </nav>
+      <BottomNav />
     </div>
   );
 };

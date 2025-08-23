@@ -9,6 +9,7 @@ export function Navigation({
   onResetOnboarding,
   userProfile,
   onUserProfile,
+  
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -81,6 +82,7 @@ export function Navigation({
                   onSignOut={onSignOut}
                   onResetOnboarding={onResetOnboarding}
                   onUserProfile={onUserProfile}
+                  userProfile={userProfile}
                 />
               )}
             </div>
@@ -146,6 +148,7 @@ export function Navigation({
             onSignOut={onSignOut}
             onResetOnboarding={onResetOnboarding}
             onUserProfile={onUserProfile}
+            userProfile={userProfile}
           />
         )}
 

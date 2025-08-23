@@ -6,6 +6,7 @@ import Learningstatics from "./Learningstatics";
 import { MdVerified } from "react-icons/md";
 import { MdHourglassEmpty } from "react-icons/md";
 // const BadgeIcon = require("../images/badge-icon.png");
+import BottomNav from "./BottomNav";
 
 interface DashboardProps {
   onSelectActivity: (activity: string) => void;
@@ -245,20 +246,7 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
       </div>
 
       {/* Bottom Navigation (mobile only) */}
-      <nav className="bottom-nav">
-        <button className="nav-btn active">
-          <span role="img" aria-label="Home">🏠</span>
-          <span>Home</span>
-        </button>
-        <button className="nav-btn">
-          <span role="img" aria-label="Activities">📚</span>
-          <span>Activities</span>
-        </button>
-        <button className="nav-btn">
-          <span role="img" aria-label="Profile">👤</span>
-          <span>Profile</span>
-        </button>
-      </nav>
+      <BottomNav />
     </div>
   );
 }
