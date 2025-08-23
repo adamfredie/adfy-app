@@ -18,6 +18,7 @@ import WordBank from './WordBank';
 import BottomNav from './BottomNav';
 import { useAuth } from '../src/contexts/AuthContext';
 
+
 // Activity progress interface - can be extended for other activities later
 interface ActivityProgress {
   storytelling?: {
@@ -183,6 +184,8 @@ export function MainApp() {
             <Route path="wordBank" element={
               <WordBank onBack={handleBackToDashboard} />
             } />
+
+
             
             {/* Default redirect to dashboard */}
             <Route path="*" element={<Navigate to="dashboard" replace />} />

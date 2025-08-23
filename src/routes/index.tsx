@@ -9,6 +9,7 @@ import { NotFound } from '../components/NotFound';
 import { ProtectedRoute } from './ProtectedRoute';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import EmailVerification from '../../components/Emailverification';
 
 // Lazy load components for better performance
 const AuthWrapper = React.lazy(() => import('../../components/auth/AuthWrapper').then(module => ({ default: module.AuthWrapper })));
@@ -37,6 +38,7 @@ export function AppRoutes() {
           {/* Public routes */}
           <Route path="/" element={<SplashScreen />} />
           <Route path="/welcome" element={<WelcomePages />} />
+          <Route path="/verify" element={<EmailVerification />} />
           <Route path="/auth/login" element={<AuthWrapperWrapper />} />
           <Route path="/auth/signup" element={<SignupFormWrapper />} />
           
