@@ -44,9 +44,9 @@ export function AppRoutes() {
           <Route 
             path="/onboarding" 
             element={
-              // <ProtectedRoute>
+              <ProtectedRoute>
                 <Onboarding />
-              // </ProtectedRoute>
+             </ProtectedRoute>
             } 
           />
           
@@ -54,9 +54,9 @@ export function AppRoutes() {
           <Route 
             path="/app/*" 
             element={
-              // <ProtectedRoute>
+              <ProtectedRoute>
                 <MainApp />
-              // </ProtectedRoute>
+              </ProtectedRoute>
             } 
           />
           
