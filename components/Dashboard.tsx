@@ -203,8 +203,12 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
         )}
       </div>
 
-      {/* Learning Statistics Section */}
-      <Learningstatics userStats={userStats} expandedSections={expandedSections} toggleSection={toggleSection} />
+              {/* Learning Statistics Section */}
+        <Learningstatics 
+          userStats={userStats} 
+          expandedSections={expandedSections} 
+          toggleSection={toggleSection}
+        />
 
       {/* Activities Section */}
       <div className="dashboard-section">

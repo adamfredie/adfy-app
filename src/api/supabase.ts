@@ -436,3 +436,117 @@ export const isAuthCallback = () => {
   
   return !!(accessToken && refreshToken && type === 'recovery');
 };
+
+// Learning Statistics Functions
+export interface DailyWord {
+  word: string;
+  definition: string;
+  partOfSpeech: string;
+  example: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+}
+
+// Save vocabulary words learned
+export async function saveVocabularyWords(userId: string, words: DailyWord[], field: string) {
+  const vocabularyData = words.map(word => ({
+    user_id: userId,
+    word: word.word,
+    field_category: field
+  }));
+
+  const { data, error } = await supabase
+    .from('vocabulary_progress')
+    .upsert(vocabularyData, { onConflict: 'user_id,word' })
+    .select();
+
+  if (error) throw error;
+  return data;
+}
+
+// Record daily activity for streak calculation
+export async function recordDailyActivity(userId: string) {
+  const today = new Date().toISOString().split('T')[0];
+  
+  const { data, error } = await supabase
+    .from('daily_activity')
+    .upsert([{
+      user_id: userId,
+      activity_date: today
+    }], { onConflict: 'user_id,activity_date' })
+    .select();
+
+  if (error) throw error;
+  return data;
+}
+
+// Update user's total score
+export async function updateUserTotalScore(userId: string, newScore: number) {
+  const { data, error } = await supabase
+    .from('user_scores')
+    .upsert([{
+      user_id: userId,
+      total_score: newScore,
+      last_updated: new Date().toISOString()
+    }], { onConflict: 'user_id' })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+// Get user learning statistics
+export async function getUserLearningStats(userId: string) {
+  // Get total unique words learned
+  const { data: wordsData, error: wordsError } = await supabase
+    .from('vocabulary_progress')
+    .select('word')
+    .eq('user_id', userId);
+
+  if (wordsError) throw wordsError;
+
+  // Calculate current streak from daily activity
+  const { data: activityData, error: activityError } = await supabase
+    .from('daily_activity')
+    .select('activity_date')
+    .eq('user_id', userId)
+    .order('activity_date', { ascending: false });
+
+  if (activityError) throw activityError;
+
+  // Calculate streak logic
+  let currentStreak = 0;
+  if (activityData && activityData.length > 0) {
+    const today = new Date();
+    let checkDate = new Date(today);
+    
+    for (let i = 0; i < 30; i++) { // Check last 30 days max
+      const dateStr = checkDate.toISOString().split('T')[0];
+      const hasActivity = activityData.some(activity => 
+        activity.activity_date === dateStr
+      );
+      
+      if (hasActivity) {
+        currentStreak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+  }
+
+  // Get total score
+  const { data: scoreData, error: scoreError } = await supabase
+    .from('user_scores')
+    .select('total_score')
+    .eq('user_id', userId)
+    .single();
+
+  if (scoreError && scoreError.code !== 'PGRST116') throw scoreError;
+
+  return {
+    wordsLearned: wordsData?.length || 0,
+    currentStreak: currentStreak,
+    totalScore: scoreData?.total_score || 0
+  };
+}

@@ -55,6 +55,7 @@ import { Alert } from "./ui/alert";
 // import { Select } from "./ui/select";
 import { OnboardingData } from "./Onboarding";
 import { useVoiceInteraction } from "../hooks/useVoiceInteraction";
+import { useAuth } from "../src/contexts/AuthContext";
 import { analyzeStoryWithGemini, generateVoiceResponse, generateVoiceResponseFromAudio } from '../src/api/gemini';
 // import { CustomSelect } from "./ui/CustomSelect";
 import ReactMarkdown from 'react-markdown';
@@ -65,6 +66,8 @@ import { getElevenLabsAudio } from '../src/api/elevenlabs';
 import { getRandomWordsFromGemini, getGeminiExample } from '../src/api/gemini';
 // IMORTING GEMINI FUNCTION FOR GENERATING RANDOM TOPIC
 import { getRandomStoryTopics } from '../src/api/gemini';
+// Supabase learning statistics functions
+import { saveVocabularyWords, recordDailyActivity, updateUserTotalScore } from '../src/api/supabase';
 // ... inside your component
 // AUTO SCROLl
 import { ScrollToTop } from "./ScrollToTop";
@@ -250,6 +253,7 @@ export function StorytellingActivity({
   onProgressUpdate,
   onComplete 
 }: StorytellingActivityProps) {
+  const { user } = useAuth();
   const [storyAnalysis, setStoryAnalysis] = useState<any>(null);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
   const [loadingRandomWords, setLoadingRandomWords] = useState(false);
@@ -1600,7 +1604,7 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
     }
   };
 
-  const calculateFinalScore = () => {
+  const calculateFinalScore = async () => {
     const correctAnswers = questionResults.filter(result => result.isCorrect).length;
     //This is for calculating the learning score upto 25 points
     const learningScore = (correctAnswers / learningQuestions.length) * 25;
@@ -1614,6 +1618,29 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
     
     const total = Math.min(100, learningScore + storyScore + voiceScore);
     setFinalScore(Math.round(total));
+
+    // Save essential data to Supabase with retry logic
+    const saveToSupabase = async (retries = 3) => {
+      try {
+        if (user?.id) {
+          await Promise.all([
+            saveVocabularyWords(user.id, dailyWords, selectedField),
+            recordDailyActivity(user.id),
+            updateUserTotalScore(user.id, Math.round(total))
+          ]);
+        }
+      } catch (error) {
+        if (retries > 0) {
+          console.warn(`Retrying Supabase save... (${retries} attempts left)`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return saveToSupabase(retries - 1);
+        }
+        console.error('Failed to save to Supabase after retries:', error);
+        // Continue with completion even if save fails
+      }
+    };
+
+    await saveToSupabase();
     
     // Mark activity as completed
     if (onComplete) {
