@@ -3,10 +3,11 @@ import "./styles/main.css";
 import { OnboardingData } from "./Onboarding";
 import { HiOutlineBookOpen } from "react-icons/hi";
 import Learningstatics from "./Learningstatics";
-import { MdVerified } from "react-icons/md";
+import { MdDescription, MdVerified } from "react-icons/md";
 import { MdHourglassEmpty } from "react-icons/md";
 // const BadgeIcon = require("../images/badge-icon.png");
 import BottomNav from "./BottomNav";
+import { desc } from "motion/react-client";
 
 interface DashboardProps {
   onSelectActivity: (activity: string) => void;
@@ -92,6 +93,10 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
       title: 'AI Vocabulary',
       description: 'Build Vocabulary through interactive storytelling with AI guidance',
       duration: '15 Min',
+    },{
+      id:"wordBank",
+      title:"Word Bank",
+      description:"Review and revisit your learned vocabulary"
     }
   ];
 

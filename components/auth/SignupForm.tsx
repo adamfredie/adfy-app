@@ -219,7 +219,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
       </form>
 
       {/* Switch to Login */}
-      <div style={{ textAlign: 'center', marginTop: '20px' }}>
+      <div style={ {textAlign: 'center', marginTop: '1px'} }>
         <p style={{ fontSize: '14px', color: '#6b7280' }}>
           Already have an account?{' '}
           <button

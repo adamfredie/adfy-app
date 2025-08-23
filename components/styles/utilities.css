@@ -3461,7 +3461,7 @@ ml-auto{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px;
+  padding: 6px;
   cursor: pointer;
 }
 .section-header h2 {
@@ -3916,7 +3916,7 @@ ml-auto{
   max-width: 500px;
 
   /* Transparent frosted white */
-  background: rgba(255, 255, 255, 0.533);
+  background:none;
 
   /* Blur for glass effect */
   backdrop-filter: blur(12px);
@@ -3926,10 +3926,10 @@ ml-auto{
   border-radius: 50px;
 
   /* Subtle border */
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 2px solid rgba(0,0,0,0.1);
 
   /* Light shadow for floating effect */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: inert 0 10px 10px rgba(0, 0, 0, 0.8);
 
   /* Padding */
   padding: 12px 24px;
@@ -3963,7 +3963,7 @@ ml-auto{
 .nav-btn {
   background: none;
   border: none;
-  color: #6B7280;
+  color: #37474F;
   width: 100vw;
   font-size: 0.6rem;
   display: flex;
@@ -3982,6 +3982,9 @@ ml-auto{
   /* background: rgba(255, 184, 76, 0.1); */
 }
 
+.nav-btn span{
+  color: #212121
+}
 .nav-btn:hover {
   color: var(--aduffy-yellow);
   /* background: rgba(255, 184, 76, 0.05); */
@@ -4077,8 +4080,10 @@ ml-auto{
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  margin-bottom: 24px;
+  /* align-items: center; */
+  justify-content: baseline;
+  gap: 20px;
+  /* margin-bottom: 10px; */
 }
 
 .form-field {
@@ -4464,6 +4469,7 @@ ml-auto{
 
 /* Welcome Pages */
 .welcome-container {
+  overflow-y: hidden;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -4486,12 +4492,15 @@ ml-auto{
   border-radius: 30px 30px 0 0;
   position: absolute;
   bottom: 0;
+  height:60vh;
   width: 100%;
   z-index: 10;
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-evenly;
+  align-items:center;
+  /* margin-bottom: 5px; */
 }
 
 .welcome-text {
@@ -4518,7 +4527,7 @@ ml-auto{
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.8rem;
 }
 
 .progress-dot {
@@ -4540,7 +4549,7 @@ ml-auto{
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  margin-top: auto;
+  /* margin-top: auto; */
   /* margin-top: 0px; */
 }
 

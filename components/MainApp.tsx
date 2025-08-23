@@ -14,6 +14,7 @@ import { ScrollToTop } from './ScrollToTop';
 import { SplashScreen } from './SplashScreen';
 import { WelcomePages } from './WelcomePages';
 import UserProfile from './UserProfile';
+import WordBank from './WordBank';
 import BottomNav from './BottomNav';
 import { useAuth } from '../src/contexts/AuthContext';
 
@@ -102,8 +103,8 @@ export function MainApp() {
   return (
     <div className="app-container-column">
       <ScrollToTop trigger={currentActivity} />
-      {/* Hide Navigation on user-profile page for cleaner UI */}
-      {currentActivity !== 'user-profile' && (
+      {/* Hide Navigation on user-profile and wordBank pages for cleaner UI */}
+      {currentActivity !== 'user-profile' && currentActivity !== 'wordBank' && (
         <Navigation 
           currentActivity={currentActivity}
           onSignOut={handleSignOut}
@@ -115,11 +116,11 @@ export function MainApp() {
       <main className="main-content-column">
         {/* 
           CHANGED: Conditional Header Rendering
-          - Hide Header component on 'dashboard' and 'storytelling' screens
+          - Hide Header component on 'dashboard', 'storytelling', 'wordBank', and 'user-profile' screens
           - This was requested to create a cleaner UI for these specific activities
           - Header only shows on other activities (quiz, interview, voice-conversation, pronunciation, settings)
         */}
-        {currentActivity !== 'dashboard' && currentActivity !== 'storytelling' && currentActivity !== 'user-profile' && (
+        {currentActivity !== 'dashboard' && currentActivity !== 'storytelling' && currentActivity !== 'user-profile' && currentActivity !== 'wordBank' && (
           <Header 
             currentActivity={currentActivity} 
             onNavigateHome={handleBackToDashboard}
@@ -177,6 +178,10 @@ export function MainApp() {
             
             <Route path="pronunciation" element={
               <PronunciationPractice onBack={handleBackToDashboard} />
+            } />
+            
+            <Route path="wordBank" element={
+              <WordBank onBack={handleBackToDashboard} />
             } />
             
             {/* Default redirect to dashboard */}

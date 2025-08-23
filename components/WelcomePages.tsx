@@ -116,8 +116,8 @@ export function WelcomePages() {
   if (showSignIn) {
     return (
       <div className="welcome-container">
-        <div className="w-full">
-          <img src="https://aduffylearning.com/wp-content/uploads/2025/08/aduffy-welcome-screen-img.jpg" alt="A woman on the phone" className="w-full object-center" />
+        <div className=" h-full">
+          <img src="https://aduffylearning.com/wp-content/uploads/2025/08/aduffy-welcome-screen-img.jpg" alt="A woman on the phone" className=" object-cover h-full" />
         </div>
 
         <div className="welcome-content">
@@ -217,7 +217,7 @@ export function WelcomePages() {
   return (
     <>
       <div className="welcome-container">
-        <div className="">
+        <div className="w-full">
           <img src="https://aduffylearning.com/wp-content/uploads/2025/08/aduffy-welcome-screen-img.jpg" alt="A woman on the phone" className="object-cover w-full" />
         </div>
 
@@ -225,10 +225,7 @@ export function WelcomePages() {
           <div className="welcome-text">
             <h1 className="welcome-title">{welcomePages[currentPage].title}</h1>
             <p className="welcome-description">{welcomePages[currentPage].description}</p>
-          </div>
-
-          {/* Progress Dots  */}
-           <div className="welcome-progress">
+           <div className="welcome-progress mt-4">
             {welcomePages.map((_, index) => (
               <div
                 key={index}
@@ -236,6 +233,9 @@ export function WelcomePages() {
               />
             ))}
           </div>
+          </div>
+
+          {/* Progress Dots  */}
           
           {/* Action Buttons */}
           <div className="welcome-actions">
