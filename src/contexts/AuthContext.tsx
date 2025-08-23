@@ -57,6 +57,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Initialize auth state on mount
   useEffect(() => {
     let mounted = true;
+    let safetyTimeout: NodeJS.Timeout;
+
+    // Safety timeout to ensure loading state is always reset
+    safetyTimeout = setTimeout(() => {
+      if (mounted && loading) {
+        console.warn('⚠️ AuthContext: Safety timeout reached, forcing loading to false');
+        setLoading(false);
+      }
+    }, 10000); // 10 second safety timeout
+
+    // Check if Supabase client is properly initialized
+    if (!supabase) {
+      console.error('❌ AuthContext: Supabase client is not initialized!');
+      console.error('❌ AuthContext: This will cause infinite loading. Check environment variables.');
+      
+      // Force loading to false to prevent infinite loading
+      if (mounted) {
+        setLoading(false);
+      }
+      return;
+    }
 
     // Test Supabase connection first
     const testConnection = async () => {
@@ -136,24 +157,59 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Get initial session
     const getInitialSession = async () => {
       try {
+        // Double-check Supabase client is available
+        if (!supabase) {
+          console.error('❌ AuthContext: Supabase client not available in getInitialSession');
+          return;
+        }
+
+        console.log('🔍 AuthContext: Getting initial session...');
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         
         if (mounted) {
+          console.log('🔍 AuthContext: Initial session retrieved:', initialSession ? 'exists' : 'none');
           setSession(initialSession);
           setUser(initialSession?.user ?? null);
           
           // If we have a session, get the user profile
           if (initialSession?.user) {
             console.log('🔍 AuthContext: Found existing session, fetching user profile...');
-            await fetchUserProfile(initialSession.user.id);
+            
+            // Add timeout protection for profile fetching
+            try {
+              const profilePromise = fetchUserProfile(initialSession.user.id);
+              const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Profile fetch timeout after 5 seconds')), 5000);
+              });
+              
+              await Promise.race([profilePromise, timeoutPromise]);
+              console.log('✅ AuthContext: User profile fetched successfully');
+            } catch (error) {
+              console.warn('⚠️ AuthContext: Profile fetch failed or timed out:', error);
+              
+              // During hot reload, try to recover profile from localStorage as backup
+              if (typeof window !== 'undefined') {
+                try {
+                  const storedProfile = localStorage.getItem('adfy-user-profile');
+                  if (storedProfile) {
+                    const parsedProfile = JSON.parse(storedProfile);
+                    console.log('🔄 AuthContext: Recovered profile from localStorage during hot reload');
+                    setUserProfile(parsedProfile);
+                  }
+                } catch (localStorageError) {
+                  console.log('ℹ️ AuthContext: No stored profile in localStorage');
+                }
+              }
+            }
           } else {
             console.log('🔍 AuthContext: No existing session found');
           }
         }
       } catch (error) {
-        console.error('Error getting initial session:', error);
+        console.error('❌ AuthContext: Exception getting initial session:', error);
       } finally {
         if (mounted) {
+          console.log('✅ AuthContext: Setting loading to false');
           setLoading(false);
         }
       }
@@ -164,24 +220,55 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
-        console.log('Auth state changed:', event, newSession);
+        console.log('🔄 AuthContext: Auth state changed:', event, newSession);
         
         if (mounted) {
           setSession(newSession);
           setUser(newSession?.user ?? null);
           
           if (event === 'SIGNED_IN' && newSession?.user) {
-            await fetchUserProfile(newSession.user.id);
+            console.log('🔍 AuthContext: SIGNED_IN event, fetching user profile...');
+            try {
+              // Add timeout protection
+              const profilePromise = fetchUserProfile(newSession.user.id);
+              const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Profile fetch timeout after 5 seconds')), 5000);
+              });
+              
+              await Promise.race([profilePromise, timeoutPromise]);
+              console.log('✅ AuthContext: User profile fetched successfully');
+            } catch (error) {
+              console.warn('⚠️ AuthContext: Profile fetch failed or timed out:', error);
+              // Continue anyway - don't let profile failure block the app...
+            }
           } else if (event === 'SIGNED_OUT') {
             setUserProfile(null);
           } else if (event === 'TOKEN_REFRESHED' && newSession?.user) {
             // Handle token refresh (important for email verification)
             console.log('🔄 Token refreshed, user:', newSession.user.email);
-            await fetchUserProfile(newSession.user.id);
+            try {
+              const profilePromise = fetchUserProfile(newSession.user.id);
+              const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Profile fetch timeout after 5 seconds')), 5000);
+              });
+              
+              await Promise.race([profilePromise, timeoutPromise]);
+            } catch (error) {
+              console.warn('⚠️ AuthContext: Profile fetch failed or timed out:', error);
+            }
           } else if (event === 'USER_UPDATED' && newSession?.user) {
             // Handle user updates (like email confirmation)
             console.log('👤 User updated:', newSession.user.email, 'confirmed:', newSession.user.email_confirmed_at);
-            await fetchUserProfile(newSession.user.id);
+            try {
+              const profilePromise = fetchUserProfile(newSession.user.id);
+              const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Profile fetch timeout after 5 seconds')), 5000);
+              });
+              
+              await Promise.race([profilePromise, timeoutPromise]);
+            } catch (error) {
+              console.warn('⚠️ AuthContext: Profile fetch failed or timed out:', error);
+            }
           }
         }
       }
@@ -200,15 +287,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      clearTimeout(safetyTimeout); // Clear safety timeout on cleanup
     };
   }, []);
 
   // Fetch user profile from Supabase
   const fetchUserProfile = async (userId: string) => {
     try {
+      // Check if Supabase client is available
+      if (!supabase) {
+        console.error('❌ AuthContext: Supabase client not available in fetchUserProfile');
+        setUserProfile(null);
+        return;
+      }
+
+      console.log('🔍 AuthContext: Fetching user profile for user:', userId);
       const { getUserProfile } = await import('../api/supabase');
       const profile = await getUserProfile(userId);
+      
+      // Store profile in localStorage as backup for hot reloads
+      if (profile && typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('adfy-user-profile', JSON.stringify(profile));
+          console.log('💾 AuthContext: Profile stored in localStorage for hot reload recovery');
+        } catch (localStorageError) {
+          console.log('ℹ️ AuthContext: Could not store profile in localStorage');
+        }
+      }
+      
       setUserProfile(profile);
+      return profile;
     } catch (error: any) {
       console.log('ℹ️ User profile not found (this is normal for new users):', error.message);
       // Profile might not exist yet (new user) - this is not an error
@@ -217,6 +325,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error('Error fetching user profile:', error);
       }
       setUserProfile(null);
+      return null;
     }
   };
 

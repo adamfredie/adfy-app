@@ -183,7 +183,7 @@ const [activeSection, setActiveSection] = useState("profile");
               <label className="userProfileLabel">Job Title</label>
               <input
                 type="text"
-                defaultValue="Marketing Head"
+                defaultValue={userProfile?.jobTitle || ""}
                 className="w-full border rounded-md px-3 py-2 text-sm mt-1"
               />
             </div>
@@ -193,7 +193,7 @@ const [activeSection, setActiveSection] = useState("profile");
               <label className="userProfileLabel">Company</label>
               <input
                 type="text"
-                defaultValue="Acufly"
+                defaultValue={userProfile?.company || ""}
                 className="w-full border rounded-md px-3 py-2 text-sm mt-1"
               />
             </div>
@@ -201,20 +201,52 @@ const [activeSection, setActiveSection] = useState("profile");
             {/* Professional Field */}
             <div className="mb-3">
               <label className="userProfileLabel">Professional Field</label>
-              <select className="w-full border rounded-md px-3 py-2 text-sm mt-1">
-                <option>Marketing</option>
-                <option>Engineering</option>
-                <option>Design</option>
-              </select>
+                <select 
+                 defaultValue={userProfile?.field || ""}
+                 className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+               >
+
+                 <option value="">Select a field</option>
+                 {/* <option value={userProfile?.field}>{userProfile?.field}</option> */}
+                 {/* <option value="Marketing">Marketing</option>
+                 <option value="Engineering">Engineering</option>
+                 <option value="Design">Design</option>
+                 <option value="Product">Product</option>
+                 <option value="Sales">Sales</option>
+                 <option value="Finance">Finance</option>
+                 <option value="Healthcare">Healthcare</option>
+                 <option value="Education">Education</option>
+                 <option value="Technology">Technology</option>
+                 <option value="Research">Research</option>
+                 <option value="Consulting">Consulting</option>
+                 <option value="Operations">Operations</option>
+                 <option value="Human Resources">Human Resources</option>
+                 <option value="Legal">Legal</option>
+                 <option value="Other">Other</option> */}
+                 <option value="">Choose your professional field</option>
+              <option value="marketing">Marketing</option>
+              <option value="technology">Technology</option>
+              <option value="sales">Sales</option>
+              <option value="product">Product Management</option>
+              <option value="finance">Finance</option>
+              <option value="operations">Operations</option>
+              <option value="consulting">Consulting</option>
+              <option value="other">Other</option>
+               </select>
             </div>
 
             {/* Experience Level */}
             <div className="mb-3">
               <label className="userProfileLabel">Experience Level</label>
-              <select className="w-full border rounded-md px-3 py-2 text-sm mt-1">
-                <option>Mid level 3–7</option>
-                <option>Entry level 0–2</option>
-                <option>Senior level 8+</option>
+              <select 
+                defaultValue={userProfile?.experienceLevel || ""}
+                className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+              >
+               <option value="">Choose your experience level</option>
+              <option value="entry">Entry Level (0-2 years)</option>
+              <option value="mid">Mid Level (3-7 years)</option>
+              <option value="senior">Senior Level (8-12 years)</option>
+              <option value="executive">Executive Level (13+ years)</option>
               </select>
             </div>
           </div>
