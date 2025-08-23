@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  FiArrowLeft,
-  FiSettings,
-} from "react-icons/fi";
-import Learningstatics from "./Learningstatics";
+import { FiArrowLeft, FiSettings } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa6";
 import { OnboardingData } from "./Onboarding";
 
@@ -12,20 +8,50 @@ const UserProfile: React.FC<{
   userProfile: OnboardingData | null;
 }> = ({ onBack, userProfile }) => {
   const [activeTab, setActiveTab] = useState<"profile" | "preferences">("profile");
-  const [activeSection, setActiveSection] = useState("profile");
+  const [activeSection, setActiveSection] = useState("Profile");
 
   const [expandedSections, setExpandedSections] = useState({
-    course: true,
-    learningStats: false,
     goalsChallenges: false,
+    comminicationChallenges: true,
   });
 
   const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+    setExpandedSections((prev) => {
+      const allClosed = Object.keys(prev).reduce((acc, key) => {
+        acc[key as keyof typeof expandedSections] = false;
+        return acc;
+      }, {} as typeof expandedSections);
+
+      return {
+        ...allClosed,
+        [section]: !prev[section],
+      };
+    });
   };
+
+  const communicationChallenges = [
+    { id: "public-speaking", label: "Public speaking and presentations" },
+    { id: "meeting-participation", label: "Active participation in meetings" },
+    { id: "email-clarity", label: "Writing clear and professional emails" },
+    { id: "difficult-conversations", label: "Having difficult conversations" },
+    { id: "networking", label: "Professional networking" },
+    { id: "cross-team-collaboration", label: "Cross-team collaboration" },
+    { id: "client-communication", label: "Client communication" },
+    { id: "virtual-meetings", label: "Virtual meeting facilitation" },
+    { id: "persuasive-writing", label: "Persuasive writing and proposals" },
+    { id: "conflict-resolution", label: "Conflict resolution" },
+  ];
+
+  const improvementGoals = [
+    { id: "confidence", label: "Build confidence in speaking" },
+    { id: "vocabulary", label: "Expand professional vocabulary" },
+    { id: "clarity", label: "Improve message clarity" },
+    { id: "persuasion", label: "Enhance persuasive communication" },
+    { id: "leadership", label: "Develop leadership communication" },
+    { id: "storytelling", label: "Master storytelling techniques" },
+    { id: "active-listening", label: "Improve active listening skills" },
+    { id: "emotional-intelligence", label: "Enhance emotional intelligence" },
+  ];
 
   // ---------------- Profile Form States ----------------
   const initialForm = {
@@ -35,49 +61,51 @@ const UserProfile: React.FC<{
     experienceLevel: "Mid level 3–7",
   };
 
+  const initialCheckedItems = communicationChallenges
+    .concat(improvementGoals)
+    .reduce((acc, item) => ({ ...acc, [item.label]: false }), {});
+
   const [form, setForm] = useState(initialForm);
-  const [ischanged, setischanged] = useState(false);
+  const [checkedItems, setCheckedItems] = useState(initialCheckedItems);
+  const [ischanged, setIsChanged] = useState(false);
 
-  // Check if form changed
-  useEffect(() => {
-    const changed = Object.keys(initialForm).some(
-      (key) => form[key as keyof typeof form] !== initialForm[key as keyof typeof initialForm]
-    );
-    setischanged(changed);
-  }, [form]);
-
-  // ---------------- Stats Section ----------------
-  const getStatsBasedOnLevel = () => {
-    if (!userProfile) {
-      return { wordsLearned: 0, weeklyGoal: 0, currentStreak: 0, totalScore: 0 };
-    }
-    const baseStats = {
-      beginner: { wordsLearned: 89, weeklyGoal: 25, currentStreak: 5, totalScore: 650 },
-      intermediate: { wordsLearned: 234, weeklyGoal: 50, currentStreak: 12, totalScore: 1450 },
-      advanced: { wordsLearned: 412, weeklyGoal: 75, currentStreak: 18, totalScore: 2890 },
-    };
-    const level = userProfile?.vocabulary_level || "intermediate";
-    return baseStats[level as keyof typeof baseStats] || baseStats.intermediate;
+  // Handle checkbox changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setCheckedItems((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
   };
 
-  const userStats = getStatsBasedOnLevel();
+  // Check if form or checkboxes changed
+  useEffect(() => {
+    const hasFormChanged = Object.entries(form).some(
+      ([key, value]) => value !== initialForm[key as keyof typeof initialForm]
+    );
+    const hasCheckboxChanged = Object.entries(checkedItems).some(
+      ([key, value]) => value !== initialCheckedItems[key]
+    );
+    setIsChanged(hasFormChanged || hasCheckboxChanged);
+  }, [form, checkedItems]);
 
+  // const userStats = getStatsBasedOnLevel();
   return (
     <div className="w-full max-w-[500px] mx-auto bg-white h-screen shadow-lg flex flex-col">
       {/* ------------------- HEADER ------------------- */}
-      <div className="flex items-center justify-between px-4 py-2 ">
+      <div className="flex items-center justify-between px-4 py-2">
         <button onClick={onBack}>
           <FiArrowLeft size={22} className="text-yellow-500" />
         </button>
         <div className="titleContainer px-3 w-full">
-          <h1 className="text-lg font-semibold">Profile</h1>
+          <h1 className="text-lg font-semibold">{activeSection}</h1>
         </div>
       </div>
 
       {/* ------------------- PROFILE HEADER ------------------- */}
-      <div className="flex items-center justify-between px-4 mt-4">
+      <div className="flex items-center justify-between px-4 mt-2">
         <div className="relative">
-          <div className="w-20 h-20 rounded-full bg-pink-300 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-pink-300 flex items-center justify-center">
             <span className="text-3xl">👤</span>
           </div>
           <button className="absolute bottom-0 right-0 bg-white rounded-full px-2 py-0.5 shadow-md text-xs font-semibold">
@@ -94,14 +122,14 @@ const UserProfile: React.FC<{
           size={22}
           className="text-gray-700 cursor-pointer"
           onClick={() =>
-            setActiveSection((elem) => (elem === "settings" ? "profile" : "settings"))
+            setActiveSection((elem) => (elem === "Settings" ? "Profile" : "Settings"))
           }
         />
       </div>
 
       {/* ------------------- MAIN CONTENT ------------------- */}
-      {activeSection === "settings" ? (
-        <div className="flex flex-col mt-16">
+      {activeSection === "Settings" ? (
+        <div className="flex flex-col mt-11">
           <div className="border-t-[3px] border-[var(--primary)] pt-2"></div>
           <div className="privacy px-6">
             <div className="w-full text-left py-2 font-bold flex justify-between">
@@ -114,20 +142,20 @@ const UserProfile: React.FC<{
               Support <FaArrowRight className="text-gray-300" />
             </div>
           </div>
-          <div className="border-t-2 px-6 mt-4 pt-4">
+          <div className="border-t-4 border-b-4 flex items-center  px-6 mt-4 py-4">
             <button className="text-[var(--primary)] font-semibold">Log out</button>
           </div>
         </div>
       ) : (
         <div className="container">
           {/* Tabs */}
-          <div className="flex border-b mt-6">
+          <div className="flex border-b mt-1">
             <button
               onClick={() => setActiveTab("profile")}
               className={`flex-1 py-2 text-center font-medium ${
                 activeTab === "profile"
-                  ? "  border-b-[3px] border-[var(--primary)] font-extrabold"
-                  : "text-[var(--font-size-sm)] font-extrabold  border-b-2 border-gray-300"
+                  ? "border-b-[3px] border-[var(--primary)] font-extrabold"
+                  : "text-[var(--font-size-sm)] font-extrabold border-b-2 border-gray-300"
               }`}
             >
               Profile
@@ -136,16 +164,16 @@ const UserProfile: React.FC<{
               onClick={() => setActiveTab("preferences")}
               className={`flex-1 py-2 text-center font-medium ${
                 activeTab === "preferences"
-                  ? "  border-b-[3px] border-[var(--primary)] font-extrabold"
+                  ? "border-b-[3px] border-[var(--primary)] font-extrabold"
                   : "text-[var(--font-size-sm)] font-extrabold border-b-2 border-gray-300"
               }`}
             >
-              <h2>Learning Preferences</h2>
+              Learning Preferences
             </button>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto px-4 py-4">
+          <div className="flex-1 px-4 py-2">
             {activeTab === "profile" ? (
               <div>
                 <h3 className="userProfileLabel">Professional Information</h3>
@@ -200,23 +228,76 @@ const UserProfile: React.FC<{
                 </div>
               </div>
             ) : (
-              <div>
-                <Learningstatics
-                  userStats={userStats}
-                  expandedSections={expandedSections}
-                  toggleSection={toggleSection}
-                />
-                <div className="dashboard-section">
-                  <div
-                    className="section-header"
-                    onClick={() => toggleSection("goalsChallenges")}
-                  >
-                    <h2>Goals & Challenges</h2>
-                    <span className="material-symbols-outlined">
-                      {expandedSections.goalsChallenges
-                        ? "expand_circle_up"
-                        : "expand_circle_down"}
-                    </span>
+              <div className="!mt-0">
+                {/* Communication Challenges */}
+                <div className="div border-b-8 border-gray-100">
+                  <div className="challengesDiv">
+                    <div
+                      className="section-header"
+                      onClick={() => toggleSection("comminicationChallenges")}
+                    >
+                      <h2>Communication Challenges</h2>
+                      <span className="material-symbols-outlined">
+                        {expandedSections.comminicationChallenges
+                          ? "expand_circle_up"
+                          : "expand_circle_down"}
+                      </span>
+                    </div>
+                    {expandedSections.comminicationChallenges && (
+                      <div className="section-content">
+                        <div className="communication-challenges-grid">
+                          {communicationChallenges.map((challenge) => (
+                            <div key={challenge.id} className="communication-challenge-item">
+                              <input
+                                type="checkbox"
+                                name={challenge.label}
+                                onChange={handleChange}
+                                checked={!!checkedItems[challenge.label]}
+                              />
+                              <label className="communication-challenge-label">
+                                {challenge.label}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Improvement Goals */}
+                <div className="div border-b-8 border-gray-100">
+                  <div className="challengesDiv">
+                    <div
+                      className="section-header"
+                      onClick={() => toggleSection("goalsChallenges")}
+                    >
+                      <h2>Primary Improvement Goals</h2>
+                      <span className="material-symbols-outlined">
+                        {expandedSections.goalsChallenges
+                          ? "expand_circle_up"
+                          : "expand_circle_down"}
+                      </span>
+                    </div>
+                    {expandedSections.goalsChallenges && (
+                      <div className="section-content">
+                        <div className="communication-challenges-grid">
+                          {improvementGoals.map((challenge) => (
+                            <div key={challenge.id} className="communication-challenge-item">
+                              <input
+                                type="checkbox"
+                                name={challenge.label}
+                                onChange={handleChange}
+                                checked={!!checkedItems[challenge.label]}
+                              />
+                              <label className="communication-challenge-label">
+                                {challenge.label}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -226,16 +307,13 @@ const UserProfile: React.FC<{
           {/* Save button appears only if changes are made */}
           {ischanged && (
             <div className="px-4 py-3 mb-10">
-              <button className="w-full bg-[var(--primary)]  py-2 rounded-md font-semibold">
+              <button className="w-full bg-[var(--primary)] py-2 rounded-md font-semibold">
                 Save
               </button>
             </div>
           )}
         </div>
       )}
-
-      {/* ------------------- BOTTOM NAV ------------------- */}
-      <BottomNav />
     </div>
   );
 };

@@ -35,8 +35,8 @@ export function Navigation({
   }, []);
   return (
     <>
-    {/* For desktop screen desktop UserMenu will open  */}
-      <header className="top-nav hidden bg-red-400 md:flex">
+          {/* For desktop screen desktop UserMenu will open  */}
+      <header className="top-nav hidden md:flex bg-red-400">
         {/* DESKTOP NAVIGATION */}
         <div className="nav-desktop">
           <div className="nav-left">
@@ -89,6 +89,7 @@ export function Navigation({
           </div>
         </div>
       </header>
+      
           {/* In spmall screen this will be seen on desktop it will be hidden */}
       <header className="top-nav-mobile relative block md:hidden" ref={mobileMenuRef} >
         {/* FOR MOBILE NAVIGATION */}

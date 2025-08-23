@@ -14,6 +14,7 @@ import { ScrollToTop } from './ScrollToTop';
 import { SplashScreen } from './SplashScreen';
 import { WelcomePages } from './WelcomePages';
 import UserProfile from './UserProfile';
+import BottomNav from './BottomNav';
 import { useAuth } from '../src/contexts/AuthContext';
 
 // Activity progress interface - can be extended for other activities later
@@ -101,13 +102,16 @@ export function MainApp() {
   return (
     <div className="app-container-column">
       <ScrollToTop trigger={currentActivity} />
-      <Navigation 
-        currentActivity={currentActivity}
-        onSignOut={handleSignOut}
-        onResetOnboarding={handleResetOnboarding}
-        userProfile={userProfile}
-        onUserProfile={() => navigate('/app/user-profile')}
-      />
+      {/* Hide Navigation on user-profile page for cleaner UI */}
+      {currentActivity !== 'user-profile' && (
+        <Navigation 
+          currentActivity={currentActivity}
+          onSignOut={handleSignOut}
+          onResetOnboarding={handleResetOnboarding}
+          userProfile={userProfile}
+          onUserProfile={() => navigate('/app/user-profile')}
+        />
+      )}
       <main className="main-content-column">
         {/* 
           CHANGED: Conditional Header Rendering
@@ -180,6 +184,9 @@ export function MainApp() {
           </Routes>
         </div>
       </main>
+      
+      {/* Bottom Navigation - appears on all app pages */}
+      <BottomNav />
     </div>
   );
 }

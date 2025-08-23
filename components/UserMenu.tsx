@@ -2,8 +2,8 @@ import React from 'react';
 import './styles/main.css';
 import { useAuth } from '../src/contexts/AuthContext';
 
-export function UserMenu({ onSignOut, onResetOnboarding, onUserProfile,userProfile:user }) {
-  const { userProfile } = useAuth();
+export function UserMenu({ onSignOut, onResetOnboarding, onUserProfile, userProfile }) {
+  const { userProfile: authUserProfile } = useAuth();
   const formatExperienceLevel = (level) => {
     if (!level) return '';
     
@@ -20,15 +20,15 @@ export function UserMenu({ onSignOut, onResetOnboarding, onUserProfile,userProfi
     <div className="user-menu">
       <div className="user-menu-header">
         {/* <div className="user-name">Owner</div> */}
-        <div className="user-name">{userProfile?.name || ''}</div>
+        <div className="user-name">{authUserProfile?.name || ''}</div>
         <div className="user-details">Aduffy Learning • Technology</div>
         {/* <div className="user-details">Executive Level (10+ years)</div> */}
-        <div className="user-details">{formatExperienceLevel(userProfile?.experienceLevel)}</div>
+        <div className="user-details">{formatExperienceLevel(authUserProfile?.experienceLevel)}</div>
       </div>
       <div className="user-menu-divider" />
       <div className="user-menu-item">
         <span role="img" aria-label="profile">👤</span>
-        <span onClick={user}>Profile Settings</span>
+        <span onClick={onUserProfile}>Profile Settings</span>
       </div>
       <a href="#" className="user-menu-item">
         <span role="img" aria-label="preferences">⚙️</span>

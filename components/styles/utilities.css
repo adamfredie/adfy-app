@@ -3461,7 +3461,7 @@ ml-auto{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 18px 0 18px;
+  padding: 8px;
   cursor: pointer;
 }
 .section-header h2 {
@@ -3477,7 +3477,7 @@ ml-auto{
   transform: rotate(180deg);
 }
 .section-content {
-  padding: 12px 18px 18px 18px;
+  padding: 10px 10px 10px 10px;
   overflow-x: hidden;
   width: 100%;
   word-wrap: break-word;
@@ -3909,7 +3909,7 @@ ml-auto{
   justify-content: space-around;
   align-items: center;
   position: fixed;
-  bottom: 40px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
   width: 90vw;
@@ -3951,13 +3951,13 @@ ml-auto{
   
   .nav-btn {
     min-width: 50px;
-    padding: 6px 8px;
+    padding: 4px 6px;
     font-size: 0.7rem;
   }
   
   .nav-icon {
-    width: 18px;
-    height: 18px;
+    width: 1.25rem;
+    height: 1.25rem;
   }
 }
 .nav-btn {
@@ -3965,7 +3965,7 @@ ml-auto{
   border: none;
   color: #6B7280;
   width: 100vw;
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3973,7 +3973,7 @@ ml-auto{
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  padding: 8px 12px;
+  padding: 4px 8px;
   border-radius: 12px;
   min-width: 60px;
 }
@@ -3988,8 +3988,8 @@ ml-auto{
 }
 
 .nav-icon {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   stroke-width: 2px;
 }
 
@@ -4735,4 +4735,16 @@ ml-auto{
   color: var(--text-primary);
   font-size: var(--font-size-base);
   font-weight: 700;
+}
+
+.challengesDiv{
+    background: #fff;
+
+      padding: 8px;
+      overflow: hidden;
+      width: calc(100% - 24px);
+      box-sizing: border-box;
+      margin-top: 2px;
+      width: 100%;
+
 }

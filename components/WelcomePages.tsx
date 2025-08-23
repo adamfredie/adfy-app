@@ -221,7 +221,6 @@ export function WelcomePages() {
           <img src="https://aduffylearning.com/wp-content/uploads/2025/08/aduffy-welcome-screen-img.jpg" alt="A woman on the phone" className="object-cover w-full" />
         </div>
 
-        Content Section
         <div className="welcome-content">
           <div className="welcome-text">
             <h1 className="welcome-title">{welcomePages[currentPage].title}</h1>
