@@ -220,9 +220,6 @@ const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             {authLoading ? 'Creating Account...' : 'Create Account'}
           </button>
         </div>
-      </form>
-
-      {/* Switch to Login */}
       <div style={ {textAlign: 'center', marginTop: '1px'} }>
         <p style={{ fontSize: '14px', color: '#6b7280' }}>
           Already have an account?{' '}
@@ -241,7 +238,10 @@ const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             Sign in
           </button>
         </p>
+      {/* Switch to Login */}
       </div>
+      </form>
+
     </div>
   );
 }
