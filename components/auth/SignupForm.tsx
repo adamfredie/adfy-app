@@ -1,6 +1,7 @@
 import React, { useState,useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../src/contexts/AuthContext';
+import { supabase } from '../../src/api/supabase';
 
 interface SignupFormProps {
   onSuccess: () => void;
@@ -39,62 +40,65 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
       }
     }
   }, [user, isEmailVerified, userProfile, navigate]);
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccessMessage('');
 
-    // Validation
-    if (!email || !password || !confirmPassword) {
-      setError('Please fill in all fields');
-      return;
-    }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
+  setSuccessMessage('');
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
+  // Validation
+  if (!email || !password || !confirmPassword) {
+    setError('Please fill in all fields');
+    return;
+  }
+  if (!validateEmail(email)) {
+    setError('Invalid email format');
+    return;
+  }
+  if (password !== confirmPassword) {
+    setError('Passwords do not match');
+    return;
+  }
+  if (password.length < 6) {
+    setError('Password must be at least 6 characters long');
+    return;
+  }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return;
-    }
+  try {
+    const result = await signUp(email, password); // <-- from useAuth
 
-    try {
-      const result = await signUp(email, password);
-      
-      if (result.success) {
-        if (result.error) {
-          // This means signup succeeded but email verification is required
-          setSuccessMessage(result.error);
-          // Still proceed to onboarding - user can verify email later
-          setTimeout(() => {
-            navigate('/onboarding');
-          }, 2000);
-          // hello
-          // hello
-        } else {
-          setSuccessMessage('Account created successfully! Please check your email to verify your account.');
-          // Proceed to onboarding
-          console.log("Proceeding to onboarding");
-          setTimeout(() => {
-            navigate('/onboarding');
-          }, 2000);
-        }
+    if (result.error) {
+      if (result.error.toLowerCase().includes("already")) {
+        setError("This email is already registered. Please sign in instead.");
       } else {
-        setError(result.error || 'Signup failed');
+        setError(result.error);
       }
-    } catch (err) {
-      setError('An unexpected error occurred');
-      console.error('Signup error:', err);
+      return;
     }
-  };
+
+    setSuccessMessage("Account created successfully! Please check your email.");
+    setTimeout(() => navigate("/onboarding"), 2000);
+
+  } catch (err: any) {
+    console.error("Signup error:", err);
+    setError("An unexpected error occurred");
+  }
+};
+
+
+  const validateEmail = (value: string) => {
+  // Basic regex: ensures text@text.domain
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(value);
+};
+
 // Used for setting the email variable
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    setError('');
-    setSuccessMessage('');
-  };
+const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+  setEmail(value);
+  setError('');
+  setSuccessMessage('');
+};
 // Used for setting the password variable
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
@@ -158,7 +162,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
       {/* Form Fields */}
       <form onSubmit={handleSubmit} className="onboarding-form">
         <div className="form-field">
-          <label htmlFor="email" className="field-label">What's your email?</label>
+          <label htmlFor="email" className="field-label">What's your email</label>
           <input
             id="email"
             type="email"

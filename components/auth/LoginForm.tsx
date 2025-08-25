@@ -46,6 +46,12 @@ export function LoginForm({ onSuccess, onSwitchToSignup, onClose }: LoginFormPro
   // };
 
 
+    const validateEmail = (value: string) => {
+  // Basic regex: ensures text@text.domain
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(value);
+};
+
   const handleSubmit = async (e: React.FormEvent) => {
     console.log('📝 LoginForm: handleSubmit called');
     e.preventDefault();
@@ -53,6 +59,11 @@ export function LoginForm({ onSuccess, onSwitchToSignup, onClose }: LoginFormPro
 
     if (!email || !password) {
       setError('Please fill in all fields');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError('Invalid email format');
       return;
     }
 

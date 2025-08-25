@@ -330,7 +330,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Sign up function
-  const signUp = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const signUp = async (email: string, password: string): Promise<{ success: boolean; error?: string; code?: string  }> => {
     setAuthLoading(true);
     try {
       // Get the correct redirect URL for the current environment
@@ -346,16 +346,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       });
 
-      if (error) {
-        return { success: false, error: error.message };
+       if (error) {
+      if (error.message.toLowerCase().includes("already")) {
+        return { success: false, error: "This email is already registered. Please sign in instead.", code: "EMAIL_REGISTERED" };
       }
-
+      return { success: false, error: error.message };
+    }
       if (data.user && !data.user.email_confirmed_at) {
-        return { 
-          success: true, 
-          error: 'Please check your email and verify your account before signing in.' 
-        };
-      }
+      return {
+        success: false,
+        error: "This email is already registered but not verified. Please check your inbox.",
+        code: "EMAIL_NOT_CONFIRMED"
+      };
+    }
 
       return { success: true };
     } catch (error) {
