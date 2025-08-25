@@ -9,6 +9,7 @@ export function Navigation({
   onResetOnboarding,
   userProfile,
   onUserProfile,
+  
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -34,8 +35,8 @@ export function Navigation({
   }, []);
   return (
     <>
-    {/* For desktop screen desktop UserMenu will open  */}
-      <header className="top-nav hidden bg-red-400 md:flex">
+          {/* For desktop screen desktop UserMenu will open  */}
+      <header className="top-nav hidden md:flex bg-red-400">
         {/* DESKTOP NAVIGATION */}
         <div className="nav-desktop">
           <div className="nav-left">
@@ -81,12 +82,14 @@ export function Navigation({
                   onSignOut={onSignOut}
                   onResetOnboarding={onResetOnboarding}
                   onUserProfile={onUserProfile}
+                  userProfile={userProfile}
                 />
               )}
             </div>
           </div>
         </div>
       </header>
+      
           {/* In spmall screen this will be seen on desktop it will be hidden */}
       <header className="top-nav-mobile relative block md:hidden" ref={mobileMenuRef} >
         {/* FOR MOBILE NAVIGATION */}
@@ -105,9 +108,9 @@ export function Navigation({
               </div>
             </div>
           </div>
-          <div className="nav-right">
+          {/* <div className="nav-right">
             {/* Search button */}
-            <button className="nav-icon-btn ">
+            {/* <button className="nav-icon-btn ">
               <svg
                 width="20"
                 height="20"
@@ -119,14 +122,14 @@ export function Navigation({
                 <circle cx="11" cy="11" r="7" />
                 <line x1="16.5" y1="16.5" x2="21" y2="21" />
               </svg>
-            </button>
+            </button> */}
 
             {/* Mobile hamburger menu toggle */}
-            <button
+            {/* <button
               className="nav-icon-btn "
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <svg
+            > */}
+              {/* <svg
                 width="20"
                 height="20"
                 fill="none"
@@ -136,16 +139,17 @@ export function Navigation({
               >
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            </button>
-          </div>
+                <line x1="3" y1="18" x2="21" y2="18" /> */}
+              {/* </svg> */}
+            {/* </button> */}
+          {/* </div> */} 
         </div>
         {isMenuOpen && (
           <UserMenu
             onSignOut={onSignOut}
             onResetOnboarding={onResetOnboarding}
             onUserProfile={onUserProfile}
+            userProfile={userProfile}
           />
         )}
 

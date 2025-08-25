@@ -472,22 +472,10 @@ body {
   background: var(--warning-dark);
 }
 
-/* Top Navigation */
-/* .top-nav {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  /* align-items: center; */
-  /* padding: var(--space-2) var(--space-4); */
-  /* background: white; */
-  /* border-bottom: 1px solid var(--bg-muted); */
-  /* position: sticky; */
-  /* top: 0;
-  z-index: 100; */
-/* } */ 
 
 .top-nav {
   display: none;
+
 }
 
 
@@ -1522,3 +1510,61 @@ body {
   display: inline-block;
   vertical-align: middle;
 } 
+
+.communication-challenges-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* two equal columns */
+  gap: 1rem 2rem;
+  /* row gap and column gap */
+  padding: 1rem;
+  width: fit-content;
+
+  margin-bottom: 1rem;
+}
+
+.communication-challenge-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 14px;
+  line-height: 1.2;
+  color: #1a1a1a;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Fixed square checkbox */
+.communication-challenge-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  width: 20px;
+  /* fixed width */
+  height: 20px;
+  /* fixed height */
+  border: 2px solid #000;
+  /* black border always */
+  border-radius: 3px;
+  /* square look (tiny rounding) */
+  background: #fff;
+  /* white when unchecked */
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+}
+
+/* When checked */
+.communication-challenge-item input[type="checkbox"]:checked {
+  background-color: var(--primary);
+  /* yellow fill */
+  /* border-color: #000; */
+
+  border: 2px solid var(--primary);
+  background-image: url("../../components/figma/icon.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  /* keep border black */
+}

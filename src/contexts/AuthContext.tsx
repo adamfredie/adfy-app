@@ -45,7 +45,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<OnboardingData|null>(null);
-  
+
   // Loading states
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(false);
