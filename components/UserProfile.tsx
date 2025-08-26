@@ -3,6 +3,8 @@ import { FiArrowLeft, FiSettings } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa6";
 import { OnboardingData } from "./Onboarding";
 
+import { useAuth } from "../src/contexts/AuthContext";
+
 const UserProfile: React.FC<{
   onBack: () => void;
   userProfile: OnboardingData | null;
@@ -89,6 +91,7 @@ const UserProfile: React.FC<{
     setIsChanged(hasFormChanged || hasCheckboxChanged);
   }, [form, checkedItems]);
 
+  const {signOut} = useAuth();
   // const userStats = getStatsBasedOnLevel();
   return (
     <div className="w-full max-w-[500px] mx-auto bg-white h-screen shadow-lg flex flex-col">
@@ -143,7 +146,7 @@ const UserProfile: React.FC<{
             </div>
           </div>
           <div className="border-t-4 border-b-4 flex items-center  px-6 mt-4 py-4">
-            <button className="text-[var(--primary)] font-semibold">Log out</button>
+            <button className="text-[var(--primary)] font-semibold" onClick={signOut}>Log out</button>
           </div>
         </div>
       ) : (

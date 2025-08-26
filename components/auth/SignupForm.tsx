@@ -1,7 +1,7 @@
 import React, { useState,useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../src/contexts/AuthContext';
-import { supabase } from '../../src/api/supabase';
+import { CircleCheck } from 'lucide-react';
 
 interface SignupFormProps {
   onSuccess: () => void;
@@ -36,7 +36,8 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
         navigate('/app/dashboard'); // Navigate to dashboard
       } else {
         console.log('⚠️ User needs to complete onboarding');
-        navigate('/onboarding'); // Navigate to onboarding
+        // navigate removed as due to it Success message was not showing
+
       }
     }
   }, [user, isEmailVerified, userProfile, navigate]);
@@ -65,18 +66,14 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 
   try {
-    const result = await signUp(email, password); // <-- from useAuth
+    const result = await signUp(email, password); 
 
     if (result.error) {
-      if (result.error.toLowerCase().includes("already")) {
-        setError("This email is already registered. Please sign in instead.");
-      } else {
-        setError(result.error);
-      }
+      setError(result.error);
       return;
     }
 
-    setSuccessMessage("Account created successfully! Please check your email.");
+    setSuccessMessage("Account created! Check your email to verify.");
     setTimeout(() => navigate("/onboarding"), 2000);
 
   } catch (err: any) {
@@ -116,48 +113,25 @@ const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     <div className="onboarding-mobile-container">
       {/* Header */}
       <div className="onboarding-header">
+
+        <div className="divIconContainer ">
         <button 
           onClick={onClose}
           className="back-button"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
             <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
+
+        <img src='/favicon.ico'/>
+
+        </div>
         <h1 className="onboarding-title">
           Create Account
         </h1>
       </div>
 
-      {/* Success Message */}
-      {successMessage && (
-        <div className="success-message" style={{
-          backgroundColor: '#dcfce7',
-          border: '1px solid #22c55e',
-          borderRadius: '8px',
-          padding: '12px',
-          margin: '16px',
-          color: '#16a34a',
-          fontSize: '14px'
-        }}>
-          {successMessage}
-        </div>
-      )}
-
-      {/* Error Display */}
-      {error && (
-        <div className="error-message" style={{
-          backgroundColor: '#fee2e2',
-          border: '1px solid #f87171',
-          borderRadius: '8px',
-          padding: '12px',
-          margin: '16px',
-          color: '#dc2626',
-          fontSize: '14px'
-        }}>
-          {error}
-        </div>
-      )}
 
       {/* Form Fields */}
       <form onSubmit={handleSubmit} className="onboarding-form">
@@ -173,7 +147,7 @@ const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             className="mobile-input"
             required
             disabled={authLoading}
-          />
+            />
         </div>
         
         <div className="form-field">
@@ -189,10 +163,22 @@ const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             required
             disabled={authLoading}
           />
-          <small style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
-            Must be at least 6 characters long
-          </small>
+            {/* Added Icon Change into yellow colour when password length increase to 6 or more */}
+          <div className="cautionContainer flex gap-2 items-center">
+            <div
+              className={`flex items-center justify-center h-4 w-4 rounded-full transition-colors mt-1
+                ${password.length >= 6 ? "text-[#FFC400]" : "text-gray-300"}`}
+            >
+              <CircleCheck />
+            </div>
+              <small className={`text-x  mt-1  ${password.length >= 6 ? "text-var(--text-primary)" : "text-gray-300"}  `}>
+              Must be at least 6 characters long
+            </small>
+
+          </div>
+
         </div>
+
 
         <div className="form-field">
           <label htmlFor="confirmPassword" className="field-label">Confirm password</label>
@@ -206,10 +192,39 @@ const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             className="mobile-input"
             required
             disabled={authLoading}
-          />
+            />
         </div>
 
         {/* Continue Button */}
+            {/* Success Message */}
+            {successMessage && (
+              <div className="success-message" style={{
+                backgroundColor: '#45CB45',
+                borderRadius: '10px',
+                padding: '12px',
+                height:"4rem",
+
+                margin: '4px 0',
+                color: '#ffffff',
+                fontSize: '14px'
+              }}>
+                {successMessage}
+              </div>
+            )}
+      
+            {/* Error Display */}
+            {error && (
+              <div className="error-message" style={{
+                backgroundColor: '#E03800',
+                borderRadius: '10px',
+                padding: '12px',
+                height:"4rem",
+                color: '#ffffff',
+                fontSize: '14px'
+              }}>
+                {error}
+              </div>
+            )}
         <div className="onboarding-actions">
           <button
             type="submit"

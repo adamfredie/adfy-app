@@ -343,22 +343,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
         password,
         options: {
           emailRedirectTo: redirectTo
-        }
-      });
+        },
+      },
+    );
 
-       if (error) {
-      if (error.message.toLowerCase().includes("already")) {
-        return { success: false, error: "This email is already registered. Please sign in instead.", code: "EMAIL_REGISTERED" };
-      }
-      return { success: false, error: error.message };
-    }
+
+      console.log("Data is here \n\n", data);
+
+
+      
+      if (error) {
+            console.log("❌ Supabase signUp error:", error.message);
+
+            if (error.message.toLowerCase().includes("already")) {
+              return { 
+                success: false, 
+                error: "This email is already registered. Please sign in instead.", 
+                code: "EMAIL_REGISTERED" 
+              };
+            }
+
+            return { success: false, error: error.message };
+          }
+
+
       if (data.user && !data.user.email_confirmed_at) {
-      return {
-        success: false,
-        error: "This email is already registered but not verified. Please check your inbox.",
-        code: "EMAIL_NOT_CONFIRMED"
-      };
-    }
+        return {
+          success: false,
+          error: "Email already registered. Please verify instead.",
+          code: "EMAIL_NOT_CONFIRMED"
+        };
+      }
+
+      // If there is no error generated we can check with it 
+      if(data.user?.identities?.length == 0){
+        return {success: false, error: "Looks like you already have an account. Try logging in!"};
+      }
 
       return { success: true };
     } catch (error) {

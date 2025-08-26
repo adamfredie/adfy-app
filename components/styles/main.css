@@ -1071,7 +1071,8 @@ body {
   color: var(--text-secondary);
   margin: 0 var(--space-2);
 }
-
+/* This css is not implementing on the back button UI icon */
+/* 
 .back-button {
   display: inline-flex;
   align-items: center;
@@ -1080,7 +1081,7 @@ body {
   text-decoration: none;
   font-size: var(--font-size-base);
   margin-bottom: var(--space-6);
-}
+} */
 
 /* Progress Section */
 .progress-section {
@@ -1563,7 +1564,7 @@ body {
   /* border-color: #000; */
 
   border: 2px solid var(--primary);
-  background-image: url("../../components/figma/icon.svg");
+  background-image: url("/icon.svg");
   background-repeat: no-repeat;
   background-position: center;
   /* keep border black */
