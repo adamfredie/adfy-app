@@ -448,19 +448,28 @@ export interface DailyWord {
 
 // Save vocabulary words learned
 export async function saveVocabularyWords(userId: string, words: DailyWord[], field: string) {
-  const vocabularyData = words.map(word => ({
-    user_id: userId,
-    word: word.word,
-    field_category: field
-  }));
+  try {
+    // First, save words to word_bank table
+    await saveWordsToWordBank(words, field);
+    
+    // Then, save user progress to vocabulary_progress table
+    const vocabularyData = words.map(word => ({
+      user_id: userId,
+      word: word.word,
+      field_category: field
+    }));
 
-  const { data, error } = await supabase
-    .from('vocabulary_progress')
-    .upsert(vocabularyData, { onConflict: 'user_id,word' })
-    .select();
+    const { data, error } = await supabase
+      .from('vocabulary_progress')
+      .upsert(vocabularyData, { onConflict: 'user_id,word' })
+      .select();
 
-  if (error) throw error;
-  return data;
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error saving vocabulary data:', error);
+    throw error;
+  }
 }
 
 // Record daily activity for streak calculation
@@ -549,4 +558,148 @@ export async function getUserLearningStats(userId: string) {
     currentStreak: currentStreak,
     totalScore: scoreData?.total_score || 0
   };
+}
+
+// Word Bank Functions - Simplified approach
+export interface WordBankWord {
+  id: string;
+  word: string;
+  type: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  definition: string;
+  field_category?: string;
+  learned_at?: string; // When the user learned this word
+}
+
+// Save words to word_bank table
+export async function saveWordsToWordBank(words: DailyWord[], field: string) {
+  try {
+    // Check which words already exist in word_bank
+    const existingWords = words.map(w => w.word);
+    const { data: existingData, error: checkError } = await supabase
+      .from('word_bank')
+      .select('word')
+      .in('word', existingWords);
+
+    if (checkError) throw checkError;
+
+    // Filter out words that already exist
+    const existingWordSet = new Set(existingData?.map(item => item.word) || []);
+    const newWords = words.filter(word => !existingWordSet.has(word.word));
+
+    if (newWords.length === 0) {
+      console.log('All words already exist in word_bank');
+      return [];
+    }
+
+    // Only insert new words
+    const wordBankData = newWords.map(word => ({
+      word: word.word,
+      type: word.partOfSpeech || 'noun',
+      difficulty: word.difficulty || 'intermediate',
+      definition: word.definition,
+      field_category: field
+    }));
+
+    const { data, error } = await supabase
+      .from('word_bank')
+      .insert(wordBankData)
+      .select();
+
+    if (error) throw error;
+    
+    console.log(`Inserted ${newWords.length} new words into word_bank`);
+    return data;
+  } catch (error) {
+    console.error('Error saving words to word_bank:', error);
+    throw error;
+  }
+}
+
+// Get words from word_bank table by field category
+export async function getWordBankWordsByField(field: string): Promise<WordBankWord[]> {
+  try {
+    const { data, error } = await supabase
+      .from('word_bank')
+      .select('*')
+      .eq('field_category', field)
+      .order('word', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching word bank words by field:', error);
+    throw error;
+  }
+}
+
+// Fetch words that the user has learned from their activities
+export async function getWordBankWords(userId: string, field?: string): Promise<WordBankWord[]> {
+  try {
+    // Get words from user's vocabulary progress (what they've learned)
+    let query = supabase
+      .from('vocabulary_progress')
+      .select('*')
+      .eq('user_id', userId);
+
+    // Filter by field if specified
+    if (field) {
+      query = query.eq('field_category', field);
+    }
+
+    const { data: progressData, error: progressError } = await query;
+
+    if (progressError) {
+      console.error('Error fetching user vocabulary progress:', progressError);
+      throw progressError;
+    }
+
+    if (!progressData || progressData.length === 0) {
+      console.log('No vocabulary progress found for user:', userId);
+      return [];
+    }
+
+    // Get detailed word information from the word_bank table
+    const wordIds = progressData.map(item => item.word);
+    
+    // Remove field category filter from word_bank query to get all word definitions
+    // This ensures we get the word details even if field categories don't match exactly
+    const { data: wordDetails, error: wordDetailsError } = await supabase
+      .from('word_bank')
+      .select('*')
+      .in('word', wordIds);
+
+    if (wordDetailsError) {
+      console.error('Error fetching word details:', wordDetailsError);
+      throw wordDetailsError;
+    }
+
+    // Add debug logging to help troubleshoot field category mismatches
+    console.log('Debug - Progress data:', progressData);
+    console.log('Debug - Word details found:', wordDetails);
+    console.log('Debug - Words with missing definitions:', 
+      progressData.filter(item => !wordDetails?.find(detail => detail.word === item.word))
+        .map(item => ({ word: item.word, field: item.field_category }))
+    );
+
+    // Merge progress data with word details
+    const transformedWords: WordBankWord[] = (progressData || []).map((progressItem: any) => {
+      const wordDetail = wordDetails?.find(detail => detail.word === progressItem.word);
+      
+      return {
+        id: progressItem.id || progressItem.word_id,
+        word: progressItem.word,
+        type: wordDetail?.type || 'noun',
+        difficulty: wordDetail?.difficulty || 'intermediate',
+        definition: wordDetail?.definition || `Definition for ${progressItem.word}`,
+        field_category: progressItem.field_category,
+        learned_at: progressItem.created_at || progressItem.learned_at || new Date().toISOString()
+      };
+    });
+
+    return transformedWords;
+  } catch (error) {
+    console.error('Error in getWordBankWords:', error);
+    throw error;
+  }
 }
