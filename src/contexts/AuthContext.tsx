@@ -19,6 +19,10 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   
+  // OTP verification methods
+  sendOTP: (email: string) => Promise<{ success: boolean; error?: string }>;
+  verifyOTP: (email: string, otp: string) => Promise<{ success: boolean; error?: string }>;
+  
   // Profile management
   updateUserProfile: (profile: Partial<OnboardingData>) => Promise<void>;
   refreshUserProfile: () => Promise<void>;
@@ -436,6 +440,71 @@ export function AuthProvider({ children }: AuthProviderProps) {
       throw error;
     }
   };
+
+  // Send OTP function
+  const sendOTP = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      console.log('🔐 AuthContext: Sending OTP to:', email);
+      
+      // For now, we'll simulate OTP sending since we don't have a real OTP service
+      // In production, you would integrate with a service like Twilio, AWS SNS, etc.
+      
+      // Store the OTP in localStorage for demo purposes
+      // In production, this would be handled by your backend
+      const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      localStorage.setItem(`otp_${email}`, otp);
+      localStorage.setItem(`otp_${email}_timestamp`, Date.now().toString());
+      
+      console.log('🔐 AuthContext: OTP generated (demo):', otp);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      return { success: false, error: 'Failed to send verification code' };
+    }
+  };
+
+  // Verify OTP function
+  const verifyOTP = async (email: string, otp: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      console.log('🔐 AuthContext: Verifying OTP for:', email);
+      
+      // Get stored OTP
+      const storedOTP = localStorage.getItem(`otp_${email}`);
+      const timestamp = localStorage.getItem(`otp_${email}_timestamp`);
+      
+      if (!storedOTP || !timestamp) {
+        return { success: false, error: 'No verification code found. Please request a new one.' };
+      }
+      
+      // Check if OTP is expired (5 minutes)
+      const now = Date.now();
+      const otpTime = parseInt(timestamp);
+      if (now - otpTime > 5 * 60 * 1000) {
+        localStorage.removeItem(`otp_${email}`);
+        localStorage.removeItem(`otp_${email}_timestamp`);
+        return { success: false, error: 'Verification code has expired. Please request a new one.' };
+      }
+      
+      // Verify OTP
+      if (storedOTP !== otp) {
+        return { success: false, error: 'Invalid verification code. Please try again.' };
+      }
+      
+      // Clear OTP after successful verification
+      localStorage.removeItem(`otp_${email}`);
+      localStorage.removeItem(`otp_${email}_timestamp`);
+      
+      console.log('🔐 AuthContext: OTP verified successfully');
+      return { success: true };
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      return { success: false, error: 'Failed to verify code' };
+    }
+  };
 // Update user profile
   // Update user profile
   const updateUserProfile = async (profile: Partial<OnboardingData>): Promise<void> => {
@@ -506,6 +575,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signUp,
     signIn,
     signOut,
+    sendOTP,
+    verifyOTP,
     updateUserProfile,
     refreshUserProfile,
     isAuthenticated,

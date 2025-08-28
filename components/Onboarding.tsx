@@ -332,6 +332,7 @@ const renderPersonalStep = () => (
     <div className="onboarding-header">
 
       <div className="divIconContainer">
+        <img src='/favicon12.ico'/>
       <button 
         onClick={() => navigate("/welcome")}
         className="back-button"
@@ -341,7 +342,6 @@ const renderPersonalStep = () => (
         </svg>
       </button>
 
-       <img src='/favicon.ico'/>
 
       </div>
       <h1 className="onboarding-title">
@@ -358,7 +358,7 @@ const renderPersonalStep = () => (
       }}
     >
       <div className="form-field">
-        <Label htmlFor="name" className="field-label">What's your name?</Label>
+        <Label htmlFor="name" className="field-label mt-2">What's your name?</Label>
         <Input
           id="name"
           type="text"
@@ -392,6 +392,7 @@ const renderPersonalStep = () => (
       <div className="onboarding-header">
         <div className="divIconContainer">
 
+          <img src="/favicon12.ico"/>
         <button 
           onClick={() => setCurrentStep('personal')}
           className="back-button"
@@ -401,7 +402,6 @@ const renderPersonalStep = () => (
           </svg>
         </button>
 
-        <img src="/favicon.ico"/>
         </div>
         <h1 className="onboarding-title">Professional Background</h1>
         <p className="onboarding-subtitle">
@@ -500,6 +500,7 @@ const renderPersonalStep = () => (
       {/* Header */}
       <div className="onboarding-header">
         <div className="divIconContainer">
+          <img src="favicon12.ico"/>
         <button 
           onClick={() => setCurrentStep('professional')}
           className="back-button"
@@ -509,7 +510,6 @@ const renderPersonalStep = () => (
           </svg>
         </button>
 
-        <img src="favicon.ico"/>
 
         </div>
         <h1 className="onboarding-title">Communication Skills Assessment</h1>
@@ -602,6 +602,7 @@ const renderPersonalStep = () => (
       <div className="onboarding-header">
         <div className="divIconContainer">
 
+          <img src="/favicon12.ico"/>
         <button 
           onClick={() => setCurrentStep('assessment')}
           className="back-button"
@@ -611,7 +612,6 @@ const renderPersonalStep = () => (
           </svg>
         </button>
 
-        <img src="/favicon.ico"/>
         </div>
         <h1 className="onboarding-title">Goals & Challenges</h1>
         <p className="onboarding-subtitle">
@@ -675,6 +675,7 @@ const renderPersonalStep = () => (
       {/* Header */}
       <div className="onboarding-header">
         <div className="divIconContainer">
+          <img src="/favicon12.ico"/>
           <button 
             onClick={() => setCurrentStep('goals')}
             className="back-button"
@@ -684,7 +685,6 @@ const renderPersonalStep = () => (
             </svg>
           </button>
 
-          <img src="/favicon.ico"/>
 
         </div>
         

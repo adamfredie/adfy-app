@@ -96,9 +96,8 @@ export function Navigation({
         <div className="nav-mobile">
           <div className="nav-left">
             <div className="nav-brand">
-              <div className="nav-avatar"></div>
+              <img src="/favicon12.ico" className='w-10'/>
               <div className="nav-brand-text">
-                <span>Aduffy Learning</span>
                 <span className="nav-mobile-brand-text">
                   Hey,{' '}
                   {userProfile?.name

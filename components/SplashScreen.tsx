@@ -10,7 +10,7 @@ export function SplashScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
-      setTimeout(() => navigate('/welcome'), 500); // Wait for fade out animation
+      setTimeout(() => navigate('/welcome'), 800); // Wait for fade out animation
     }, 2000);
 
     return () => clearTimeout(timer);

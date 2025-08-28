@@ -87,7 +87,7 @@ return (
                         duration={1}
                         className="count-up-text stat-value"
                       />
-                      <div className="stat-sub">Expert level: 3000</div>
+                      <div className="stat-sub"></div>
                     </SpotlightCard>
                   </div>
                 </div>

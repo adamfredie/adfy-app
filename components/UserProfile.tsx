@@ -176,7 +176,7 @@ const UserProfile: React.FC<{
           </div>
 
           {/* Content */}
-          <div className="flex-1 px-4 py-2">
+          <div className="flex-1 px-4 py-1">
             {activeTab === "profile" ? (
               <div>
                 <h3 className="userProfileLabel">Professional Information</h3>
@@ -190,7 +190,7 @@ const UserProfile: React.FC<{
                     type="text"
                     value={form.jobTitle}
                     onChange={(e) => setForm({ ...form, jobTitle: e.target.value })}
-                    className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+                    className="w-full border rounded-md px-3 py-1 text-sm mt-1"
                   />
                 </div>
 
@@ -200,7 +200,7 @@ const UserProfile: React.FC<{
                     type="text"
                     value={form.company}
                     onChange={(e) => setForm({ ...form, company: e.target.value })}
-                    className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+                    className="w-full border rounded-md px-3 py-1 text-sm mt-1"
                   />
                 </div>
 
@@ -209,7 +209,7 @@ const UserProfile: React.FC<{
                   <select
                     value={form.professionalField}
                     onChange={(e) => setForm({ ...form, professionalField: e.target.value })}
-                    className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+                    className="w-full border rounded-md px-3 py-1 text-sm mt-1"
                   >
                     <option>Marketing</option>
                     <option>Engineering</option>
@@ -222,7 +222,7 @@ const UserProfile: React.FC<{
                   <select
                     value={form.experienceLevel}
                     onChange={(e) => setForm({ ...form, experienceLevel: e.target.value })}
-                    className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+                    className="w-full border rounded-md px-3 py-1 text-sm mt-1"
                   >
                     <option>Mid level 3–7</option>
                     <option>Entry level 0–2</option>

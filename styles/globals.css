@@ -296,7 +296,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .aduffy-button {
-  background: var(--aduffy-yellow);
+  background: var(--primary);
   color: #fff;
   border: none;
   border-radius: 6px;
