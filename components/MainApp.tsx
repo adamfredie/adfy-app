@@ -156,7 +156,7 @@ export function MainApp() {
             
             <Route path="storytelling" element={
               <StorytellingActivity 
-                onBack={handleBackToActivities}
+                onBack={handleBackToDashboard}
                 userProfile={userProfile}
                 savedProgress={activityProgress.storytelling}
                 onProgressUpdate={(progress) => handleActivityProgressUpdate('storytelling', progress)}

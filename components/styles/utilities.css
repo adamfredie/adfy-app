@@ -1382,7 +1382,7 @@ ml-auto{
   align-items: center;
   justify-content: center;
   width: 100%;
-  background: #fbb025;
+  background: var(--primary);
   color: #222b3a;
   border: none;
   /* border-radius: 1rem; */
@@ -2544,7 +2544,7 @@ ml-auto{
 }
 /* ONBOARDING CONTINUE BUTTON */
 .soft-yellow-btn {
-  background: #F9A825 !important;
+  background: var(--primary) !important;
   color:black;
 }
 /* RADIO BUTTON FOR PROFESSIONAL FIELD */
@@ -2812,24 +2812,30 @@ ml-auto{
 .step-nav {
   display: flex;
   align-items: center;
-  gap: 2.5em;
+  justify-content: space-evenly;
+  width: 100%;
+  gap: 3.5em;
+  margin-bottom: 0.8rem;
   
 }
 @media(max-width:700px){
   .step-nav{
-    gap:0.8em;
-    overflow-x:scroll;
+    gap:0.4rem;
+    flex-wrap: wrap;
+    width: 100%;
+    overflow-x: hidden;
   }
   .step-nav-item{
-    font-size:1em;
-    gap:0.2em;
+    font-size:0.5rem;
+    gap:0.1rem;
+    flex: 0 1 auto;
   }
 }
 
 .step-nav-item {
   display: flex;
   align-items: center;
-  gap: 0.5em;
+  gap: 0.4em;
   font-size: 1.08em;
   font-weight: 500;
   cursor: pointer;
@@ -2855,7 +2861,7 @@ ml-auto{
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.3em;
+  width: 1em;
   height: 1.3em;
   border-radius: 50%;
   background: transparent;
@@ -2898,8 +2904,8 @@ ml-auto{
 }
 /* ANALYZE MY STORY BUTTON */
 .analyze-story-btn {
-  background: #ffb32c;           /* solid orange */
-  color: #222b3a;                /* black text */
+  background: var(--primary);           /* solid orange */
+  color: #212121;                /* black text */
   border: none;
   border-radius: 999px;          /* pill shape */
   padding: 0.5em 5.4em;
@@ -2959,13 +2965,16 @@ ml-auto{
 }
 /* BACK TO DASHBOARD BUTTON IN THE RESULT */
 .back-to-dashboard-btn-result {
-  background: #ffb32c;           /* solid orange */
-  color: #222b3a;                /* black text */
+  background: var(--primary);
+  /* solid orange */
+  color: #212121;
+  /* black text */
   border: none;
-  border-radius: 999px;          /* pill shape */
-  /* padding: 0.7em 2.1em; */
-  padding: 0.5em 1.8em;
-  font-size: 1rem;
+  border-radius: 999px;
+  /* pill shape */
+  padding: 10px 20px !important;
+  
+  font-size: clamp(0.9rem, 1vw, 1rem);
   font-weight: 500;
   display: inline-flex;
   align-items: center;

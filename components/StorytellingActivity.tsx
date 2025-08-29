@@ -68,8 +68,9 @@ import { getRandomStoryTopics } from '../src/api/gemini';
 // ... inside your component
 // AUTO SCROLl
 import { ScrollToTop } from "./ScrollToTop";
-
-
+import { HiOutlineBookOpen } from "react-icons/hi";
+import { LuBrain } from 'react-icons/lu'
+import { LucideBrain, NotebookPen, CircleCheck, AudioLines, RotateCw,MoveLeft } from "lucide-react";
 
 
 interface StorytellingActivityProps {
@@ -1701,12 +1702,16 @@ const firstQuestion = `Here is the first question: How did you decide on your ap
       {renderViewOnlyAlert()}
       
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-3 mb-4">
-          <div className="w-16 h-16 bg-aduffy-yellow/10 rounded-full flex items-center justify-center border-2 border-aduffy-yellow/20">
-            <div className="w-8 h-8 text-aduffy-yellow" />
+        <div className="inline-flex items-center gap-1 mb-4  px-2 py-4">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-aduffy-yellow/10 rounded-full flex items-center justify-center border-2 border-aduffy-yellow/20">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-aduffy-yellow" >
+                <HiOutlineBookOpen className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-aduffy-yellow"/>
+                </div>
           </div>
+
           <div className="text-left">
-            <h2 className="text-3xl font-bold text-aduffy-navy text-center">Today's Vocabulary Words</h2>
+             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-aduffy-navy text-center">Today's Vocabulary Words</h2>
+
             
             <div className="flex items-center gap-2 mt-1 justify-center">
               <Badge className="vocab-badge-professional">
@@ -1834,12 +1839,14 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       {renderViewOnlyAlert()}
       
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-3 mb-4">
-          <div className="w-16 h-16 bg-aduffy-teal/10 rounded-full flex items-center justify-center border-2 border-aduffy-teal/20">
-            <div className="w-8 h-8 text-aduffy-teal" />
+       <div className="inline-flex items-center gap-1 mb-4 -mt-2  px-2 py-4">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-aduffy-teal/10 rounded-full flex items-center justify-center border-2 border-aduffy-teal/20">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-aduffy-teal" >
+                <LucideBrain className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-aduffy-teal"/>
+                </div>
           </div>
           <div className="text-left">
-            <h2 className="text-3xl font-bold text-aduffy-navy text-center">Learn &amp; Practice</h2>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-aduffy-navy text-center">Learn &amp; Practice</h2>
             <div className="learning-header-center">
               <Badge className="aduffy-badge-info">
                 {/*INTERACTIVE BADGE IN THE LEARNING PAGE */}
@@ -2143,20 +2150,13 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       {renderViewOnlyAlert()}
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-3 mb-4">
-          <div className="w-16 h-16 bg-aduffy-orange/10 rounded-full flex items-center justify-center border-2 border-aduffy-orange/20">
-            <div className="w-8 h-8 text-aduffy-orange" />
+          <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-aduffy-yellow/10 rounded-full flex items-center justify-center border-2 border-aduffy-yellow/20">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-aduffy-yellow" >
+                <NotebookPen className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-aduffy-ywllow"/>
+                </div>
           </div>
           <div className="text-left">
-            {/* <h2 className="storytelling-welcome-title">Write Your Story</h2> */}
-            <h2 className="ai-guided-title">
-            <span className="ai-guided-icon" aria-hidden="true">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                <path d="M12 17.25L7.09 20l.93-5.43L4 10.97l5.46-.79L12 5.5l2.54 4.68 5.46.79-3.97 3.6.93 5.43z"
-                  stroke="#222b3a" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
-              </svg>
-            </span>
-            AI-Guided Writing
-          </h2>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-aduffy-navy text-center">AI Guided Writting</h2>
             <div className="flex justify-center mt-1">
               {isViewOnly && (
                 <Badge className="view-only-badge">
@@ -2487,11 +2487,13 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-3 mb-4">
-          <div className="w-16 h-16 bg-info/10 rounded-full flex items-center justify-center border-2 border-info/20">
-            <div className="w-8 h-8 text-info" />
+           <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-aduffy-teal/10 rounded-full flex items-center justify-center border-2 border-aduffy-teal/20">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-aduffy-teal" >
+                <AudioLines className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-aduffy-teal"/>
+                </div>
           </div>
           <div className="text-left">
-            <h2 className="text-3xl font-bold text-aduffy-navy text-center">Voice Conversation</h2>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-aduffy-navy text-center">Voice Conversation</h2>
             <div className="speaking-badge-center">
               <span className="speaking-badge">
                 <span className="speaking-icon">
@@ -2784,11 +2786,13 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
     <div className="space-y-8">
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-3 mb-4">
-          <div className="w-16 h-16 bg-aduffy-yellow/10 rounded-full flex items-center justify-center border-2 border-aduffy-yellow/20">
-            <div className="w-8 h-8 text-aduffy-yellow" />
+           <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-aduffy-yellow/10 rounded-full flex items-center justify-center border-2 border-aduffy-yellow/20">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-aduffy-yellow" >
+                <CircleCheck className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-aduffy-yellow"/>
+                </div>
           </div>
           <div className="text-left">
-            <h2 className="text-3xl font-bold text-aduffy-navy text-center">Learning Complete!</h2>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-aduffy-navy text-center">Learning Completed</h2>
             {/* <div className="text-center">
               <div className="final-score-badge">
                 <div className="final-score-icon">
@@ -2951,14 +2955,8 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
       </Card> */}
 
       <div className="flex justify-center gap-4">
-        <button
-          className="back-to-dashboard-btn-result"
-          onClick={onBack}
-        >
-          <span className="arrow" aria-hidden="true">
-            ←
-          </span>
-          Back to Dashboard
+        <button className="back-to-dashboard-btn-result" onClick={onBack}>
+            <MoveLeft className="w-3 h-3" /> Back to Dashboard
         </button>
         <button
           onClick={() => {
@@ -2981,7 +2979,7 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
           className="try-again-btn"
         >
           <span className="try-again-icon" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5V3m0 0C6.477 3 2 7.477 2 13s4.477 10 10 10 10-4.477 10-10c0-2.21-.896-4.21-2.343-5.657M12 3l-3 3m3-3l3 3" stroke="#222b3a" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <RotateCw />
           </span>
           Try Again
         </button>
@@ -3106,14 +3104,14 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
   // START WRITING INTO COMPLETE PRACTICE
   const stepButton = getStepButtonProps();
   return (
-    <div className="py-8 mb-16 px-4">
+    <div className="space-y-8 mb-24 px-4">
       {/* AUTO SCROLL */}
       <ScrollToTop trigger={currentStep} />
       {/* Top row: Back to Dashboard (left), Step badge (right) */}
       <div className="flex items-center justify-between mt-2 mb-1">
         <button className="back-to-dashboard-btn ml-1" onClick={onBack}>
           <span className="arrow">←</span>
-          Back to Activities
+          Back to Dashboard
         </button>
         <span className="step-badge">
           Step {getStepNumber(currentStep)} of 5

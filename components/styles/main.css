@@ -1419,7 +1419,7 @@ body {
 }
 
 .orange-action-btn {
-  background: #F9A825;
+  background: var(--primary);
   color: black;
   border-radius: 0.75rem;
   padding: 0.5rem 1.5rem;
@@ -1434,11 +1434,11 @@ body {
   transition: background 0.2s;
 }
 .orange-action-btn:hover {
-  background: #c17900;
+  background: var(--accent);
 }
 
 .soft-yellow-btn {
-  background: #fdd995;
+  background: var(--primary);
   color: #888;
   border-radius: 1.2em;
   padding: 0.7em 1.5em;
