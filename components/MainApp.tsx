@@ -35,7 +35,7 @@ export function MainApp() {
   const [activityProgress, setActivityProgress] = useState<ActivityProgress>({});
   const location = useLocation();
   const navigate = useNavigate();
-  const { userProfile, signOut } = useAuth();
+  const { userProfile, signOut, user } = useAuth();
   
   // Get current activity from URL path
   const currentActivity = location.pathname.split('/').pop() || 'dashboard';
@@ -181,11 +181,15 @@ export function MainApp() {
             } />
             
             <Route path="wordBank" element={
-              <WordBank onBack={() => navigate('/app/activities')} />
+
+              <WordBank onBack={() => navigate('/app/activities')}
+                 userField={userProfile?.field}
+                userId={user?.id}/>
             } />
             
             <Route path="activities" element={
               <ActivitiesPage onBack={handleBackToDashboard} />
+
             } />
 
 

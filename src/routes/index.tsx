@@ -38,7 +38,12 @@ export function AppRoutes() {
           {/* Public routes */}
           <Route path="/" element={<SplashScreen />} />
           <Route path="/welcome" element={<WelcomePages />} />
+          
+          {/* Email verification routes */}
           <Route path="/verify" element={<EmailVerification />} />
+          <Route path="/auth/callback" element={<EmailVerification />} />
+          
+          {/* Auth routes */}
           <Route path="/auth/login" element={<AuthWrapperWrapper />} />
           <Route path="/auth/signup" element={<SignupFormWrapper />} />
           
