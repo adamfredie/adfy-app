@@ -1058,7 +1058,7 @@ body {
 .storytelling-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: var(--space-6) var(--space-4);
+  padding: 100px 0px;
 }
 
 /* Breadcrumb Navigation */
@@ -1524,7 +1524,7 @@ body {
   /* row gap and column gap */
   padding: 1rem;
   width: fit-content;
-
+  /* font-size:xx-small; */
   margin-bottom: 1rem;
 }
 
@@ -1532,8 +1532,8 @@ body {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 14px;
-  line-height: 1.2;
+  font-size: 0.8rem;
+  line-height: 1.1;
   color: #1a1a1a;
   cursor: pointer;
   position: relative;

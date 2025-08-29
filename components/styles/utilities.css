@@ -3689,7 +3689,7 @@ ml-auto{
   min-width: 0;
   position: relative;
   overflow: hidden;
-  min-height: 90px;
+  min-height: 105px;
 }
 /* Dashboard icon styles */
 .dashboardIco {
@@ -3979,7 +3979,7 @@ ml-auto{
   min-width: 60px;
 }
 .nav-btn.active {
-  color: var(--aduffy-yellow);
+  color: var(--primary);
   /* background: rgba(255, 184, 76, 0.1); */
 }
 
@@ -3987,7 +3987,7 @@ ml-auto{
   color: #212121
 }
 .nav-btn:hover {
-  color: var(--aduffy-yellow);
+  color: var(--primary);
   /* background: rgba(255, 184, 76, 0.05); */
 }
 

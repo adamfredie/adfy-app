@@ -96,7 +96,7 @@ export function Navigation({
         <div className="nav-mobile">
           <div className="nav-left">
             <div className="nav-brand">
-              <img src="/favicon12.ico" className='w-10'/>
+              <img src="/favicon12.ico" className='object-cover h-full'/>
               <div className="nav-brand-text">
                 <span className="nav-mobile-brand-text">
                   Hey,{' '}

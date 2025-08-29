@@ -3106,14 +3106,14 @@ setPreviousWords(prev => [...prev, ...newWordStrings]);
   // START WRITING INTO COMPLETE PRACTICE
   const stepButton = getStepButtonProps();
   return (
-    <div className="space-y-8">
+    <div className="py-8 mb-16 px-4">
       {/* AUTO SCROLL */}
       <ScrollToTop trigger={currentStep} />
       {/* Top row: Back to Dashboard (left), Step badge (right) */}
       <div className="flex items-center justify-between mt-2 mb-1">
         <button className="back-to-dashboard-btn ml-1" onClick={onBack}>
           <span className="arrow">←</span>
-          Back to Dashboard
+          Back to Activities
         </button>
         <span className="step-badge">
           Step {getStepNumber(currentStep)} of 5

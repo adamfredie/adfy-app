@@ -94,10 +94,10 @@ const UserProfile: React.FC<{
   const {signOut} = useAuth();
   // const userStats = getStatsBasedOnLevel();
   return (
-    <div className="w-full max-w-[500px] mx-auto bg-white h-screen shadow-lg flex flex-col">
+    <div className="w-full max-w-[500px] mx-auto bg-white h-screen shadow-lg flex flex-col ">
       {/* ------------------- HEADER ------------------- */}
       <div className="flex items-center justify-between px-4 py-2">
-        <button onClick={onBack}>
+        <button onClick={() => (activeSection === "Settings" ? setActiveSection("Profile") : onBack())}>
           <FiArrowLeft size={22} className="text-yellow-500" />
         </button>
         <div className="titleContainer px-3 w-full">
@@ -116,7 +116,7 @@ const UserProfile: React.FC<{
           </button>
         </div>
 
-        <div className="flex-1 ml-4">
+        <div className="flex-1 ml-4 mt-1">
           <h2 className="text-base font-semibold">{userProfile?.name}</h2>
           <p className="text-sm text-gray-600">Professional Communication Mastery</p>
         </div>
@@ -176,7 +176,7 @@ const UserProfile: React.FC<{
           </div>
 
           {/* Content */}
-          <div className="flex-1 px-4 py-1">
+          <div className="flex-1 px-4 py-2">
             {activeTab === "profile" ? (
               <div>
                 <h3 className="userProfileLabel">Professional Information</h3>
@@ -309,7 +309,7 @@ const UserProfile: React.FC<{
 
           {/* Save button appears only if changes are made */}
           {ischanged && (
-            <div className="px-4 py-3 mb-10">
+            <div className="px-4 py-3 mb-20">
               <button className="w-full bg-[var(--primary)] py-2 rounded-md font-semibold">
                 Save
               </button>

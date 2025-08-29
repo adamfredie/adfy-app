@@ -49,6 +49,11 @@ export function MainApp() {
     navigate('/app/dashboard');
   }, [navigate]);
 
+  // New: route activity Back buttons to Activities first
+  const handleBackToActivities = useCallback(() => {
+    navigate('/app/activities');
+  }, [navigate]);
+
   const handleProfileUpdate = useCallback((updatedProfile: any) => {
     // Profile updates are handled by AuthContext
     console.log('Profile update requested:', updatedProfile);
@@ -144,14 +149,14 @@ export function MainApp() {
             
             <Route path="user-profile" element={
               <UserProfile
-                onBack={handleBackToDashboard}
+                onBack={handleBackToActivities}
                 userProfile={userProfile}
               />
             } />
             
             <Route path="storytelling" element={
               <StorytellingActivity 
-                onBack={handleBackToDashboard}
+                onBack={handleBackToActivities}
                 userProfile={userProfile}
                 savedProgress={activityProgress.storytelling}
                 onProgressUpdate={(progress) => handleActivityProgressUpdate('storytelling', progress)}
@@ -160,19 +165,19 @@ export function MainApp() {
             } />
             
             <Route path="quiz" element={
-              <VocabularyQuiz onBack={handleBackToDashboard} />
+              <VocabularyQuiz onBack={handleBackToActivities} />
             } />
             
             <Route path="interview" element={
-              <InterviewPrep onBack={handleBackToDashboard} />
+              <InterviewPrep onBack={handleBackToActivities} />
             } />
             
             <Route path="voice-conversation" element={
-              <VoiceConversation onBack={handleBackToDashboard} />
+              <VoiceConversation onBack={handleBackToActivities} />
             } />
             
             <Route path="pronunciation" element={
-              <PronunciationPractice onBack={handleBackToDashboard} />
+              <PronunciationPractice onBack={handleBackToActivities} />
             } />
             
             <Route path="wordBank" element={

@@ -14,7 +14,7 @@ const ActivitiesPage: React.FC<ActivitiesPageProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="w-full max-w-[500px] mx-auto bg-white min-h-screen shadow-lg flex flex-col">
+    <div className="w-full max-w-[500px] mx-auto bg-white min-h-screen shadow-lg flex flex-col mb-4">
       {/* Header */}
       <div className="px-4 py-2 border-b border-gray-200 bg-white">
         <div className="flex items-center justify-between mb-2">
