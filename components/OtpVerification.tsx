@@ -135,30 +135,30 @@ export function OtpVerification({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="otp-overlay show"
-        onClick={(e) => e.target === e.currentTarget && onClose()}
-      >
+      {isOpen && (
         <motion.div
-          drag="y"
-          dragConstraints={{ top: 0, bottom: 0 }}
-          dragElastic={0.2}
-          onDragEnd={handleDragEnd}
-          initial={{ y: "100%" }}
-          animate={{ 
-            y: isExpanded ? 0 : "20%",
-            height: isExpanded ? "100vh" : "auto"
-          }}
-          transition={{ type: "spring", damping: 30, stiffness: 300 }}
-          className={`otp-modal ${isExpanded ? "expanded" : ""}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="otp-overlay show"
+          onClick={(e) => e.target === e.currentTarget && onClose()}
         >
+          <motion.div
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
+            initial={{ y: "100%" }}
+            animate={{ 
+              y: isExpanded ? 0 : "20%",
+              height: isExpanded ? "100vh" : "auto"
+            }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className={`otp-modal ${isExpanded ? "expanded" : ""}`}
+          >
           {/* Drag Handle */}
           <div className="otp-drag-handle" />
           
@@ -244,8 +244,9 @@ export function OtpVerification({
               </button>
             </div>
           </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </AnimatePresence>
   );
 }

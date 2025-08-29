@@ -149,7 +149,7 @@ export function MainApp() {
             
             <Route path="user-profile" element={
               <UserProfile
-                onBack={handleBackToActivities}
+                onBack={handleBackToDashboard}
                 userProfile={userProfile}
               />
             } />
