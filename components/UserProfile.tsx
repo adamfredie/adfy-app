@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FiArrowLeft, FiSettings } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa6";
 import { OnboardingData } from "./Onboarding";
+import { signOut, supabase, updateUserProfileInSupabase } from "../src/api/supabase";
 
 import { useAuth } from "../src/contexts/AuthContext";
 
@@ -57,19 +58,104 @@ const UserProfile: React.FC<{
 
   // ---------------- Profile Form States ----------------
   const initialForm = {
-    jobTitle: "Marketing Head",
-    company: "Acufly",
-    professionalField: "Marketing",
-    experienceLevel: "Mid level 3–7",
+    jobTitle: userProfile?.jobTitle || "Marketing Head",
+    company: userProfile?.company || "Acufly",
+    professionalField: userProfile?.field || userProfile?.fieldOfInterest || "marketing",
+    experienceLevel: userProfile?.experienceLevel || "mid",
   };
 
   const initialCheckedItems = communicationChallenges
     .concat(improvementGoals)
-    .reduce((acc, item) => ({ ...acc, [item.label]: false }), {});
+    .reduce((acc, item) => ({ 
+      ...acc, 
+      [item.label]: (userProfile?.communicationChallenges?.includes(item.id) || 
+                    userProfile?.improvementGoals?.includes(item.id)) || false
+    }), {});
 
   const [form, setForm] = useState(initialForm);
   const [checkedItems, setCheckedItems] = useState(initialCheckedItems);
   const [ischanged, setIsChanged] = useState(false);
+  const [userId, setUserId] = useState<string>("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Get current user ID from Supabase auth
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    };
+    getCurrentUser();
+  }, []);
+
+  // Handle save button click
+  const handleSave = async () => {
+    if (!userId) {
+      console.error('No user ID available');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Extract communication challenges and improvement goals from checked items
+      const selectedCommunicationChallenges = communicationChallenges
+        .filter(challenge => checkedItems[challenge.label])
+        .map(challenge => challenge.id);
+
+      const selectedImprovementGoals = improvementGoals
+        .filter(goal => checkedItems[goal.label])
+        .map(goal => goal.id);
+
+      const updateData = {
+        jobTitle: form.jobTitle,
+        company: form.company,
+        professionalField: form.professionalField,
+        experienceLevel: form.experienceLevel,
+        communicationChallenges: selectedCommunicationChallenges,
+        improvementGoals: selectedImprovementGoals,
+      };
+
+      const result = await updateUserProfileInSupabase(userId, updateData);
+      
+      if (result.success) {
+        // Reset the changed state
+        setIsChanged(false);
+        console.log('Profile updated successfully');
+        // You can add a success toast/notification here
+      } else {
+        console.error('Failed to update profile:', result.error);
+        // You can add an error toast/notification here
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      // You can add an error toast/notification here
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Update form and checked items when userProfile changes
+  useEffect(() => {
+    if (userProfile) {
+      setForm({
+        jobTitle: userProfile.jobTitle || "Marketing Head",
+        company: userProfile.company || "Acufly",
+        professionalField: userProfile.field || userProfile.fieldOfInterest || "marketing",
+        experienceLevel: userProfile.experienceLevel || "mid",
+      });
+
+      setCheckedItems(
+        communicationChallenges
+          .concat(improvementGoals)
+          .reduce((acc, item) => ({ 
+            ...acc, 
+            [item.label]: (userProfile.communicationChallenges?.includes(item.id) || 
+                          userProfile.improvementGoals?.includes(item.id)) || false
+          }), {})
+      );
+    }
+  }, [userProfile]);
 
   // Handle checkbox changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,14 +168,29 @@ const UserProfile: React.FC<{
 
   // Check if form or checkboxes changed
   useEffect(() => {
+    const currentInitialForm = {
+      jobTitle: userProfile?.jobTitle || "Marketing Head",
+      company: userProfile?.company || "Acufly",
+      professionalField: userProfile?.field || userProfile?.fieldOfInterest || "marketing",
+      experienceLevel: userProfile?.experienceLevel || "mid",
+    };
+
+    const currentInitialCheckedItems = communicationChallenges
+      .concat(improvementGoals)
+      .reduce((acc, item) => ({ 
+        ...acc, 
+        [item.label]: (userProfile?.communicationChallenges?.includes(item.id) || 
+                      userProfile?.improvementGoals?.includes(item.id)) || false
+      }), {});
+
     const hasFormChanged = Object.entries(form).some(
-      ([key, value]) => value !== initialForm[key as keyof typeof initialForm]
+      ([key, value]) => value !== currentInitialForm[key as keyof typeof currentInitialForm]
     );
     const hasCheckboxChanged = Object.entries(checkedItems).some(
-      ([key, value]) => value !== initialCheckedItems[key]
+      ([key, value]) => value !== currentInitialCheckedItems[key]
     );
     setIsChanged(hasFormChanged || hasCheckboxChanged);
-  }, [form, checkedItems]);
+  }, [form, checkedItems, userProfile]);
 
   const {signOut} = useAuth();
   // const userStats = getStatsBasedOnLevel();
@@ -211,9 +312,17 @@ const UserProfile: React.FC<{
                     onChange={(e) => setForm({ ...form, professionalField: e.target.value })}
                     className="w-full border rounded-md px-3 py-1 text-sm mt-1"
                   >
-                    <option>Marketing</option>
+                    {/* <option>Marketing</option>
                     <option>Engineering</option>
-                    <option>Design</option>
+                    <option>Design</option> */}
+                     <option value="marketing">Marketing</option>
+              <option value="technology">Technology</option>
+              <option value="sales">Sales</option>
+              <option value="product">Product Management</option>
+              <option value="finance">Finance</option>
+              <option value="operations">Operations</option>
+              <option value="consulting">Consulting</option>
+              <option value="other">Other</option>
                   </select>
                 </div>
 
@@ -224,9 +333,14 @@ const UserProfile: React.FC<{
                     onChange={(e) => setForm({ ...form, experienceLevel: e.target.value })}
                     className="w-full border rounded-md px-3 py-1 text-sm mt-1"
                   >
-                    <option>Mid level 3–7</option>
+                    {/* <option>Mid level 3–7</option>
                     <option>Entry level 0–2</option>
-                    <option>Senior level 8+</option>
+                    <option>Senior level 8+</option> */}
+                    {/* <option value="">Choose your experience level</option> */}
+              <option value="entry">Entry Level (0-2 years)</option>
+              <option value="mid">Mid Level (3-7 years)</option>
+              <option value="senior">Senior Level (8-12 years)</option>
+              <option value="executive">Executive Level (13+ years)</option>
                   </select>
                 </div>
               </div>
