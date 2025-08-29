@@ -105,6 +105,7 @@ function Learningstatics({ userStats, expandedSections, toggleSection }) {
                 Current Streak
                 <div className="dashboardIco !text-[#28a745] bg-[#c8e7ce]">
                   <IoIosTrendingUp />
+
                 </div>
               </div>
               <div className="streakCounter flex gap-1 items-center">
@@ -140,7 +141,7 @@ function Learningstatics({ userStats, expandedSections, toggleSection }) {
                 duration={1}
                 className="count-up-text stat-value"
               />
-              <div className="stat-sub">Expert level: 3000</div>
+
             </SpotlightCard>
           </div>
         </div>

@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Header } from './Header';
+// import { Header } from './Header';
 import { Dashboard } from './Dashboard';
 import { Onboarding, OnboardingData } from './Onboarding';
-import { Settings } from './Settings';
 import { StorytellingActivity } from './StorytellingActivity';
 import { VocabularyQuiz } from './VocabularyQuiz';
 import { InterviewPrep } from './InterviewPrep';
@@ -15,6 +14,7 @@ import { SplashScreen } from './SplashScreen';
 import { WelcomePages } from './WelcomePages';
 import UserProfile from './UserProfile';
 import WordBank from './WordBank';
+import ActivitiesPage from './ActivitiesPage';
 import BottomNav from './BottomNav';
 import { useAuth } from '../src/contexts/AuthContext';
 
@@ -47,6 +47,11 @@ export function MainApp() {
 
   const handleBackToDashboard = useCallback(() => {
     navigate('/app/dashboard');
+  }, [navigate]);
+
+  // New: route activity Back buttons to Activities first
+  const handleBackToActivities = useCallback(() => {
+    navigate('/app/activities');
   }, [navigate]);
 
   const handleProfileUpdate = useCallback((updatedProfile: any) => {
@@ -104,8 +109,8 @@ export function MainApp() {
   return (
     <div className="app-container-column">
       <ScrollToTop trigger={currentActivity} />
-      {/* Hide Navigation on user-profile and wordBank pages for cleaner UI */}
-      {currentActivity !== 'user-profile' && currentActivity !== 'wordBank' && (
+      {/* Hide Navigation on user-profile, wordBank, and activities pages for cleaner UI */}
+      {currentActivity !== 'user-profile' && currentActivity !== 'wordBank' && currentActivity !== 'activities' && (
         <Navigation 
           currentActivity={currentActivity}
           onSignOut={handleSignOut}
@@ -121,7 +126,7 @@ export function MainApp() {
           - This was requested to create a cleaner UI for these specific activities
           - Header only shows on other activities (quiz, interview, voice-conversation, pronunciation, settings)
         */}
-        {currentActivity !== 'dashboard' && currentActivity !== 'storytelling' && currentActivity !== 'user-profile' && currentActivity !== 'wordBank' && (
+        {/* {currentActivity !== 'dashboard' && currentActivity !== 'storytelling' && currentActivity !== 'user-profile' && currentActivity !== 'wordBank' && (
           <Header 
             currentActivity={currentActivity} 
             onNavigateHome={handleBackToDashboard}
@@ -129,7 +134,7 @@ export function MainApp() {
             onResetOnboarding={handleResetOnboarding}
             userProfile={userProfile}
           />
-        )}
+        )} */}
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           <Routes>
             <Route path="dashboard" element={
@@ -140,13 +145,7 @@ export function MainApp() {
               />
             } />
             
-            <Route path="settings" element={
-              <Settings 
-                onBack={handleBackToDashboard}
-                userProfile={userProfile}
-                onProfileUpdate={handleProfileUpdate}
-              />
-            } />
+
             
             <Route path="user-profile" element={
               <UserProfile
@@ -166,27 +165,31 @@ export function MainApp() {
             } />
             
             <Route path="quiz" element={
-              <VocabularyQuiz onBack={handleBackToDashboard} />
+              <VocabularyQuiz onBack={handleBackToActivities} />
             } />
             
             <Route path="interview" element={
-              <InterviewPrep onBack={handleBackToDashboard} />
+              <InterviewPrep onBack={handleBackToActivities} />
             } />
             
             <Route path="voice-conversation" element={
-              <VoiceConversation onBack={handleBackToDashboard} />
+              <VoiceConversation onBack={handleBackToActivities} />
             } />
             
             <Route path="pronunciation" element={
-              <PronunciationPractice onBack={handleBackToDashboard} />
+              <PronunciationPractice onBack={handleBackToActivities} />
             } />
             
             <Route path="wordBank" element={
-              <WordBank 
-                onBack={handleBackToDashboard} 
-                userField={userProfile?.field}
-                userId={user?.id}
-              />
+
+              <WordBank onBack={() => navigate('/app/activities')}
+                 userField={userProfile?.field}
+                userId={user?.id}/>
+            } />
+            
+            <Route path="activities" element={
+              <ActivitiesPage onBack={handleBackToDashboard} />
+
             } />
 
 

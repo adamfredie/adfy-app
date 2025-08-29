@@ -3,6 +3,8 @@ import { FiArrowLeft, FiSettings } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa6";
 import { OnboardingData } from "./Onboarding";
 
+import { useAuth } from "../src/contexts/AuthContext";
+
 const UserProfile: React.FC<{
   onBack: () => void;
   userProfile: OnboardingData | null;
@@ -89,12 +91,13 @@ const UserProfile: React.FC<{
     setIsChanged(hasFormChanged || hasCheckboxChanged);
   }, [form, checkedItems]);
 
+  const {signOut} = useAuth();
   // const userStats = getStatsBasedOnLevel();
   return (
-    <div className="w-full max-w-[500px] mx-auto bg-white h-screen shadow-lg flex flex-col">
+    <div className="w-full max-w-[500px] mx-auto bg-white h-screen shadow-lg flex flex-col ">
       {/* ------------------- HEADER ------------------- */}
       <div className="flex items-center justify-between px-4 py-2">
-        <button onClick={onBack}>
+        <button onClick={() => (activeSection === "Settings" ? setActiveSection("Profile") : onBack())}>
           <FiArrowLeft size={22} className="text-yellow-500" />
         </button>
         <div className="titleContainer px-3 w-full">
@@ -113,7 +116,7 @@ const UserProfile: React.FC<{
           </button>
         </div>
 
-        <div className="flex-1 ml-4">
+        <div className="flex-1 ml-4 mt-1">
           <h2 className="text-base font-semibold">{userProfile?.name}</h2>
           <p className="text-sm text-gray-600">Professional Communication Mastery</p>
         </div>
@@ -143,7 +146,7 @@ const UserProfile: React.FC<{
             </div>
           </div>
           <div className="border-t-4 border-b-4 flex items-center  px-6 mt-4 py-4">
-            <button className="text-[var(--primary)] font-semibold">Log out</button>
+            <button className="text-[var(--primary)] font-semibold" onClick={signOut}>Log out</button>
           </div>
         </div>
       ) : (
@@ -187,7 +190,7 @@ const UserProfile: React.FC<{
                     type="text"
                     value={form.jobTitle}
                     onChange={(e) => setForm({ ...form, jobTitle: e.target.value })}
-                    className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+                    className="w-full border rounded-md px-3 py-1 text-sm mt-1"
                   />
                 </div>
 
@@ -197,7 +200,7 @@ const UserProfile: React.FC<{
                     type="text"
                     value={form.company}
                     onChange={(e) => setForm({ ...form, company: e.target.value })}
-                    className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+                    className="w-full border rounded-md px-3 py-1 text-sm mt-1"
                   />
                 </div>
 
@@ -206,7 +209,7 @@ const UserProfile: React.FC<{
                   <select
                     value={form.professionalField}
                     onChange={(e) => setForm({ ...form, professionalField: e.target.value })}
-                    className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+                    className="w-full border rounded-md px-3 py-1 text-sm mt-1"
                   >
                     <option>Marketing</option>
                     <option>Engineering</option>
@@ -219,7 +222,7 @@ const UserProfile: React.FC<{
                   <select
                     value={form.experienceLevel}
                     onChange={(e) => setForm({ ...form, experienceLevel: e.target.value })}
-                    className="w-full border rounded-md px-3 py-2 text-sm mt-1"
+                    className="w-full border rounded-md px-3 py-1 text-sm mt-1"
                   >
                     <option>Mid level 3–7</option>
                     <option>Entry level 0–2</option>
@@ -306,7 +309,7 @@ const UserProfile: React.FC<{
 
           {/* Save button appears only if changes are made */}
           {ischanged && (
-            <div className="px-4 py-3 mb-10">
+            <div className="px-4 py-3 mb-20">
               <button className="w-full bg-[var(--primary)] py-2 rounded-md font-semibold">
                 Save
               </button>

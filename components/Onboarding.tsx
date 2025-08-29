@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../src/contexts/AuthContext";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+
+
 import { Label } from "./ui/label";
 import { 
   Presentation, Users, Mail, 
@@ -328,14 +330,20 @@ const renderPersonalStep = () => (
   <div className="onboarding-mobile-container">
     {/* Header */}
     <div className="onboarding-header">
+
+      <div className="divIconContainer">
+        <img src='/favicon12.ico'/>
       <button 
-        onClick={() => setCurrentStep('personal')}
+        onClick={() => navigate("/welcome")}
         className="back-button"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
           <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </button>
+
+
+      </div>
       <h1 className="onboarding-title">
         Let's get to know you better to personalize your learning experience
       </h1>
@@ -350,7 +358,7 @@ const renderPersonalStep = () => (
       }}
     >
       <div className="form-field">
-        <Label htmlFor="name" className="field-label">What's your name?</Label>
+        <Label htmlFor="name" className="field-label mt-2">What's your name?</Label>
         <Input
           id="name"
           type="text"
@@ -382,14 +390,19 @@ const renderPersonalStep = () => (
     <div className="onboarding-mobile-container">
       {/* Header */}
       <div className="onboarding-header">
+        <div className="divIconContainer">
+
+          <img src="/favicon12.ico"/>
         <button 
           onClick={() => setCurrentStep('personal')}
           className="back-button"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
             <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
+
+        </div>
         <h1 className="onboarding-title">Professional Background</h1>
         <p className="onboarding-subtitle">
           Help us understand your professional context for better personalization
@@ -442,7 +455,7 @@ const renderPersonalStep = () => (
               <option value="consulting">Consulting</option>
               <option value="other">Other</option>
             </select>
-            <svg className="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none">
+            <svg className="select-arrow" width="12" height="12" viewBox="6 0 24 24" fill="none">
               <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             </div>
@@ -463,7 +476,7 @@ const renderPersonalStep = () => (
               <option value="senior">Senior Level (8-12 years)</option>
               <option value="executive">Executive Level (13+ years)</option>
             </select>
-            <svg className="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none">
+            <svg className="select-arrow" width="12" height="12" viewBox="6 0 24 24" fill="none">
               <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
@@ -486,14 +499,19 @@ const renderPersonalStep = () => (
     <div className="onboarding-mobile-container">
       {/* Header */}
       <div className="onboarding-header">
+        <div className="divIconContainer">
+          <img src="favicon12.ico"/>
         <button 
           onClick={() => setCurrentStep('professional')}
           className="back-button"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
             <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
+
+
+        </div>
         <h1 className="onboarding-title">Communication Skills Assessment</h1>
         <p className="onboarding-subtitle">
           Rate your current confidence level in these communication areas (1 = Not confident, 5 = Very confident)
@@ -541,7 +559,7 @@ const renderPersonalStep = () => (
           <Label className="question-label">
             Overall, how would you rate your current professional communication skills?
           </Label>
-          <div className="skill-level-options">
+          <div className="skill-level-options-level">
             {[
                { value: "beginner", label: "Beginner" },
                { value: "intermediate", label: "Intermediate" },
@@ -582,14 +600,19 @@ const renderPersonalStep = () => (
     <div className="onboarding-mobile-container">
       {/* Header */}
       <div className="onboarding-header">
+        <div className="divIconContainer">
+
+          <img src="/favicon12.ico"/>
         <button 
           onClick={() => setCurrentStep('assessment')}
           className="back-button"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
             <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
+
+        </div>
         <h1 className="onboarding-title">Goals & Challenges</h1>
         <p className="onboarding-subtitle">
           Help us understand what you want to improve and what challenges you face
@@ -651,14 +674,20 @@ const renderPersonalStep = () => (
     <div className="onboarding-mobile-container">
       {/* Header */}
       <div className="onboarding-header">
-        <button 
-          onClick={() => setCurrentStep('assessment')}
-          className="back-button"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
+        <div className="divIconContainer">
+          <img src="/favicon12.ico"/>
+          <button 
+            onClick={() => setCurrentStep('goals')}
+            className="back-button"
+          >
+            <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
+              <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+
+
+        </div>
+        
         <h1 className="onboarding-title">Goals & Challenges</h1>
         <p className="onboarding-subtitle">
           Help us understand what you want to improve and what challenges you face
@@ -682,7 +711,7 @@ const renderPersonalStep = () => (
               key={id}
               className={`goal-option ${formData.improvementGoals!.includes(id) ? 'selected' : ''}`}
             >
-               <input
+              <input
                 type="checkbox"
                 checked={formData.improvementGoals!.includes(id)}
                 onChange={(e) => {

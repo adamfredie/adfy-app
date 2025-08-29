@@ -175,7 +175,7 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
               <div className="w-full">
                 {/* Updated: Added shield icon and "Current Level" title to match the first image */}
                 <div className="info-label current-level-header flex items-center gap-2">
-                  <MdVerified className="text-lg text-[#F9A825]"/>
+                  <MdVerified className="text-lg text-[var(--primary)]"/>
                   <div>
                     Current Level
                   </div>
@@ -217,14 +217,14 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
         />
 
       {/* Activities Section */}
-      <div className="dashboard-section">
+      {/* <div className="dashboard-section">
         <div className="section-header" onClick={() => toggleSection('activities')}>
           <h2>Activities</h2>
           <span className="material-symbols-outlined">
             {expandedSections.activities ?  "expand_circle_up": 'expand_circle_down'}
           </span>
-        </div>
-        {expandedSections.activities && (
+        </div> */}
+        {/* {expandedSections.activities && (
           <div className="section-content">
             <div className="activity-list">
               {mainActivities.map(activity => (
@@ -243,16 +243,16 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
                 </div>
               ))}
               {/* More Activities coming soon div */}
-              <div className="activity-card activity-card-disabled">
+              {/* <div className="activity-card activity-card-disabled">
                 <div className="activity-desc" style={{ textAlign: "center" }}>
                 <span className="info-icon-small">i</span>
                   More activities coming soon.
                 </div>
               </div>
-            </div>
-          </div>
-        )}
-      </div>
+            </div> */}
+          {/* // </div> */}
+        {/* // )} */} 
+      {/* // </div> */}
 
       {/* Bottom Navigation (mobile only) */}
       <BottomNav />

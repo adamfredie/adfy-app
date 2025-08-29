@@ -19,6 +19,10 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   
+  // OTP verification methods
+  sendOTP: (email: string) => Promise<{ success: boolean; error?: string }>;
+  verifyOTP: (email: string, otp: string) => Promise<{ success: boolean; error?: string }>;
+  
   // Profile management
   updateUserProfile: (profile: Partial<OnboardingData>) => Promise<void>;
   refreshUserProfile: () => Promise<void>;
@@ -330,7 +334,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Sign up function
-  const signUp = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const signUp = async (email: string, password: string): Promise<{ success: boolean; error?: string; code?: string  }> => {
     setAuthLoading(true);
     try {
       // Get the correct redirect URL for the current environment and add the verify route
@@ -344,18 +348,41 @@ export function AuthProvider({ children }: AuthProviderProps) {
         password,
         options: {
           emailRedirectTo: redirectTo
-        }
-      });
+        },
+      },
+    );
 
+
+      console.log("Data is here \n\n", data);
+
+
+      
       if (error) {
-        return { success: false, error: error.message };
-      }
+            console.log("❌ Supabase signUp error:", error.message);
+
+            if (error.message.toLowerCase().includes("already")) {
+              return { 
+                success: false, 
+                error: "This email is already registered. Please sign in instead.", 
+                code: "EMAIL_REGISTERED" 
+              };
+            }
+
+            return { success: false, error: error.message };
+          }
+
 
       if (data.user && !data.user.email_confirmed_at) {
-        return { 
-          success: true, 
-          error: 'Please check your email and verify your account before signing in.' 
+        return {
+          success: false,
+          error: "Email already registered. Please verify instead.",
+          code: "EMAIL_NOT_CONFIRMED"
         };
+      }
+
+      // If there is no error generated we can check with it 
+      if(data.user?.identities?.length == 0){
+        return {success: false, error: "Looks like you already have an account. Try logging in!"};
       }
 
       return { success: true };
@@ -412,6 +439,71 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       console.error('Error signing out:', error);
       throw error;
+    }
+  };
+
+  // Send OTP function
+  const sendOTP = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      console.log('🔐 AuthContext: Sending OTP to:', email);
+      
+      // For now, we'll simulate OTP sending since we don't have a real OTP service
+      // In production, you would integrate with a service like Twilio, AWS SNS, etc.
+      
+      // Store the OTP in localStorage for demo purposes
+      // In production, this would be handled by your backend
+      const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      localStorage.setItem(`otp_${email}`, otp);
+      localStorage.setItem(`otp_${email}_timestamp`, Date.now().toString());
+      
+      console.log('🔐 AuthContext: OTP generated (demo):', otp);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      return { success: false, error: 'Failed to send verification code' };
+    }
+  };
+
+  // Verify OTP function
+  const verifyOTP = async (email: string, otp: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      console.log('🔐 AuthContext: Verifying OTP for:', email);
+      
+      // Get stored OTP
+      const storedOTP = localStorage.getItem(`otp_${email}`);
+      const timestamp = localStorage.getItem(`otp_${email}_timestamp`);
+      
+      if (!storedOTP || !timestamp) {
+        return { success: false, error: 'No verification code found. Please request a new one.' };
+      }
+      
+      // Check if OTP is expired (5 minutes)
+      const now = Date.now();
+      const otpTime = parseInt(timestamp);
+      if (now - otpTime > 5 * 60 * 1000) {
+        localStorage.removeItem(`otp_${email}`);
+        localStorage.removeItem(`otp_${email}_timestamp`);
+        return { success: false, error: 'Verification code has expired. Please request a new one.' };
+      }
+      
+      // Verify OTP
+      if (storedOTP !== otp) {
+        return { success: false, error: 'Invalid verification code. Please try again.' };
+      }
+      
+      // Clear OTP after successful verification
+      localStorage.removeItem(`otp_${email}`);
+      localStorage.removeItem(`otp_${email}_timestamp`);
+      
+      console.log('🔐 AuthContext: OTP verified successfully');
+      return { success: true };
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      return { success: false, error: 'Failed to verify code' };
     }
   };
 // Update user profile
@@ -484,6 +576,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signUp,
     signIn,
     signOut,
+    sendOTP,
+    verifyOTP,
     updateUserProfile,
     refreshUserProfile,
     isAuthenticated,

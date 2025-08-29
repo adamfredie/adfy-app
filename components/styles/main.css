@@ -501,13 +501,17 @@ body {
 .nav-left {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  /* background: red; */
 }
 
 .nav-brand {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
   text-decoration: none;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .nav-brand-text {
@@ -1054,7 +1058,7 @@ body {
 .storytelling-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: var(--space-6) var(--space-4);
+  padding: 100px 0px;
 }
 
 /* Breadcrumb Navigation */
@@ -1071,7 +1075,8 @@ body {
   color: var(--text-secondary);
   margin: 0 var(--space-2);
 }
-
+/* This css is not implementing on the back button UI icon */
+/* 
 .back-button {
   display: inline-flex;
   align-items: center;
@@ -1080,7 +1085,7 @@ body {
   text-decoration: none;
   font-size: var(--font-size-base);
   margin-bottom: var(--space-6);
-}
+} */
 
 /* Progress Section */
 .progress-section {
@@ -1414,7 +1419,7 @@ body {
 }
 
 .orange-action-btn {
-  background: #F9A825;
+  background: var(--primary);
   color: black;
   border-radius: 0.75rem;
   padding: 0.5rem 1.5rem;
@@ -1429,11 +1434,11 @@ body {
   transition: background 0.2s;
 }
 .orange-action-btn:hover {
-  background: #c17900;
+  background: var(--accent);
 }
 
 .soft-yellow-btn {
-  background: #fdd995;
+  background: var(--primary);
   color: #888;
   border-radius: 1.2em;
   padding: 0.7em 1.5em;
@@ -1519,7 +1524,7 @@ body {
   /* row gap and column gap */
   padding: 1rem;
   width: fit-content;
-
+  /* font-size:xx-small; */
   margin-bottom: 1rem;
 }
 
@@ -1527,8 +1532,8 @@ body {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 14px;
-  line-height: 1.2;
+  font-size: 0.8rem;
+  line-height: 1.1;
   color: #1a1a1a;
   cursor: pointer;
   position: relative;
@@ -1563,7 +1568,7 @@ body {
   /* border-color: #000; */
 
   border: 2px solid var(--primary);
-  background-image: url("../../components/figma/icon.svg");
+  background-image: url("/icon.svg");
   background-repeat: no-repeat;
   background-position: center;
   /* keep border black */

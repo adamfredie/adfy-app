@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./styles/main.css";
+import logoPng from "../images/logo.png"
 
 export function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
@@ -9,7 +10,7 @@ export function SplashScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
-      setTimeout(() => navigate('/welcome'), 500); // Wait for fade out animation
+      setTimeout(() => navigate('/welcome'), 800); // Wait for fade out animation
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -20,10 +21,8 @@ export function SplashScreen() {
       <div className="splash-content">
         <div className="splash-logo">
           <div className="logo-text">
-            <span className="logo-main">Aduffy</span>
-            <span className="logo-sparkle">✨</span>
+            <img src={logoPng} alt="logo"/>
           </div>
-          <div className="logo-subtitle">Learning</div>
         </div>
       </div>
     </div>
