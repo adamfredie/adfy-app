@@ -424,8 +424,12 @@ const UserProfile: React.FC<{
           {/* Save button appears only if changes are made */}
           {ischanged && (
             <div className="px-4 py-3 mb-20">
-              <button className="w-full bg-[var(--primary)] py-2 rounded-md font-semibold">
-                Save
+              <button 
+                onClick={handleSave}
+                disabled={isSaving}
+                className="w-full bg-[var(--primary)] py-2 rounded-md font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSaving ? 'Saving...' : 'Save'}
               </button>
             </div>
           )}

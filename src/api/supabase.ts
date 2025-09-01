@@ -233,8 +233,16 @@ export const getUserProfile = async (userId: string) => {
                 console.log('ℹ️ No user profile found for user:', userId, '- This is normal for new users');
                 return null;
             }
-            // For other errors, throw them
-            throw error;
+            
+            // Handle 406 errors (Not Acceptable) - usually permission or table issues
+            if (error.code === '406' || error.message.includes('406')) {
+                console.warn('⚠️ HTTP 406 error when fetching user profile - table may not exist or have permission issues');
+                return null;
+            }
+            
+            // For other errors, log them but don't throw to prevent app crashes
+            console.error('Error fetching user profile:', error);
+            return null;
         }
         
         // Profile found, return mapped data
@@ -500,8 +508,36 @@ export async function updateUserTotalScore(userId: string, newScore: number) {
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    // Handle 406 errors gracefully
+    if (error.code === '406') {
+      console.warn('⚠️ User scores table not accessible - this may be normal for new users');
+      return null;
+    }
+    throw error;
+  }
   return data;
+}
+
+// Get weekly vocabulary progress
+export async function getWeeklyProgress(userId: string) {
+  try {
+    // Get words learned in the last 7 days
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    
+    const { data, error } = await supabase
+      .from('vocabulary_progress')
+      .select('word')
+      .eq('user_id', userId)
+      .gte('created_at', weekAgo.toISOString());
+      
+    if (error) throw error;
+    return data?.length || 0;
+  } catch (error) {
+    console.error('Error fetching weekly progress:', error);
+    return 0;
+  }
 }
 
 // Get user learning statistics
@@ -551,12 +587,23 @@ export async function getUserLearningStats(userId: string) {
     .eq('user_id', userId)
     .single();
 
-  if (scoreError && scoreError.code !== 'PGRST116') throw scoreError;
+  if (scoreError) {
+    // Handle 406 errors and missing data gracefully
+    if (scoreError.code === '406' || scoreError.code === 'PGRST116') {
+      console.warn('⚠️ User scores table not accessible or no data found - this is normal for new users');
+    } else {
+      console.error('Error fetching user scores:', scoreError);
+    }
+  }
+
+  // Get weekly progress
+  const weeklyProgress = await getWeeklyProgress(userId);
 
   return {
     wordsLearned: wordsData?.length || 0,
     currentStreak: currentStreak,
-    totalScore: scoreData?.total_score || 0
+    totalScore: scoreData?.total_score || 0,
+    weeklyProgress: weeklyProgress
   };
 }
 

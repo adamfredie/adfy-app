@@ -18,6 +18,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  // OTP-related state kept for future use but not implemented in flow
   const [showOTP, setShowOTP] = useState(false);
   const [pendingUserData, setPendingUserData] = useState<{email: string, password: string} | null>(null);
 
@@ -54,22 +55,22 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
     }
 
     try {
-      // Send OTP for verification
-      const otpResult = await sendOTP(email);
+      // Direct Supabase signup (original system)
+      const result = await signUp(email, password);
       
-      if (otpResult.error) {
-        setError(otpResult.error);
-        return;
+      if (result.success) {
+        setSuccessMessage("Account created successfully! Please check your email to verify your account.");
+        // Navigate to onboarding after a short delay
+        setTimeout(() => {
+          onSuccess();
+        }, 2000);
+      } else {
+        setError(result.error || 'Failed to create account');
       }
 
-      // Store user data for after OTP verification
-      setPendingUserData({ email, password });
-      setShowOTP(true);
-      setSuccessMessage("Verification code sent to your email!");
-
     } catch (err: any) {
-      console.error("OTP sending error:", err);
-      setError("Failed to send verification code");
+      console.error("Signup error:", err);
+      setError("An unexpected error occurred");
     }
   };
 
@@ -78,6 +79,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
     return regex.test(value);
   };
 
+  // OTP-related functions kept for future use but not implemented in current flow
   const handleOTPVerify = async (otp: string) => {
     if (!pendingUserData) {
       return { success: false, error: "No pending verification found" };
@@ -285,8 +287,8 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
         </form>
       </motion.div>
 
-      {/* OTP Verification Modal */}
-      {pendingUserData && (
+      {/* OTP Verification Modal - Kept for future use but not implemented in current flow */}
+      {/* {pendingUserData && (
         <OtpVerification
           email={pendingUserData.email}
           onVerify={handleOTPVerify}
@@ -295,7 +297,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
           onSuccess={handleOTPSuccess}
           isOpen={showOTP}
         />
-      )}
+      )} */}
     </AnimatePresence>
   );
 }
