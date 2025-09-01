@@ -8,14 +8,14 @@ const isDevelopment = import.meta.env.DEV;
 
 // Helper function to get the correct URL for redirects based on environment
 export const getURL = () => {
+  // For production with custom domain
+  if (import.meta.env.VITE_SITE_URL) {
+    return import.meta.env.VITE_SITE_URL;
+  }
+  
   // For Vercel deployments
   if (import.meta.env.VITE_VERCEL_URL) {
     return `https://${import.meta.env.VITE_VERCEL_URL}`;
-  }
-  
-  // For production with custom domain
-  if (import.meta.env.VITE_SITE_URL) {
-    return `${import.meta.env.VITE_SITE_URL}`;
   }
   
   // For local development

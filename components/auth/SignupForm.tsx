@@ -60,7 +60,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
       
       if (result.success) {
         setSuccessMessage("Account created successfully! Please check your email to verify your account.");
-        // Navigate to onboarding after a short delay
+        // Navigate back to welcome page after a short delay
         setTimeout(() => {
           onSuccess();
         }, 2000);
