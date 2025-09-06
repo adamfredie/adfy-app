@@ -337,8 +337,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signUp = async (email: string, password: string): Promise<{ success: boolean; error?: string; code?: string  }> => {
     setAuthLoading(true);
     try {
-      // Get the correct redirect URL for the current environment
-      const redirectTo = getURL();
+      // Get the correct redirect URL for the current environment and add the verify route
+      const baseUrl = getURL();
+      const redirectTo = `${baseUrl}/verify`;
       
       console.log('🔐 AuthContext: Signing up with redirectTo:', redirectTo);
       
