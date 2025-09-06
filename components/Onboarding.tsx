@@ -17,6 +17,8 @@ import {
 // Keep the original interface for backward compatibility
 export interface OnboardingData {
   name?: string;
+  gender?: string;
+  avatarUrl?: string;
   email: string;
   jobTitle: string;
   company: string;
@@ -48,18 +50,19 @@ interface OnboardingProps {
   // Remove onComplete prop - we'll use navigation instead
 }
 
+
 type Step = 'personal' | 'professional' | 'assessment' | 'goals' | 'goals-part2';
 // Array of objects
 const communicationChallenges = [
-  { id: 'public-speaking', label: 'Public speaking and presentations', icon:<Presentation/> },
+  { id: 'public-speaking', label: 'Public speaking +  presentations', icon:<Presentation/> },
   { id: 'meeting-participation', label: 'Active participation in meetings', icon:<Users/> },
-  { id: 'email-clarity', label: 'Writing clear and professional emails', icon: <Mail /> },
+  { id: 'email-clarity', label: 'Writing professional emails', icon: <Mail /> },
   { id: 'difficult-conversations', label: 'Having difficult conversations', icon:<MessageSquare/> },
   { id: 'networking', label: 'Professional networking', icon: <TrendingUp/> },
   { id: 'cross-team-collaboration', label: 'Cross-team collaboration', icon: <Settings/>  },
   { id: 'client-communication', label: 'Client communication', icon: <Phone /> },
   { id: 'virtual-meetings', label: 'Virtual meeting facilitation', icon: <Video />},
-  { id: 'persuasive-writing', label: 'Persuasive writing and proposals', icon: <FileText/> },
+  { id: 'persuasive-writing', label: 'Persuasive writing + proposals', icon: <FileText/> },
   { id: 'conflict-resolution', label: 'Conflict resolution', icon: <AlertTriangle/> }
 ]
 // Array of objects
@@ -82,6 +85,8 @@ export function Onboarding() {
   const [currentStep, setCurrentStep] = useState<Step>('personal');
   const [formData, setFormData] = useState<OnboardingData>({
     name: '',
+    gender: '',
+    avatarUrl: '',
     email: user?.email || '', // Add the required email property
     jobTitle: '',
     company: '',
@@ -99,7 +104,8 @@ export function Onboarding() {
     },
     communicationChallenges: [],
     improvementGoals: [],
-    currentSkillLevel: ''
+    currentSkillLevel: '',
+    
   });
 
   // Show loading state while auth is initializing
@@ -209,6 +215,11 @@ export function Onboarding() {
           ).join(', ')}`
         : formData.learningGoals || ''
     };
+
+    // If no avatar yet, generate based on gender once and persist
+    if (!finalData.avatarUrl) {
+      finalData.avatarUrl = generateAvatarUrl(finalData.gender, user?.id);
+    }
     
     console.log("Fetching the data");
     console.log("Final data prepared:", finalData);
@@ -309,6 +320,18 @@ export function Onboarding() {
     }
   };
 
+  const generateAvatarUrl = (genderValue?: string, seedBase?: string): string => {
+    const seed = (seedBase || formData.name || user?.id || 'adfy-user') + '-' + Math.floor(Math.random() * 100000);
+    // Choose a dicebear style roughly aligned with gender
+    const style = genderValue === 'male'
+      ? 'adventurer'
+      : genderValue === 'female'
+      ? 'avataaars'
+      : 'identicon';
+    // Use PNG for broader rendering support
+    return `https://api.dicebear.com/7.x/${style}/png?seed=${encodeURIComponent(seed)}&radius=50`;
+  };
+
   const isStepValid = (): boolean => {
     switch (currentStep) {
       case 'personal':
@@ -332,21 +355,11 @@ const renderPersonalStep = () => (
     <div className="onboarding-header">
 
       <div className="divIconContainer">
-        <img src='/favicon12.ico'/>
-      <button 
-        onClick={() => navigate("/welcome")}
-        className="back-button"
-      >
-        <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
-          <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-
-
-      </div>
+        <img src='/aduffy-logo.png' alt="aduffy logo" decoding="async" fetchPriority="high" height={30} width={80}/>
       <h1 className="onboarding-title">
         Let's get to know you better to personalize your learning experience
       </h1>
+      </div>
     </div>
 
     {/* Form Fields */}
@@ -371,8 +384,29 @@ const renderPersonalStep = () => (
         />
       </div>
 
+      <div className="form-field">
+        <Label htmlFor="gender" className="field-label mt-2">Gender</Label>
+        <div className="select-wrapper">
+          <select
+            id="gender"
+            value={formData.gender || ''}
+            onChange={(e) => updateFormData({ gender: e.target.value })}
+            className="mobile-select"
+          >
+            <option value="">Select your gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="prefer-not-to-say">Prefer not to say</option>
+            <option value="other">Other</option>
+          </select>
+          <svg className="select-arrow" width="12" height="12" viewBox="6 0 24 24" fill="none">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
       {/* Continue Button */}
-      <div className="onboarding-actions">
+      <div className="onboarding-actions ">
         <Button
           type="submit"
           disabled={!formData.name}
@@ -380,6 +414,18 @@ const renderPersonalStep = () => (
         >
           Continue
         </Button>
+
+      </div>
+     <div className="centerDiv flex items-center justify-center">
+
+                  <button 
+                 onClick={()=> {navigate("/welcome")}}
+                 className="back-button-signup"
+               >
+                 <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
+                   <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                 </svg>
+               </button>
       </div>
     </form>
   </div>
@@ -392,21 +438,14 @@ const renderPersonalStep = () => (
       <div className="onboarding-header">
         <div className="divIconContainer">
 
-          <img src="/favicon12.ico"/>
-        <button 
-          onClick={() => setCurrentStep('personal')}
-          className="back-button"
-        >
-          <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
-            <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
+          <img src='/aduffy-logo.png' alt="aduffy logo" decoding="async" fetchPriority="high" height={30} width={80} />
+    
 
-        </div>
         <h1 className="onboarding-title">Professional Background</h1>
         <p className="onboarding-subtitle">
           Help us understand your professional context for better personalization
         </p>
+        </div>
       </div>
 
       {/* Form Fields */}
@@ -481,9 +520,7 @@ const renderPersonalStep = () => (
             </svg>
           </div>
         </div>
-      </div>
-       {/* Continue Button */}
-       <div className="onboarding-actions">
+       <div className="onboarding-actions ">
         <Button
           onClick={() => setCurrentStep('assessment')}
           disabled={!formData.jobTitle || !formData.field || !formData.experienceLevel}
@@ -492,6 +529,20 @@ const renderPersonalStep = () => (
       Continue
         </Button>
       </div>
+
+      <div className="centerDiv flex items-center justify-center">
+
+                  <button 
+                 onClick={() => setCurrentStep('personal')}
+                 className="back-button-signup"
+               >
+                 <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
+                   <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                 </svg>
+               </button>
+      </div>
+      </div>
+       {/* Continue Button */}
     </div>
   );
 
@@ -500,22 +551,15 @@ const renderPersonalStep = () => (
       {/* Header */}
       <div className="onboarding-header">
         <div className="divIconContainer">
-          <img src="favicon12.ico"/>
-        <button 
-          onClick={() => setCurrentStep('professional')}
-          className="back-button"
-        >
-          <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
-            <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
+          <img src='/aduffy-logo.png' alt="aduffy logo" decoding="async" fetchPriority="high" height={30} width={80} />
+      
 
 
-        </div>
         <h1 className="onboarding-title">Communication Skills Assessment</h1>
         <p className="onboarding-subtitle">
           Rate your current confidence level in these communication areas (1 = Not confident, 5 = Very confident)
         </p>
+        </div>
       </div>
 
       {/* Assessment Questions */}
@@ -580,10 +624,7 @@ const renderPersonalStep = () => (
              ))}
            </div>
          </div>
-       </div>
- 
-       {/* Continue Button */}
-       <div className="onboarding-actions">
+       <div className="onboarding-actions ">
          <Button
            onClick={() => setCurrentStep('goals')}
            disabled={!formData.currentSkillLevel}
@@ -592,6 +633,21 @@ const renderPersonalStep = () => (
            Continue
          </Button>
        </div>
+
+       <div className="centerDiv flex items-center justify-center">
+
+                  <button 
+                   onClick={() => setCurrentStep('professional')}
+                 className="back-button-signup"
+               >
+                 <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
+                   <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                 </svg>
+               </button>
+      </div>
+       </div>
+ 
+       {/* Continue Button */}
      </div>
    );
 
@@ -602,30 +658,18 @@ const renderPersonalStep = () => (
       <div className="onboarding-header">
         <div className="divIconContainer">
 
-          <img src="/favicon12.ico"/>
-        <button 
-          onClick={() => setCurrentStep('assessment')}
-          className="back-button"
-        >
-          <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
-            <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
+          <img src='/aduffy-logo.png' alt="aduffy logo" decoding="async" fetchPriority="high" height={30} width={80} />
+        
 
-        </div>
-        <h1 className="onboarding-title">Goals & Challenges</h1>
+        <h1 className="onboarding-title">Challenges You currently Face</h1>
         <p className="onboarding-subtitle">
           Help us understand what you want to improve and what challenges you face
         </p>
+        </div>
       </div>
 
       {/* Challenges Section */}
       <div className="onboarding-form">
-        <div className="section-question">
-          <Label className="question-label">What communication challenges do you currently face?</Label>
-          <p className="question-hint">Select all that apply</p>
-        </div>
-
         <div className="challenges-grid">
           {communicationChallenges.map(({ id, label, icon }) => (
             <label
@@ -652,13 +696,7 @@ const renderPersonalStep = () => (
             </label>
           ))}
         </div>
-        </div>
-
-        
-       
-
-      {/* Continue Button */}
-      <div className="onboarding-actions">
+      <div className="onboarding-form-challenge ">
         <Button
           onClick={() => setCurrentStep('goals-part2')}
           disabled={formData.communicationChallenges!.length === 0}
@@ -668,6 +706,25 @@ const renderPersonalStep = () => (
         </Button>
 
       </div>
+
+
+      <div className="centerDiv flex items-center justify-center">
+
+                  <button 
+                   onClick={() => setCurrentStep('assessment')}
+                 className="back-button-signup"
+               >
+                 <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
+                   <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                 </svg>
+               </button>
+      </div>
+        </div>
+
+        
+       
+
+      {/* Continue Button */}
     </div>
   );
    const renderGoalsStepPart2 = () => (
@@ -675,36 +732,20 @@ const renderPersonalStep = () => (
       {/* Header */}
       <div className="onboarding-header">
         <div className="divIconContainer">
-          <img src="/favicon12.ico"/>
-          <button 
-            onClick={() => setCurrentStep('goals')}
-            className="back-button"
-          >
-            <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
-              <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+          <img src='/aduffy-logo.png' alt="aduffy logo" decoding="async" fetchPriority="high" height={30} width={80} />
+    
 
 
-        </div>
-        
-        <h1 className="onboarding-title">Goals & Challenges</h1>
+        <h1 className="onboarding-title">What Do You Want to Improve?</h1>
         <p className="onboarding-subtitle">
           Help us understand what you want to improve and what challenges you face
         </p>
+        </div>
+        
       </div>
 
       {/* Challenges Section */}
       <div className="onboarding-form">
-       
-
-       
-
-        <div className="section-question">
-          <Label className="question-label">What are your primary improvement goals?</Label>
-          <p className="question-hint">Select all that apply</p>
-        </div>
-
         <div className="goals-grid">
           {improvementGoals.map(({ id, label, icon }) => (
             <label
@@ -731,10 +772,7 @@ const renderPersonalStep = () => (
             </label>
           ))}
         </div>
-      </div>
-
-      
-      <div className="onboarding-actions">
+      <div className="onboarding-actions onboarding-form-challenge ">
          <Button
           onClick={handleCompleteSetup}
           // disabled={formData.communicationChallenges!.length === 0 || formData.improvementGoals!.length === 0}
@@ -744,6 +782,21 @@ const renderPersonalStep = () => (
           Complete Setup
         </Button>
       </div>
+
+      <div className="centerDiv flex items-center justify-center">
+
+                  <button 
+                   onClick={() => setCurrentStep('goals')}
+                 className="back-button-signup"
+               >
+                 <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
+                   <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                 </svg>
+               </button>
+      </div>
+      </div>
+
+      
     </div>
   );
   // Redering each step of the onboarding process by using switch case

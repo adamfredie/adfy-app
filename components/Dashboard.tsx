@@ -148,8 +148,8 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
               <div className="course-info-item">
                 {/* <span className="info-icon" role="img" aria-label="Course">📘</span> */}
                 <div>
-                  <div className="info-label flex gap-2">
-                    <HiOutlineBookOpen className="text-xl text-[#17A2B8]" />
+                  <div className="info-label ">
+                    <HiOutlineBookOpen className=" text-[#17A2B8]  info-label-icon" />
                     <div className="">
                       Course Name
                     </div>
@@ -160,9 +160,9 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
               <div className="course-info-item">
                 {/* <span className="info-icon" role="img" aria-label="Duration">⏳</span> */}
                 <div>
-                  <div className="info-label flex gap-2 ">
-                    <MdHourglassEmpty className="text-xl text-[#28A745]"/>
-                    <div>
+                  <div className="info-label  ">
+                    <MdHourglassEmpty className=" text-[#28A745] info-label-icon"/>
+                    <div className="">
                       Course Duration
                     </div>
                   </div>
@@ -174,8 +174,8 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
               {/* <span className="info-icon" role="img" aria-label="Level">💡</span> */}
               <div className="w-full">
                 {/* Updated: Added shield icon and "Current Level" title to match the first image */}
-                <div className="info-label current-level-header flex items-center gap-2">
-                  <MdVerified className="text-lg text-[var(--primary)]"/>
+                <div className="info-label current-level-header">
+                  <MdVerified className=" text-[var(--primary)]  info-label-icon"/>
                   <div>
                     Current Level
                   </div>

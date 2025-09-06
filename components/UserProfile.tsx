@@ -94,35 +94,40 @@ const UserProfile: React.FC<{
   const {signOut} = useAuth();
   // const userStats = getStatsBasedOnLevel();
   return (
-    <div className="w-full max-w-[500px] mx-auto bg-white h-screen shadow-lg flex flex-col ">
+    <div className="w-full max-w-[500px] mx-auto bg-white min-h-screen shadow-lg flex flex-col ">
       {/* ------------------- HEADER ------------------- */}
-      <div className="flex items-center justify-between px-4 py-2">
+      <div className="flex items-center gap-1 px-4  pt-4 pb-5  ">
         <button onClick={() => (activeSection === "Settings" ? setActiveSection("Profile") : onBack())}>
-          <FiArrowLeft size={22} className="text-yellow-500" />
+          <FiArrowLeft size={20} className="text-yellow-500" />
         </button>
-        <div className="titleContainer px-3 w-full">
-          <h1 className="text-lg font-semibold">{activeSection}</h1>
+        <div className="titleContainer px-3 ">
+          <h1>{activeSection}</h1>
         </div>
       </div>
 
       {/* ------------------- PROFILE HEADER ------------------- */}
-      <div className="flex items-center justify-between px-4 mt-2">
+      <div className="flex items-center gap-2 h-[80px] px-4 ">
         <div className="relative">
-          <div className="w-16 h-16 rounded-full bg-pink-300 flex items-center justify-center">
-            <span className="text-3xl">👤</span>
-          </div>
-          <button className="absolute bottom-0 right-0 bg-white rounded-full px-2 py-0.5 shadow-md text-xs font-semibold">
-            Edit
-          </button>
+          {userProfile?.avatarUrl ? (
+            <img
+              src={userProfile.avatarUrl}
+              alt="User avatar"
+              className="w-20 h-20 rounded-full object-cover bg-gray-100"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-pink-300 flex items-center justify-center">
+              <span className="text-3xl">👤</span>
+            </div>
+          )}
         </div>
 
-        <div className="flex-1 ml-4 mt-1">
-          <h2 className="text-base font-semibold">{userProfile?.name}</h2>
-          <p className="text-sm text-gray-600">Professional Communication Mastery</p>
+        <div className="flex-1 ">
+          <h2 className="text-[1rem] font-bold">{userProfile?.name}</h2>
+          <p className="text-[13px] text-gray-600 font-normal">Professional Communication Mastery</p>
         </div>
 
         <FiSettings
-          size={22}
+          size={20}
           className="text-gray-700 cursor-pointer"
           onClick={() =>
             setActiveSection((elem) => (elem === "Settings" ? "Profile" : "Settings"))
@@ -132,9 +137,9 @@ const UserProfile: React.FC<{
 
       {/* ------------------- MAIN CONTENT ------------------- */}
       {activeSection === "Settings" ? (
-        <div className="flex flex-col mt-11">
+        <div className="flex flex-col pt-6">
           <div className="border-t-[3px] border-[var(--primary)] pt-2"></div>
-          <div className="privacy px-6">
+          <div className="privacy px-6  text-[1rem] ">
             <div className="w-full text-left py-2 font-bold flex justify-between">
               Privacy Policy <FaArrowRight className="text-gray-300" />
             </div>
@@ -150,12 +155,12 @@ const UserProfile: React.FC<{
           </div>
         </div>
       ) : (
-        <div className="container">
+        <div className="container   ">
           {/* Tabs */}
-          <div className="flex border-b mt-1">
+          <div className="flex border-b text-[14px] ">
             <button
               onClick={() => setActiveTab("profile")}
-              className={`flex-1 py-2 text-center font-medium ${
+              className={`flex-1 pt-3 pb-2 text-center  font-semibold ${
                 activeTab === "profile"
                   ? "border-b-[3px] border-[var(--primary)] font-extrabold"
                   : "text-[var(--font-size-sm)] font-extrabold border-b-2 border-gray-300"
@@ -165,7 +170,7 @@ const UserProfile: React.FC<{
             </button>
             <button
               onClick={() => setActiveTab("preferences")}
-              className={`flex-1 py-2 text-center font-medium ${
+              className={`flex-1 pt-3 pb-2 text-center font-semibold ${
                 activeTab === "preferences"
                   ? "border-b-[3px] border-[var(--primary)] font-extrabold"
                   : "text-[var(--font-size-sm)] font-extrabold border-b-2 border-gray-300"
@@ -176,7 +181,7 @@ const UserProfile: React.FC<{
           </div>
 
           {/* Content */}
-          <div className="flex-1 px-4 py-2">
+          <div className="flex-1  py-4  px-4">
             {activeTab === "profile" ? (
               <div>
                 <h3 className="userProfileLabel">Professional Information</h3>
@@ -307,9 +312,8 @@ const UserProfile: React.FC<{
             )}
           </div>
 
-          {/* Save button appears only if changes are made */}
           {ischanged && (
-            <div className="px-4 py-3 mb-20">
+            <div className="px-4 pt-2 mb-24">
               <button className="w-full bg-[var(--primary)] py-2 rounded-md font-semibold">
                 Save
               </button>

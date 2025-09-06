@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 // import { Header } from './Header';
 import { Dashboard } from './Dashboard';
-import { Onboarding, OnboardingData } from './Onboarding';
 import { StorytellingActivity } from './StorytellingActivity';
 import { VocabularyQuiz } from './VocabularyQuiz';
 import { InterviewPrep } from './InterviewPrep';
@@ -10,8 +9,6 @@ import { VoiceConversation } from './VoiceConversation';
 import { PronunciationPractice } from './PronunciationPractice';
 import { Navigation } from './Navigation';
 import { ScrollToTop } from './ScrollToTop';
-import { SplashScreen } from './SplashScreen';
-import { WelcomePages } from './WelcomePages';
 import UserProfile from './UserProfile';
 import WordBank from './WordBank';
 import ActivitiesPage from './ActivitiesPage';
@@ -156,7 +153,7 @@ export function MainApp() {
             
             <Route path="storytelling" element={
               <StorytellingActivity 
-                onBack={handleBackToDashboard}
+                onBack={handleBackToActivities}
                 userProfile={userProfile}
                 savedProgress={activityProgress.storytelling}
                 onProgressUpdate={(progress) => handleActivityProgressUpdate('storytelling', progress)}

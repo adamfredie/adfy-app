@@ -19,18 +19,17 @@ export function WelcomePages() {
   // These are three welcome pages that are shown in the welcome page via the carousel effect.The images are not used for now.
   const welcomePages = [
     {
-      title: "Welcome to Aduffy",
-      description: "Experience the future of vocabulary learning with voice interaction and personalized content",
-      image: "person-1.jpg"
+      title: "Master Pro Communication",
+      description: "Learn from our CELTA-certified coaches",
     },
     {
-      title: "Master Vocabulary in 5 Simple Steps",
-      description: "Our proven AI-powered method helps you learn, practice, and master professional vocabulary",
+      title: "Become a Confident Speaker",
+      description: "Get focused lessons through 1:1 mentorship ",
       image: "person-2.jpg"
     },
     {
-      title: "Designed for Busy Professionals",
-      description: "Perfect for mid to senior management professionals who want to enhance their communication skills",
+      title: "Learn Leadership \n  Skills",
+      description: "Lead meetings, opinions, and teams at work",
       image: "person-3.jpg"
     }
   ];
@@ -217,38 +216,41 @@ export function WelcomePages() {
   return (
     <>
       <div className="welcome-container">
-        <div className="w-full">
-          <img src="https://aduffylearning.com/wp-content/uploads/2025/08/aduffy-welcome-screen-img.jpg" alt="A woman on the phone" className="object-cover w-full" />
-        </div>
+  <div className="welcome-hero">
+    <img 
+      src="https://aduffylearning.com/wp-content/uploads/2025/08/aduffy-welcome-screen-img.jpg" 
+      alt="A woman on the phone" 
+    />
+  </div>
 
-        <div className="welcome-content">
-          <div className="welcome-text">
-            <h1 className="welcome-title">{welcomePages[currentPage].title}</h1>
-            <p className="welcome-description">{welcomePages[currentPage].description}</p>
-           <div className="welcome-progress mt-4">
-            {welcomePages.map((_, index) => (
-              <div
-                key={index}
-                className={`progress-dot ${index === currentPage ? 'active' : ''}`}
-              />
-            ))}
-          </div>
-          </div>
-
-          {/* Progress Dots  */}
-          
-          {/* Action Buttons */}
-          <div className="welcome-actions">
-            <button onClick={handleGetStarted} className="welcome-primary-btn">Get Started</button>
-            <button
-              onClick={handleSignInClick}
-              className="welcome-secondary-btn"
-            >
-              I already have an account
-            </button>
-          </div>
-        </div>
+  <div className="welcome-content">
+    <div className="welcome-text">
+      <img src="/aduffy-logo.png"/>
+      <h1 className="welcome-title">{welcomePages[currentPage].title}</h1>
+      <p className="welcome-description">{welcomePages[currentPage].description}</p>
+      <div className="welcome-progress mt-4">
+        {welcomePages.map((_, index) => (
+          <div
+            key={index}
+            className={`progress-dot ${index === currentPage ? 'active' : ''}`}
+          />
+        ))}
       </div>
+    </div>
+
+    <div className="welcome-actions">
+      <button onClick={handleGetStarted} className="welcome-primary-btn">
+        Get Started
+      </button>
+      <button onClick={handleSignInClick} className="welcome-secondary-btn">
+        I already have an account
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
     </>
   );
 }

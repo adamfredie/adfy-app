@@ -451,7 +451,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // Store the OTP in localStorage for demo purposes
       // In production, this would be handled by your backend
-      const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      const otp = "1234";
       localStorage.setItem(`otp_${email}`, otp);
       localStorage.setItem(`otp_${email}_timestamp`, Date.now().toString());
       
