@@ -68,8 +68,8 @@ export function WelcomePages() {
 
   // Handle authentication success
   const handleAuthSuccess = () => {
-    // Navigate to onboarding - the ProtectedRoute will handle redirects
-    navigate('/onboarding');
+    // Navigate back to welcome page after signup
+    navigate('/welcome');
   };
 
   const handleCloseAuth = () => {

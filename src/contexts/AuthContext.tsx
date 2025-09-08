@@ -372,16 +372,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
 
 
-      if (data.user && !data.user.email_confirmed_at) {
+      // Check if user was created successfully
+      if (data.user) {
+        // If email is not confirmed, this is normal for new signups
+        // Supabase sends confirmation email automatically
+        if (!data.user.email_confirmed_at) {
+          console.log('✅ User created successfully, confirmation email sent');
+          return { success: true };
+        }
+        
+        // If email is already confirmed, user already exists
         return {
           success: false,
-          error: "Email already registered. Please verify instead.",
-          code: "EMAIL_NOT_CONFIRMED"
+          error: "This email is already registered and verified. Please sign in instead.",
+          code: "EMAIL_ALREADY_VERIFIED"
         };
       }
 
       // If there is no error generated we can check with it 
-      if(data.user?.identities?.length == 0){
+      if(data.user && data.user.identities && data.user.identities.length === 0){
         return {success: false, error: "Looks like you already have an account. Try logging in!"};
       }
 

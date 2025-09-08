@@ -11,6 +11,7 @@ interface LearningStats {
   wordsLearned: number;
   currentStreak: number;
   totalScore: number;
+  weeklyProgress: number;
 }
 
 function Learningstatics({ userStats, expandedSections, toggleSection }) {
@@ -18,7 +19,8 @@ function Learningstatics({ userStats, expandedSections, toggleSection }) {
   const [stats, setStats] = useState<LearningStats>({
     wordsLearned: 0,
     currentStreak: 0,
-    totalScore: 0
+    totalScore: 0,
+    weeklyProgress: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -92,7 +94,7 @@ function Learningstatics({ userStats, expandedSections, toggleSection }) {
                 className="count-up-text stat-value"
               />
               <div className="stat-sub">
-                <span className="text-[#28a745]">+5</span> this week
+                <span className="text-[#28a745]">+{stats.weeklyProgress}</span> this week
               </div>
             </SpotlightCard>
 

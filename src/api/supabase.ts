@@ -8,14 +8,14 @@ const isDevelopment = import.meta.env.DEV;
 
 // Helper function to get the correct URL for redirects based on environment
 export const getURL = () => {
+  // For production with custom domain
+  if (import.meta.env.VITE_SITE_URL) {
+    return import.meta.env.VITE_SITE_URL;
+  }
+  
   // For Vercel deployments
   if (import.meta.env.VITE_VERCEL_URL) {
     return `https://${import.meta.env.VITE_VERCEL_URL}`;
-  }
-  
-  // For production with custom domain
-  if (import.meta.env.VITE_SITE_URL) {
-    return `${import.meta.env.VITE_SITE_URL}`;
   }
   
   // For local development
@@ -235,8 +235,16 @@ export const getUserProfile = async (userId: string) => {
                 console.log('ℹ️ No user profile found for user:', userId, '- This is normal for new users');
                 return null;
             }
-            // For other errors, throw them
-            throw error;
+            
+            // Handle 406 errors (Not Acceptable) - usually permission or table issues
+            if (error.code === '406' || error.message.includes('406')) {
+                console.warn('⚠️ HTTP 406 error when fetching user profile - table may not exist or have permission issues');
+                return null;
+            }
+            
+            // For other errors, log them but don't throw to prevent app crashes
+            console.error('Error fetching user profile:', error);
+            return null;
         }
         
         // Profile found, return mapped data
@@ -504,8 +512,36 @@ export async function updateUserTotalScore(userId: string, newScore: number) {
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    // Handle 406 errors gracefully
+    if (error.code === '406') {
+      console.warn('⚠️ User scores table not accessible - this may be normal for new users');
+      return null;
+    }
+    throw error;
+  }
   return data;
+}
+
+// Get weekly vocabulary progress
+export async function getWeeklyProgress(userId: string) {
+  try {
+    // Get words learned in the last 7 days
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    
+    const { data, error } = await supabase
+      .from('vocabulary_progress')
+      .select('word')
+      .eq('user_id', userId)
+      .gte('created_at', weekAgo.toISOString());
+      
+    if (error) throw error;
+    return data?.length || 0;
+  } catch (error) {
+    console.error('Error fetching weekly progress:', error);
+    return 0;
+  }
 }
 
 // Get user learning statistics
@@ -555,12 +591,23 @@ export async function getUserLearningStats(userId: string) {
     .eq('user_id', userId)
     .single();
 
-  if (scoreError && scoreError.code !== 'PGRST116') throw scoreError;
+  if (scoreError) {
+    // Handle 406 errors and missing data gracefully
+    if (scoreError.code === '406' || scoreError.code === 'PGRST116') {
+      console.warn('⚠️ User scores table not accessible or no data found - this is normal for new users');
+    } else {
+      console.error('Error fetching user scores:', scoreError);
+    }
+  }
+
+  // Get weekly progress
+  const weeklyProgress = await getWeeklyProgress(userId);
 
   return {
     wordsLearned: wordsData?.length || 0,
     currentStreak: currentStreak,
-    totalScore: scoreData?.total_score || 0
+    totalScore: scoreData?.total_score || 0,
+    weeklyProgress: weeklyProgress
   };
 }
 
@@ -705,5 +752,153 @@ export async function getWordBankWords(userId: string, field?: string): Promise<
   } catch (error) {
     console.error('Error in getWordBankWords:', error);
     throw error;
+  }
+}
+
+// Update user profile information in Supabase
+export const updateUserProfileInSupabase = async (
+  userId: string,
+  updateData: {
+    jobTitle: string;
+    company: string;
+    professionalField: string;
+    experienceLevel: string;
+    communicationChallenges: string[];
+    improvementGoals: string[];
+  }
+) => {
+  try {
+    // First, get the current user profile to check if field is changing
+    const { data: currentProfile, error: fetchError } = await supabase
+      .from('user_profiles')
+      .select('field')
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching current profile:', fetchError);
+      throw fetchError;
+    }
+
+    const oldField = currentProfile?.field;
+    const newField = updateData.professionalField;
+
+    // Update the user profile
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .update({
+        job_title: updateData.jobTitle,
+        company: updateData.company,
+        field: updateData.professionalField,
+        experience_level: updateData.experienceLevel,
+        communication_challenges: updateData.communicationChallenges,
+        improvement_goals: updateData.improvementGoals,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', userId)
+      .select();
+
+    if (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
+
+    // If the professional field changed, migrate vocabulary progress
+    if (oldField && newField && oldField !== newField) {
+      console.log(`Professional field changed from ${oldField} to ${newField}, migrating vocabulary progress...`);
+      
+      try {
+        const migrationResult = await migrateVocabularyProgress(userId, oldField, newField);
+        if (migrationResult.success) {
+          console.log(`Successfully migrated ${migrationResult.migratedCount} vocabulary records`);
+        } else {
+          console.warn('Vocabulary migration failed, but profile update succeeded');
+        }
+      } catch (migrationError) {
+        console.error('Error during vocabulary migration:', migrationError);
+        // Don't fail the entire update if migration fails
+      }
+    }
+
+    console.log('User profile updated successfully:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to update user profile:', error);
+    return { success: false, error };
+  }
+};
+
+// Field Word Recommendations
+export async function getFieldWordRecommendations(userId: string, field: string) {
+  try {
+    // Get all words from the word_bank for the given field
+    const { data: wordBankData, error: wordBankError } = await supabase
+      .from('word_bank')
+      .select('*')
+      .eq('field_category', field)
+      .order('word', { ascending: true });
+
+    if (wordBankError) {
+      console.error('Error fetching word bank words for recommendations:', wordBankError);
+      throw wordBankError;
+    }
+
+    // Filter out words that the user has already learned
+    const { data: userWords, error: userWordsError } = await supabase
+      .from('vocabulary_progress')
+      .select('word')
+      .eq('user_id', userId)
+      .eq('field_category', field);
+
+    if (userWordsError) {
+      console.error('Error fetching user learned words:', userWordsError);
+      throw userWordsError;
+    }
+
+    const learnedWordSet = new Set(userWords?.map(item => item.word) || []);
+    const recommendations = wordBankData.filter(word => !learnedWordSet.has(word.word));
+
+         console.log(`Retrieved ${recommendations.length} field recommendations for user ${userId} in field ${field}`);
+     return recommendations;
+  } catch (error) {
+    console.error('Error in getFieldWordRecommendations:', error);
+    throw error;
+  }
+}
+
+// Migrate user's vocabulary progress to new field category when they change professional field
+export async function migrateVocabularyProgress(userId: string, oldField: string, newField: string): Promise<{ success: boolean; migratedCount: number }> {
+  try {
+    // Update all vocabulary progress records for this user from old field to new field
+    const { data, error } = await supabase
+      .from('vocabulary_progress')
+      .update({ field_category: newField })
+      .eq('user_id', userId)
+      .eq('field_category', oldField);
+
+    if (error) {
+      console.error('Error migrating vocabulary progress:', error);
+      throw error;
+    }
+
+    // Count how many records were updated
+    const { count, error: countError } = await supabase
+      .from('vocabulary_progress')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('field_category', newField);
+
+    if (countError) {
+      console.error('Error counting migrated records:', countError);
+      throw countError;
+    }
+
+    const migratedCount = count || 0;
+    console.log(`Successfully migrated ${migratedCount} vocabulary progress records from ${oldField} to ${newField} for user ${userId}`);
+    
+    return { success: true, migratedCount };
+  } catch (error) {
+    console.error('Failed to migrate vocabulary progress:', error);
+    return { success: false, migratedCount: 0 };
   }
 }
