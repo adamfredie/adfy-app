@@ -177,6 +177,8 @@ export const storeUserOnboardingData = async (userId: string, onboardingData: On
       user_id: userId,
       name: onboardingData.name || 'Unknown User',
       email: onboardingData.email || '', // Use email from onboardingData instead
+      gender: onboardingData.gender || null,
+      avatar_url: onboardingData.avatarUrl || null,
       job_title: onboardingData.jobTitle || '',
       company: onboardingData.company || '',
       field: onboardingData.field || onboardingData.fieldOfInterest || '',
@@ -249,6 +251,8 @@ export const getUserProfile = async (userId: string) => {
         const mappedProfile = {
           ...data,
           name: data.name, // Add explicit mapping for name field
+          gender: data.gender,
+          avatarUrl: data.avatar_url,
           jobTitle: data.job_title,
           experienceLevel: data.experience_level,
           vocabularyLevel: data.vocabulary_level,

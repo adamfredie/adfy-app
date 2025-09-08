@@ -14,15 +14,44 @@ interface SignupFormProps {
 export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormProps) {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [mobileNo, setMobileNo] = useState('')
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   // OTP-related state kept for future use but not implemented in flow
   const [showOTP, setShowOTP] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    // Mark that signup has animated once
+    setHasAnimated(true);
+  }, []);
+  // const [pendingUserData, setPendingUserData] = useState<{email: string, password: string, mobileNo: string} | null>(null);
+
+  // const { signUp, sendOTP, verifyOTP, authLoading, user, isEmailVerified, userProfile } = useAuth();
+
   const [pendingUserData, setPendingUserData] = useState<{email: string, password: string} | null>(null);
 
   const { signUp, sendOTP, verifyOTP, authLoading, user, isEmailVerified, userProfile } = useAuth();
+
+const validateForm = () => {
+  if (!email || !mobileNo || !password || !confirmPassword) {
+    return "Please fill in all fields";
+  }
+  if (!validateEmail(email)) {
+    return "Invalid email format";
+  }
+  if (password !== confirmPassword) {
+    return "Passwords do not match";
+  }
+  if (password.length < 6) {
+    return "Password must be at least 6 characters long";
+  }
+  return "";
+};
+  
+
 
   useEffect(() => {
     if (user && isEmailVerified) {
@@ -37,36 +66,38 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
     setError('');
     setSuccessMessage('');
 
-    if (!email || !password || !confirmPassword) {
-      setError('Please fill in all fields');
-      return;
-    }
-    if (!validateEmail(email)) {
-      setError('Invalid email format');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return;
-    }
+    const validationError = validateForm();
+  if (validationError) {
+    setError(validationError);
+    return;
+  }
 
     try {
+      // Send OTP for verification
+      // const otpResult = await sendOTP(phone);
+      const otpResult = await sendOTP(email);
       // Direct Supabase signup (original system)
-      const result = await signUp(email, password);
+//const result = await signUp(email, password); 
       
-      if (result.success) {
+/*  if (result.success) {
         setSuccessMessage("Account created successfully! Please check your email to verify your account.");
-        // Navigate back to welcome page after a short delay
+        
         setTimeout(() => {
           onSuccess();
         }, 2000);
       } else {
         setError(result.error || 'Failed to create account');
-      }
+      } */
+
+      // Store user data for after OTP verification
+      // setPendingUserData({ email, password, mobileNo: phone });
+      // setShowOTP(true);
+      // setSuccessMessage("Verification code sent to your phone!");
+
+       setPendingUserData({ email, password });
+      setShowOTP(true);
+      setSuccessMessage("Verification code sent to your email!");
+
 
     } catch (err: any) {
       console.error("Signup error:", err);
@@ -87,8 +118,8 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
 
     try {
       // Verify OTP
+      // const verifyResult = await verifyOTP(pendingUserData.mobileNo, otp);
       const verifyResult = await verifyOTP(pendingUserData.email, otp);
-      
       if (!verifyResult.success) {
         return verifyResult;
       }
@@ -112,6 +143,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
       return { success: false, error: "No pending verification found" };
     }
 
+    // return await sendOTP(pendingUserData.mobileNo);
     return await sendOTP(pendingUserData.email);
   };
 
@@ -129,11 +161,21 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
     setSuccessMessage("");
   };
 
+  const normalizePhone = (value: string) => {
+    if (!value) return '';
+    const trimmed = value.toString().trim();
+    // Accept formats like +15551234567 or 15551234567 (we'll prefix + if missing)
+    const digits = trimmed.replace(/[^0-9+]/g, '');
+    if (digits.startsWith('+') && digits.length >= 8) return digits;
+    if (/^\d{8,}$/.test(digits)) return `+${digits}`;
+    return '';
+  };
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key="signup-form"
-        initial={{ x: "100%", opacity: 0 }}
+        // key="signup-form"
+        initial={hasAnimated ? false : { x: "100%", opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: "-100%", opacity: 0 }}
         transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -142,15 +184,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
         {/* Header */}
         <div className="onboarding-header">
           <div className="divIconContainer ">
-            <img src='/favicon12.ico'/>
-            <button 
-              onClick={onClose}
-              className="back-button"
-            >
-              <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
-                <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
+            <img src='/aduffy-logo.png' alt="aduffy logo" decoding="async" fetchPriority="high" height={30} width={80} />
           </div>
           <h1 className="onboarding-title">Create Account</h1>
         </div>
@@ -168,7 +202,21 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
               placeholder="Enter your email"
               className="mobile-input"
               required
-              disabled={authLoading}
+              disabled={authLoading || showOTP}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="mobileNo" className="field-label">What's your Mobile Number</label>
+            <input
+              id="mobileNo"
+              type="tel"
+              value={mobileNo}
+              onChange={(e) => setMobileNo(e.target.value)}
+              placeholder="Enter your mobile no"
+              className="mobile-input"
+              required
+              disabled={authLoading || showOTP}
             />
           </div>
           
@@ -209,12 +257,14 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
               placeholder="Confirm your password"
               className="mobile-input"
               required
-              disabled={authLoading}
+              disabled={authLoading || showOTP}
             />
           </div>
 
           {/* Success Message */}
           {successMessage && (
+            <AnimatePresence>
+
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -232,10 +282,13 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
             >
               {successMessage}
             </motion.div>
+            </AnimatePresence>
           )}
 
           {/* Error Display */}
           {error && (
+            <AnimatePresence>
+
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -252,12 +305,13 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
             >
               {error}
             </motion.div>
+            </AnimatePresence>
           )}
 
           <div className="onboarding-actions">
             <button
               type="submit"
-              disabled={!email || !password || !confirmPassword || authLoading}
+              disabled={!email || !password || !confirmPassword || authLoading || !mobileNo}
               className="continue-button"
               style={{ opacity: authLoading ? 0.7 : 1 }}
             >
@@ -265,11 +319,15 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
             </button>
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: '1px' }}>
+
+          
+
+          <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: '14px', color: '#6b7280' }}>
               Already have an account?{' '}
               <button
                 onClick={onSwitchToLogin}
+                type='button'
                 style={{
                   background: 'none',
                   border: 'none',
@@ -284,11 +342,24 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
               </button>
             </p>
           </div>
+      <div className="centerDiv flex items-center justify-center">
+
+                  <button 
+                 onClick={onClose}
+                 className="back-button-signup"
+               >
+                 <svg width="24" height="24" viewBox="6 0 24 24" fill="none">
+                   <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                 </svg>
+               </button>
+      </div>
         </form>
       </motion.div>
 
-      {/* OTP Verification Modal - Kept for future use but not implemented in current flow */}
-      {/* {pendingUserData && (
+
+      {/* OTP Verification Modal */}
+      {pendingUserData && (
+
         <OtpVerification
           email={pendingUserData.email}
           onVerify={handleOTPVerify}
@@ -297,7 +368,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
           onSuccess={handleOTPSuccess}
           isOpen={showOTP}
         />
-      )} */}
+      )} 
     </AnimatePresence>
   );
 }
