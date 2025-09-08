@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
-
+import { ArrowLeft } from 'lucide-react';
 interface OtpVerificationProps {
   email: string;
   onVerify: (otp: string) => Promise<{ success: boolean; error?: string }>;
@@ -26,6 +26,7 @@ export function OtpVerification({
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [isClosing, setIsClosing] = useState(false);
 
   // Removed auto-verification - user must click verify button
 
@@ -126,14 +127,23 @@ export function OtpVerification({
     }
   };
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
-    const threshold = 100;
-    if (info.offset.y < -threshold) {
-      setIsExpanded(true);
-    } else if (info.offset.y > threshold && isExpanded) {
-      setIsExpanded(false);
-    }
-  };
+
+const handleDragEnd = (event: any, info: PanInfo) => {
+  const threshold = 100;
+
+  if (info.offset.y < -threshold) {
+    // Drag up → expand modal
+    setIsExpanded(true);
+  } else if (info.offset.y > threshold) {
+    // Drag down → dismiss modal to bottom
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      // setIsExpanded(false);
+      onClose(); // finally unmount after animation
+    }, 300); // matches transition duration
+  }
+};
 
   return (
     <AnimatePresence>
@@ -146,33 +156,44 @@ export function OtpVerification({
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={0.2}
-            onDragEnd={handleDragEnd}
-            initial={{ y: "100%" }}
-            animate={{ 
-              y: isExpanded ? 0 : "20%",
-              height: isExpanded ? "100vh" : "auto"
-            }}
-            exit={{ y: "100%", opacity: 0 }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className={`otp-modal ${isExpanded ? "expanded" : ""}`}
-          >
+  drag="y"
+  dragConstraints={{ top: 0, bottom: 0 }}
+  dragElastic={0.2}
+  onDragEnd={handleDragEnd}
+  initial={{ y: "100%" }}
+  animate={
+    isClosing
+      ? { y: "100%", opacity: 0 } // slide down + fade out
+      : {
+          y: isExpanded ? 0 : "20%",
+          height: isExpanded ? "100vh" : "auto",
+          opacity: 1,
+        }
+  }
+  exit={{ y: "100%", opacity: 0 }}
+  transition={{ type: "spring", damping: 30, stiffness: 300 }}
+  className={`otp-modal ${isExpanded ? "expanded" : ""}`}
+>
+
           {/* Drag Handle */}
-          <div className="otp-drag-handle" />
+
+            <div className="otp-drag-handle" />
+
+
           
           {/* Back Button - only show when expanded */}
           {isExpanded && (
-            <button className="otp-back-btn" onClick={onClose}>
-              ←
-            </button>
-          )}
+            <div className="otp-handler">
 
+            <button className="otp-back-btn" onClick={onClose}>
+              <ArrowLeft />
+              </button>
+            </div>
+          )}
           <div className="otp-content">
             <div className="otp-header">
-              <h2>Check your email</h2>
-              <p>We've sent a verification code to your email.</p>
+              <h2>Check your entered email</h2>
+              <p>We've sent  a verification code via email.</p>
             </div>
 
             <div className="otp-input-group">

@@ -36,7 +36,7 @@ export function Navigation({
   return (
     <>
           {/* For desktop screen desktop UserMenu will open  */}
-      <header className="top-nav hidden md:flex bg-red-400">
+      <header className="top-nav !hidden !md:flex ">
         {/* DESKTOP NAVIGATION */}
         <div className="nav-desktop">
           <div className="nav-left">
@@ -96,7 +96,7 @@ export function Navigation({
         <div className="nav-mobile">
           <div className="nav-left">
             <div className="nav-brand">
-              <img src="/favicon12.ico" className='object-cover h-full'/>
+              <img src="/aduffy-logo.png" className='object-cover' decoding="async" fetchPriority="high" height={35} width={70} />
               <div className="nav-brand-text">
                 <span className="nav-mobile-brand-text">
                   Hey,{' '}
