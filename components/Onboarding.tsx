@@ -661,7 +661,7 @@ const renderPersonalStep = () => (
           <img src='/aduffy-logo.png' alt="aduffy logo" decoding="async" fetchPriority="high" height={30} width={80} />
         
 
-        <h1 className="onboarding-title">Challenges You currently Face</h1>
+        <h1 className="onboarding-title">Challenges You Currently Face</h1>
         <p className="onboarding-subtitle">
           Help us understand what you want to improve and what challenges you face
         </p>

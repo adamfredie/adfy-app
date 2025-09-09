@@ -23,12 +23,12 @@ export function WelcomePages() {
       description: "Learn from our CELTA-certified coaches",
     },
     {
-      title: "Become a Confident Speaker",
+      title: "Become A Confident Speaker",
       description: "Get focused lessons through 1:1 mentorship ",
       image: "person-2.jpg"
     },
     {
-      title: "Learn Leadership \n  Skills",
+      title: "Learn Leadership  Skills For Work",
       description: "Lead meetings, opinions, and teams at work",
       image: "person-3.jpg"
     }
