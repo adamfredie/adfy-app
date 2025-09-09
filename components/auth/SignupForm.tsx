@@ -19,6 +19,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  // OTP-related state kept for future use but not implemented in flow
   const [showOTP, setShowOTP] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
 
@@ -97,11 +98,18 @@ const validateForm = () => {
       return;
     }
       const otpResult = await sendOTP(email);
+      // Direct Supabase signup (original system)
+//const result = await signUp(email, password); 
       
-      if (otpResult.error) {
-        setError(otpResult.error);
-        return;
-      }
+/*  if (result.success) {
+        setSuccessMessage("Account created successfully! Please check your email to verify your account.");
+        
+        setTimeout(() => {
+          onSuccess();
+        }, 2000);
+      } else {
+        setError(result.error || 'Failed to create account');
+      } */
 
       // Store user data for after OTP verification
       // setPendingUserData({ email, password, mobileNo: phone });
@@ -112,9 +120,10 @@ const validateForm = () => {
       setShowOTP(true);
       setSuccessMessage("Verification code sent to your email!");
 
+
     } catch (err: any) {
-      console.error("OTP sending error:", err);
-      setError("Failed to send verification code");
+      console.error("Signup error:", err);
+      setError("An unexpected error occurred");
     }
   };
 
@@ -123,6 +132,7 @@ const validateForm = () => {
     return regex.test(value);
   };
 
+  // OTP-related functions kept for future use but not implemented in current flow
   const handleOTPVerify = async (otp: string) => {
     if (!pendingUserData) {
       return { success: false, error: "No pending verification found" };
@@ -371,6 +381,7 @@ const validateForm = () => {
 
       {/* OTP Verification Modal */}
       {pendingUserData && (
+
         <OtpVerification
           email={pendingUserData.email}
           onVerify={handleOTPVerify}
@@ -379,7 +390,7 @@ const validateForm = () => {
           onSuccess={handleOTPSuccess}
           isOpen={showOTP}
         />
-      )}
+      )} 
     </AnimatePresence>
   );
 }

@@ -57,13 +57,13 @@ function EmailVerification() {
     } else {
       console.log('⚠️ EmailVerification: No verification code and user not verified');
       setVerificationStatus('error');
-      setMessage('Please check your email for the verification link.');
+      setMessage('Please check your email and click the verification link to continue.');
     }
   }, [searchParams, isEmailVerified]);
 
   const handleContinue = () => {
     if (verificationStatus === 'success' && isEmailVerified) {
-      navigate("/auth/login");
+      navigate("/onboarding");
     } else {
       navigate("/welcome");
     }
@@ -139,7 +139,7 @@ function EmailVerification() {
 
         {/* Subtitle */}
         <p className="text-gray-600 mb-6 text-sm">
-          Please continue to start the onboarding.
+          Your email has been verified successfully! Let's get you set up.
         </p>
 
         {/* Continue Button */}
