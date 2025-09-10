@@ -4580,12 +4580,26 @@ ml-auto{
   
 }
 
-.welcome-title {
+/* .welcome-title {
   font-size: 1.8rem;
   font-weight: 700;
   color: #1a1a1a;
-  /* margin-bottom: 2.9rem; */
   line-height: 1;
+  
+} */
+.welcome-title {
+  font-size: 1.8rem;
+  
+  font-weight: 700;
+  color: #1a1a1a;
+  /* margin-bottom: 2.9rem; */
+  display: inline-block;
+  width: fit-content;
+  line-height: 1.2;
+    /* controls line spacing */
+  min-height: calc(1.8rem * 2 * 1.2);
+  /* white-space: nowrap; */
+  /* background-color: red; */
   /* height: 1.5rem; */
   
 }

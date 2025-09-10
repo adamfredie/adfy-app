@@ -18,7 +18,7 @@ export function OtpVerification({
   onSuccess,
   isOpen 
 }: OtpVerificationProps) {
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -61,10 +61,10 @@ export function OtpVerification({
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 4);
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
     if (pastedData.length > 0) {
       const newOtp = [...otp];
-      for (let i = 0; i < pastedData.length && i < 4; i++) {
+      for (let i = 0; i < pastedData.length && i < 6; i++) {
         newOtp[i] = pastedData[i];
       }
       setOtp(newOtp);
@@ -75,8 +75,8 @@ export function OtpVerification({
 
   const handleVerify = async () => {
     const otpString = otp.join("");
-    if (otpString.length !== 4) {
-      setError("Please enter all 4 digits");
+    if (otpString.length !== 6) {
+      setError("Please enter all 6 digits");
       return;
     }
 
@@ -246,7 +246,7 @@ const handleDragEnd = (event: any, info: PanInfo) => {
               <button 
                 className="otp-verify-btn" 
                 onClick={handleVerify}
-                disabled={otp.join("").length !== 4 || isVerifying}
+                disabled={otp.join("").length !== 6 || isVerifying}
               >
                 {isVerifying ? "Verifying..." : "Verify"}
               </button>
