@@ -36,6 +36,15 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
 
   const { signUp, sendOTP, verifyOTP, authLoading, user, isEmailVerified, userProfile } = useAuth();
 
+
+  // Mobile number storing
+  // Mobile number verification checking wether the mobile number added is right or wrong
+
+  const validateMobile = (value: string) => {
+  const cleaned = value.replace(/\D/g, ""); // keep digits only
+  return cleaned.length >= 8 && cleaned.length <= 15; // adjust range as per your use case
+};
+
 const validateForm = () => {
   if (!email || !mobileNo) {
     return "Please fill in email and mobile number";
@@ -43,6 +52,19 @@ const validateForm = () => {
   if (!validateEmail(email)) {
     return "Invalid email format";
   }
+
+  if (password !== confirmPassword) {
+    return "Passwords do not match";
+  }
+  if (password.length < 6) {
+    return "Password must be at least 6 characters long";
+  }
+
+  if(!validateMobile(mobileNo)){
+    return "Invalid mobile number format. Use digits only"
+  }
+
+
   return "";
 };
   
@@ -69,7 +91,17 @@ const validateForm = () => {
     }
 
     try {
-      // Send OTP for verification using Supabase's built-in OTP
+
+      // Send OTP for verification
+      // const otpResult = await sendOTP(phone);
+
+      // Here we are normalising the phone number in the format +91xxyyy to have a clean data
+
+    const normalizedMobile = normalizePhone(mobileNo);
+    if (!normalizedMobile) {
+      setError("Invalid mobile number format");
+      return;
+    }
       const otpResult = await sendOTP(email);
       
       if (otpResult.success) {

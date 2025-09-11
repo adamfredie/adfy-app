@@ -395,6 +395,7 @@ body {
   color: var(--text-primary);
 }
 
+/* COMMENTED OUT - Replaced by consistent definition in utilities.css
 .activity-card {
   background: var(--bg-primary);
   border-radius: var(--radius-xl);
@@ -408,6 +409,7 @@ body {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
+*/
 
 .activity-header {
   display: flex;
@@ -1530,9 +1532,9 @@ body {
 .communication-challenge-item {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   font-size: 0.75rem;
-  line-height: 1.1;
+  line-height: 1.3;
   color: #1a1a1a;
   cursor: pointer;
   position: relative;

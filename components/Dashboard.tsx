@@ -160,7 +160,7 @@ export function Dashboard({ onSelectActivity, userProfile, activityProgress }: D
               <div className="course-info-item">
                 {/* <span className="info-icon" role="img" aria-label="Duration">⏳</span> */}
                 <div>
-                  <div className="info-label  ">
+                  <div className="info-label  -ml-[1px] ">
                     <MdHourglassEmpty className=" text-[#28A745] info-label-icon"/>
                     <div className="">
                       Course Duration

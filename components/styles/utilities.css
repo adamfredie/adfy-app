@@ -3872,6 +3872,7 @@ ml-auto{
   flex-direction: column;
   gap: 16px;
 }
+/* COMMENTED OUT - Replaced by consistent definition below
 .activity-card {
   background: #fff8e1;
   border-radius: 12px;
@@ -3881,13 +3882,8 @@ ml-auto{
   flex-direction: column;
   gap: 8px;
 }
-.activity-card-disabled {
-  background: #FFF2CA;
-  color: #aaa;
-  text-align: center;
-  font-size: 1rem;
-  padding: 12px;
-}
+*/
+
 .activity-header {
   display: flex;
   align-items: center;
@@ -3952,7 +3948,7 @@ ml-auto{
   border: 2px solid rgba(0,0,0,0.1);
 
   /* Light shadow for floating effect */
-  box-shadow:  0 1px  1px rgba(0, 0, 0, 0.2);
+  box-shadow:  0 0.8px  0.8px rgba(0, 0, 0, 0.1);
 
   /* Padding */
   padding: 12px 24px;
@@ -4572,11 +4568,13 @@ ml-auto{
   align-items: center;
   justify-content: center;
   gap: 3px;
+  padding-top: 15px;
 }
 
 .welcome-text img{
   height: 60px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
+  /* padding-top: 20px; */
   
 }
 
@@ -4597,7 +4595,9 @@ ml-auto{
   width: fit-content;
   line-height: 1.2;
     /* controls line spacing */
-  min-height: calc(1.8rem * 2 * 1.2);
+
+  /* min-height: calc(1.8rem * 2 * 1.2); */
+
   /* white-space: nowrap; */
   /* background-color: red; */
   /* height: 1.5rem; */
@@ -4837,11 +4837,9 @@ ml-auto{
 .challengesDiv{
     background: #fff;
 
-      padding: 8px;
+      padding: 5px;
       overflow: hidden;
-      width: calc(100% - 24px);
       box-sizing: border-box;
-      margin-top: 2px;
       width: 100%;
 
 }
@@ -4855,6 +4853,7 @@ ml-auto{
   width: 100%;
   height: fit-content;
   gap: 10px;
+  padding-bottom: 10px;
 }
 
 
@@ -5133,28 +5132,35 @@ ml-auto{
   }
 }
 
-/* ActivitiesPage Styles */
+/* CONSOLIDATED ACTIVITY CARD STYLES - Used across all components */
 .activity-card {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .activity-card:hover {
-  border-color: var(--primary, #3b82f6);
+  border-color: var(--primay);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }
 
 .activity-card-disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  background: #f9fafb;
 }
 
 .activity-card-disabled:hover {
   border-color: #e5e7eb;
-  box-shadow: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transform: none;
 }
 
 .activity-header {
@@ -5187,9 +5193,9 @@ ml-auto{
 
 .activity-description {
   font-size: 14px;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary);
   line-height: 1.5;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .activity-features {

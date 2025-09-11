@@ -14,20 +14,20 @@ const ActivitiesPage: React.FC<ActivitiesPageProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="w-full max-w-[500px] mx-auto bg-white h-screen shadow-lg flex flex-col mb-4 overflow-hidden">
+    <div className="w-full max-w-[500px] mx-auto bg-white h-screen shadow-lg flex flex-col ">
       {/* Header */}
       <div className="px-4 py-2 border-b border-gray-200 bg-white sticky top-0">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between ">
           <button onClick={onBack} className="text-[var(--primary)]">
-            <FiArrowLeft size={22} strokeWidth={2} />
+            <FiArrowLeft size={26} strokeWidth={2} />
           </button>
-          <h1 className="text-lg font-semibold">Activities</h1>
-          <div className="w-6"></div> {/* Spacer */}
+          <h1 className="text-xl font-semibold">Activities</h1>
+          <div className="w-6"></div>
         </div>
       </div>
 
       {/* Activities Grid */}
-      <div className="flex-1 px-4 space-y-4 mt-4">
+      <div className="flex-1 px-4  flex flex-col gap-3 mt-3">
         {/* Word Bank Activity */}
         <div 
           className="activity-card cursor-pointer hover:shadow-md transition-shadow"
@@ -72,6 +72,11 @@ const ActivitiesPage: React.FC<ActivitiesPageProps> = ({ onBack }) => {
               Start Writing
             </button>
           </div>
+        </div>
+
+
+        <div className="coming-soon text-center ">
+          <h1 className='text-lg font-semibold mb-24 text-[--primary]'>New Activites Comming Soon...</h1>
         </div>
       </div>
     </div>
