@@ -2,7 +2,7 @@
 #    .env.local
 #    .env.*.local
 node_modules/
-
+k6-tests/
 dist/
 
 .DS_Store

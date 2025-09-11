@@ -51,3 +51,6 @@ CREATE POLICY "Authenticated users can insert word bank" ON word_bank
 -- Grant permissions
 GRANT SELECT, INSERT ON vocabulary_progress TO authenticated;
 GRANT SELECT, INSERT ON word_bank TO authenticated;
+
+-- Note: OTP verification now handled by Supabase's built-in signInWithOtp functionality
+-- No custom OTP table needed

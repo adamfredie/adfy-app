@@ -5,6 +5,7 @@ import { FaArrowRight } from "react-icons/fa6";
 import { OnboardingData } from "./Onboarding";
 
 import { useAuth } from "../src/contexts/AuthContext";
+import { updateUserProfileInSupabase } from "../src/api/supabase";
 
 const UserProfile: React.FC<{
   onBack: () => void;
@@ -57,20 +58,17 @@ const UserProfile: React.FC<{
   ];
 
   // ---------------- Profile Form States ----------------
-  const initialForm = {
-    jobTitle: "Marketing Head",
-    company: "Acufly",
-    professionalField: "Marketing",
-    experienceLevel: "Mid level 3–7",
-  };
+  const [form, setForm] = useState({
+    jobTitle: "",
+    company: "",
+    professionalField: "",
+    experienceLevel: "",
+  });
 
-  const initialCheckedItems = communicationChallenges
-    .concat(improvementGoals)
-    .reduce((acc, item) => ({ ...acc, [item.label]: false }), {});
-
-  const [form, setForm] = useState(initialForm);
-  const [checkedItems, setCheckedItems] = useState(initialCheckedItems);
+  const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [ischanged, setIsChanged] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   // Handle checkbox changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,19 +79,128 @@ const UserProfile: React.FC<{
     }));
   };
 
-  // Check if form or checkboxes changed
+  // Initialize form data from userProfile
   useEffect(() => {
+    if (userProfile) {
+      setLoading(false);
+      
+      // Initialize form with user profile data
+      setForm({
+        jobTitle: userProfile.jobTitle || "",
+        company: userProfile.company || "",
+        professionalField: userProfile.field || userProfile.fieldOfInterest || "",
+        experienceLevel: userProfile.experienceLevel || "",
+      });
+
+      // Initialize checkboxes for communication challenges (by id)
+      const challengeItems = communicationChallenges.reduce((acc, item) => {
+        acc[item.id] = userProfile.communicationChallenges?.includes(item.id) || false;
+        return acc;
+      }, {} as Record<string, boolean>);
+
+      // Initialize checkboxes for improvement goals (by id)
+      const goalItems = improvementGoals.reduce((acc, item) => {
+        acc[item.id] = userProfile.improvementGoals?.includes(item.id) || false;
+        return acc;
+      }, {} as Record<string, boolean>);
+
+      setCheckedItems({ ...challengeItems, ...goalItems });
+    } else {
+      setLoading(false);
+    }
+  }, [userProfile]);
+
+  // Check if form or checkboxes changed from initial values
+  useEffect(() => {
+    if (!userProfile) return;
+
+    const initialForm = {
+      jobTitle: userProfile.jobTitle || "",
+      company: userProfile.company || "",
+      professionalField: userProfile.field || userProfile.fieldOfInterest || "",
+      experienceLevel: userProfile.experienceLevel || "",
+    };
+
+    const initialCheckedItems = communicationChallenges
+      .concat(improvementGoals)
+      .reduce((acc, item) => {
+        const isChallenge = communicationChallenges.some(c => c.id === item.id);
+        const isGoal = improvementGoals.some(g => g.id === item.id);
+
+        if (isChallenge) {
+          acc[item.id] = userProfile.communicationChallenges?.includes(item.id) || false;
+        } else if (isGoal) {
+          acc[item.id] = userProfile.improvementGoals?.includes(item.id) || false;
+        }
+        return acc;
+      }, {} as Record<string, boolean>);
+
     const hasFormChanged = Object.entries(form).some(
       ([key, value]) => value !== initialForm[key as keyof typeof initialForm]
     );
     const hasCheckboxChanged = Object.entries(checkedItems).some(
       ([key, value]) => value !== initialCheckedItems[key]
     );
+    
     setIsChanged(hasFormChanged || hasCheckboxChanged);
-  }, [form, checkedItems]);
+  }, [form, checkedItems, userProfile]);
 
-  const {signOut} = useAuth();
-  // const userStats = getStatsBasedOnLevel();
+  const { signOut, user, refreshUserProfile } = useAuth();
+
+  // Save profile changes to Supabase
+  const handleSave = async () => {
+    if (!user || !ischanged) return;
+
+    setSaving(true);
+    try {
+      // Get selected communication challenges (ids)
+      const selectedChallenges = communicationChallenges
+        .filter(challenge => checkedItems[challenge.id])
+        .map(challenge => challenge.id);
+
+      // Get selected improvement goals (ids)
+      const selectedGoals = improvementGoals
+        .filter(goal => checkedItems[goal.id])
+        .map(goal => goal.id);
+
+      // Update profile in Supabase
+      const result = await updateUserProfileInSupabase(user.id, {
+        jobTitle: form.jobTitle,
+        company: form.company,
+        professionalField: form.professionalField,
+        experienceLevel: form.experienceLevel,
+        communicationChallenges: selectedChallenges,
+        improvementGoals: selectedGoals,
+      });
+
+      if (result.success) {
+        // Refresh the user profile to get updated data
+        await refreshUserProfile();
+        setIsChanged(false);
+        console.log('Profile updated successfully');
+      } else {
+        console.error('Failed to update profile:', result.error);
+        // You might want to show an error message to the user here
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      // You might want to show an error message to the user here
+    } finally {
+      setSaving(false);
+    }
+  };
+  // Show loading state while fetching profile data
+  if (loading) {
+    return (
+      <div className="w-full max-w-[500px] mx-auto bg-white min-h-screen shadow-lg flex flex-col items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-[500px] mx-auto bg-white min-h-screen shadow-lg flex flex-col ">
       {/* ------------------- HEADER ------------------- */}
@@ -217,9 +324,17 @@ const UserProfile: React.FC<{
                     onChange={(e) => setForm({ ...form, professionalField: e.target.value })}
                     className="w-full border rounded-md px-3 py-1 text-sm mt-1"
                   >
-                    <option>Marketing</option>
+                    {/* <option>Marketing</option>
                     <option>Engineering</option>
-                    <option>Design</option>
+                    <option>Design</option> */}
+                    <option value="marketing">Marketing</option>
+              <option value="technology">Technology</option>
+              <option value="sales">Sales</option>
+              <option value="product">Product Management</option>
+              <option value="finance">Finance</option>
+              <option value="operations">Operations</option>
+              <option value="consulting">Consulting</option>
+              <option value="other">Other</option>
                   </select>
                 </div>
 
@@ -230,9 +345,10 @@ const UserProfile: React.FC<{
                     onChange={(e) => setForm({ ...form, experienceLevel: e.target.value })}
                     className="w-full border rounded-md px-3 py-1 text-sm mt-1"
                   >
-                    <option>Mid level 3–7</option>
-                    <option>Entry level 0–2</option>
-                    <option>Senior level 8+</option>
+                    <option value="entry">Entry Level (0-2 years)</option>
+              <option value="mid">Mid Level (3-7 years)</option>
+              <option value="senior">Senior Level (8-12 years)</option>
+              <option value="executive">Executive Level (13+ years)</option>
                   </select>
                 </div>
               </div>
@@ -259,9 +375,9 @@ const UserProfile: React.FC<{
                             <div key={challenge.id} className="communication-challenge-item">
                               <input
                                 type="checkbox"
-                                name={challenge.label}
+                                name={challenge.id}
                                 onChange={handleChange}
-                                checked={!!checkedItems[challenge.label]}
+                                checked={!!checkedItems[challenge.id]}
                               />
                               <label className="communication-challenge-label">
                                 {challenge.label}
@@ -295,9 +411,9 @@ const UserProfile: React.FC<{
                             <div key={challenge.id} className="communication-challenge-item">
                               <input
                                 type="checkbox"
-                                name={challenge.label}
+                                name={challenge.id}
                                 onChange={handleChange}
-                                checked={!!checkedItems[challenge.label]}
+                                checked={!!checkedItems[challenge.id]}
                               />
                               <label className="communication-challenge-label">
                                 {challenge.label}
@@ -315,8 +431,16 @@ const UserProfile: React.FC<{
 
           {ischanged && (
             <div className="px-4 pt-2 mb-24">
-              <button className="w-full bg-[var(--primary)] py-2 rounded-md font-semibold">
-                Save
+              <button 
+                onClick={handleSave}
+                disabled={saving}
+                className={`w-full py-2 rounded-md font-semibold ${
+                  saving 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-[var(--primary)] hover:bg-yellow-600'
+                }`}
+              >
+                {saving ? 'Saving...' : 'Save'}
               </button>
             </div>
           )}

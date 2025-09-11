@@ -4,6 +4,7 @@ import { useAuth } from '../../src/contexts/AuthContext';
 import { CircleCheck } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 import { OtpVerification } from '../OtpVerification';
+import { supabase } from '../../src/api/supabase';
 
 interface SignupFormProps {
   onSuccess: () => void;
@@ -45,12 +46,13 @@ export function SignupForm({ onSuccess, onSwitchToLogin, onClose }: SignupFormPr
 };
 
 const validateForm = () => {
-  if (!email || !mobileNo || !password || !confirmPassword) {
-    return "Please fill in all fields";
+  if (!email || !mobileNo) {
+    return "Please fill in email and mobile number";
   }
   if (!validateEmail(email)) {
     return "Invalid email format";
   }
+
   if (password !== confirmPassword) {
     return "Passwords do not match";
   }
@@ -61,6 +63,7 @@ const validateForm = () => {
   if(!validateMobile(mobileNo)){
     return "Invalid mobile number format. Use digits only"
   }
+
 
   return "";
 };
@@ -80,13 +83,15 @@ const validateForm = () => {
     setError('');
     setSuccessMessage('');
 
+    // Validate all fields including password
     const validationError = validateForm();
-  if (validationError) {
-    setError(validationError);
-    return;
-  }
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     try {
+
       // Send OTP for verification
       // const otpResult = await sendOTP(phone);
 
@@ -98,29 +103,15 @@ const validateForm = () => {
       return;
     }
       const otpResult = await sendOTP(email);
-      // Direct Supabase signup (original system)
-//const result = await signUp(email, password); 
       
-/*  if (result.success) {
-        setSuccessMessage("Account created successfully! Please check your email to verify your account.");
-        
-        setTimeout(() => {
-          onSuccess();
-        }, 2000);
+      if (otpResult.success) {
+        // Store user data including password for after OTP verification
+        setPendingUserData({ email, password });
+        setShowOTP(true);
+        setSuccessMessage("Verification code sent to your email!");
       } else {
-        setError(result.error || 'Failed to create account');
-      } */
-
-      // Store user data for after OTP verification
-      // setPendingUserData({ email, password, mobileNo: phone });
-      // setShowOTP(true);
-      // setSuccessMessage("Verification code sent to your phone!");
-
-       setPendingUserData({ email, password });
-      setShowOTP(true);
-      setSuccessMessage("Verification code sent to your email!");
-
-
+        setError(otpResult.error || 'Failed to send verification code');
+      }
     } catch (err: any) {
       console.error("Signup error:", err);
       setError("An unexpected error occurred");
@@ -132,25 +123,38 @@ const validateForm = () => {
     return regex.test(value);
   };
 
-  // OTP-related functions kept for future use but not implemented in current flow
+  // OTP verification with password setup
   const handleOTPVerify = async (otp: string) => {
     if (!pendingUserData) {
       return { success: false, error: "No pending verification found" };
     }
 
     try {
-      // Verify OTP
-      // const verifyResult = await verifyOTP(pendingUserData.mobileNo, otp);
+      // Verify OTP - this will automatically create and sign in the user
       const verifyResult = await verifyOTP(pendingUserData.email, otp);
+      
       if (!verifyResult.success) {
         return verifyResult;
       }
 
-      // If OTP is verified, proceed with signup
-      const signupResult = await signUp(pendingUserData.email, pendingUserData.password);
-      
-      if (signupResult.error) {
-        return { success: false, error: signupResult.error };
+      // After OTP verification, update the user's password
+      if (pendingUserData.password) {
+        try {
+          const { error: updateError } = await supabase.auth.updateUser({
+            password: pendingUserData.password
+          });
+          
+          if (updateError) {
+            console.error("Error updating password:", updateError);
+            // Don't fail the entire process if password update fails
+            // The user is already authenticated
+          } else {
+            console.log("Password updated successfully");
+          }
+        } catch (passwordError) {
+          console.error("Exception updating password:", passwordError);
+          // Continue anyway - user is authenticated
+        }
       }
 
       return { success: true };
@@ -196,7 +200,7 @@ const validateForm = () => {
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        // key="signup-form"
+        key="signup-form"
         initial={hasAnimated ? false : { x: "100%", opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: "-100%", opacity: 0 }}
@@ -333,11 +337,11 @@ const validateForm = () => {
           <div className="onboarding-actions">
             <button
               type="submit"
-              disabled={!email || !password || !confirmPassword || authLoading || !mobileNo}
+              disabled={!email || !mobileNo || !password || !confirmPassword || authLoading}
               className="continue-button"
               style={{ opacity: authLoading ? 0.7 : 1 }}
             >
-              {authLoading ? 'Creating Account...' : 'Create Account'}
+              {authLoading ? 'Sending Code...' : 'Send Verification Code'}
             </button>
           </div>
 

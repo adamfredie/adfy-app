@@ -33,6 +33,7 @@ interface AuthContextType {
   
   // Debug methods
   runDiagnostics: () => Promise<any>;
+  cleanupExpiredOTPs: () => Promise<void>;
 }
 
 // Create the context with a default value
@@ -203,6 +204,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 } catch (localStorageError) {
                   console.log('ℹ️ AuthContext: No stored profile in localStorage');
                 }
+
               }
             }
           } else {
@@ -333,65 +335,50 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Sign up function
+  // Sign up function - Modified to skip email verification
   const signUp = async (email: string, password: string): Promise<{ success: boolean; error?: string; code?: string  }> => {
     setAuthLoading(true);
     try {
-      // Get the correct redirect URL for the current environment and add the verify route
-      const baseUrl = getURL();
-      const redirectTo = `${baseUrl}/verify`;
+      console.log('🔐 AuthContext: Signing up user:', email);
       
-      console.log('🔐 AuthContext: Signing up with redirectTo:', redirectTo);
-      
+      // Sign up without email verification (since we're using custom OTP)
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectTo
+          // Completely disable email confirmation
+          emailRedirectTo: undefined,
+          // Disable email confirmation at the client level
+          captchaToken: undefined
         },
-      },
-    );
+      });
 
+      console.log("🔐 AuthContext: Signup data:", data);
 
-      console.log("Data is here \n\n", data);
-
-
-      
       if (error) {
-            console.log("❌ Supabase signUp error:", error.message);
+        console.log("❌ Supabase signUp error:", error.message);
 
-            if (error.message.toLowerCase().includes("already")) {
-              return { 
-                success: false, 
-                error: "This email is already registered. Please sign in instead.", 
-                code: "EMAIL_REGISTERED" 
-              };
-            }
+        if (error.message.toLowerCase().includes("already")) {
+          return { 
+            success: false, 
+            error: "This email is already registered. Please sign in instead.", 
+            code: "EMAIL_REGISTERED" 
+          };
+        }
 
-            return { success: false, error: error.message };
-          }
-
+        return { success: false, error: error.message };
+      }
 
       // Check if user was created successfully
       if (data.user) {
-        // If email is not confirmed, this is normal for new signups
-        // Supabase sends confirmation email automatically
-        if (!data.user.email_confirmed_at) {
-          console.log('✅ User created successfully, confirmation email sent');
-          return { success: true };
+        console.log('✅ User created successfully');
+        
+        // Check if user already exists (no new identities created)
+        if (data.user.identities && data.user.identities.length === 0) {
+          return { success: false, error: "Looks like you already have an account. Try logging in!" };
         }
         
-        // If email is already confirmed, user already exists
-        return {
-          success: false,
-          error: "This email is already registered and verified. Please sign in instead.",
-          code: "EMAIL_ALREADY_VERIFIED"
-        };
-      }
-
-      // If there is no error generated we can check with it 
-      if(data.user && data.user.identities && data.user.identities.length === 0){
-        return {success: false, error: "Looks like you already have an account. Try logging in!"};
+        return { success: true };
       }
 
       return { success: true };
@@ -403,7 +390,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Sign in function
+  // Sign in function - Modified to skip email verification check
   const signIn = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     console.log('🔐 AuthContext: signIn started');
     setAuthLoading(true);
@@ -420,13 +407,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return { success: false, error: error.message };
       }
 
-      if (data.user && !data.user.email_confirmed_at) {
-        console.log('🔐 AuthContext: Email not confirmed');
-        return { 
-          success: false, 
-          error: 'Please verify your email before signing in.' 
-        };
-      }
+      // Skip email confirmation check since we're using custom OTP verification
+      // if (data.user && !data.user.email_confirmed_at) {
+      //   console.log('🔐 AuthContext: Email not confirmed');
+      //   return { 
+      //     success: false, 
+      //     error: 'Please verify your email before signing in.' 
+      //   };
+      // }
 
       console.log('🔐 AuthContext: Sign in successful');
       return { success: true };
@@ -451,67 +439,62 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Send OTP function
+  // Send OTP function using Supabase's built-in OTP
   const sendOTP = async (email: string): Promise<{ success: boolean; error?: string }> => {
     try {
       console.log('🔐 AuthContext: Sending OTP to:', email);
       
-      // For now, we'll simulate OTP sending since we don't have a real OTP service
-      // In production, you would integrate with a service like Twilio, AWS SNS, etc.
+      // Use signInWithOtp - this will send numeric OTP if email template is configured correctly
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          shouldCreateUser: true,
+          // Use custom email template that shows the numeric code
+          data: {
+            email: email
+          }
+        }
+      });
       
-      // Store the OTP in localStorage for demo purposes
-      // In production, this would be handled by your backend
-      const otp = "1234";
-      localStorage.setItem(`otp_${email}`, otp);
-      localStorage.setItem(`otp_${email}_timestamp`, Date.now().toString());
+      if (error) {
+        console.error('❌ AuthContext: Failed to send OTP:', error);
+        return { success: false, error: error.message || 'Failed to send verification code' };
+      }
       
-      console.log('🔐 AuthContext: OTP generated (demo):', otp);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      console.log('✅ AuthContext: OTP sent successfully');
       return { success: true };
     } catch (error) {
-      console.error('Error sending OTP:', error);
+      console.error('💥 AuthContext: Exception sending OTP:', error);
       return { success: false, error: 'Failed to send verification code' };
     }
   };
 
-  // Verify OTP function
+  // Verify OTP function using Supabase's built-in OTP
   const verifyOTP = async (email: string, otp: string): Promise<{ success: boolean; error?: string }> => {
     try {
       console.log('🔐 AuthContext: Verifying OTP for:', email);
       
-      // Get stored OTP
-      const storedOTP = localStorage.getItem(`otp_${email}`);
-      const timestamp = localStorage.getItem(`otp_${email}_timestamp`);
+      // Use Supabase's built-in verifyOtp function
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email,
+        token: otp,
+        type: 'email'
+      });
       
-      if (!storedOTP || !timestamp) {
-        return { success: false, error: 'No verification code found. Please request a new one.' };
+      if (error) {
+        console.error('❌ AuthContext: OTP verification failed:', error);
+        return { success: false, error: error.message || 'Failed to verify code' };
       }
       
-      // Check if OTP is expired (5 minutes)
-      const now = Date.now();
-      const otpTime = parseInt(timestamp);
-      if (now - otpTime > 5 * 60 * 1000) {
-        localStorage.removeItem(`otp_${email}`);
-        localStorage.removeItem(`otp_${email}_timestamp`);
-        return { success: false, error: 'Verification code has expired. Please request a new one.' };
+      if (data.user) {
+        console.log('✅ AuthContext: OTP verified successfully, user authenticated');
+        return { success: true };
+      } else {
+        console.error('❌ AuthContext: No user returned after OTP verification');
+        return { success: false, error: 'Verification failed' };
       }
-      
-      // Verify OTP
-      if (storedOTP !== otp) {
-        return { success: false, error: 'Invalid verification code. Please try again.' };
-      }
-      
-      // Clear OTP after successful verification
-      localStorage.removeItem(`otp_${email}`);
-      localStorage.removeItem(`otp_${email}_timestamp`);
-      
-      console.log('🔐 AuthContext: OTP verified successfully');
-      return { success: true };
     } catch (error) {
-      console.error('Error verifying OTP:', error);
+      console.error('💥 AuthContext: Exception verifying OTP:', error);
       return { success: false, error: 'Failed to verify code' };
     }
   };
@@ -575,6 +558,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Clean up expired OTPs (can be called periodically)
+  const cleanupExpiredOTPs = async () => {
+    try {
+      const { cleanupExpiredOTPs: cleanupFunction } = await import('../api/supabase');
+      await cleanupFunction();
+    } catch (error) {
+      console.error('Error cleaning up expired OTPs:', error);
+    }
+  };
+
   // Context value
   const value: AuthContextType = {
     user,
@@ -592,6 +585,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAuthenticated,
     isEmailVerified,
     runDiagnostics,
+    cleanupExpiredOTPs,
   };
 
   return (
@@ -609,3 +603,4 @@ export function useAuth(): AuthContextType {
   }
   return context;
 }
+

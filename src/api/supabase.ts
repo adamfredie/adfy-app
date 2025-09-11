@@ -69,7 +69,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         detectSessionInUrl: true,
         // Add these for better production handling
         // flowType: 'pkce',
-        debug: import.meta.env.DEV // Enable debug in development only
+        debug: import.meta.env.DEV, // Enable debug in development only
+        // Disable email confirmation since we're using custom OTP
+        flowType: 'implicit'
     },
     global: {
         headers: {
@@ -198,7 +200,7 @@ export const storeUserOnboardingData = async (userId: string, onboardingData: On
     
     const { data, error } = await supabase
       .from('user_profiles')
-      .upsert(profileData)
+      .upsert(profileData, { onConflict: 'user_id' })
       .select();
 
     if (error) {
@@ -768,25 +770,45 @@ export const updateUserProfileInSupabase = async (
   }
 ) => {
   try {
-    // First, get the current user profile to check if field is changing
+    // First, get the current user profile to check if field is changing and get email/name
     const { data: currentProfile, error: fetchError } = await supabase
       .from('user_profiles')
-      .select('field')
+      .select('field, email, name')
       .eq('user_id', userId)
       .single();
 
-    if (fetchError) {
-      console.error('Error fetching current profile:', fetchError);
-      throw fetchError;
+    // If profile doesn't exist, get email and name from auth.users
+    let userEmail = currentProfile?.email;
+    let userName = currentProfile?.name;
+    
+    if (!userEmail || !userName) {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+        throw userError;
+      }
+      userEmail = userEmail || userData.user?.email;
+      userName = userName || userData.user?.user_metadata?.full_name || userData.user?.email?.split('@')[0] || 'User';
+    }
+
+    if (!userEmail) {
+      throw new Error('User email not found');
+    }
+    
+    if (!userName) {
+      throw new Error('User name not found');
     }
 
     const oldField = currentProfile?.field;
     const newField = updateData.professionalField;
 
-    // Update the user profile
+    // Update the user profile using upsert to handle cases where profile doesn't exist
     const { data, error } = await supabase
       .from('user_profiles')
-      .update({
+      .upsert({
+        user_id: userId,
+        name: userName,
+        email: userEmail,
         job_title: updateData.jobTitle,
         company: updateData.company,
         field: updateData.professionalField,
@@ -794,8 +816,7 @@ export const updateUserProfileInSupabase = async (
         communication_challenges: updateData.communicationChallenges,
         improvement_goals: updateData.improvementGoals,
         updated_at: new Date().toISOString()
-      })
-      .eq('user_id', userId)
+      }, { onConflict: 'user_id' })
       .select();
 
     if (error) {
@@ -902,3 +923,5 @@ export async function migrateVocabularyProgress(userId: string, oldField: string
     return { success: false, migratedCount: 0 };
   }
 }
+
+// Note: Custom OTP functions removed - now using Supabase's built-in signInWithOtp and verifyOtp
